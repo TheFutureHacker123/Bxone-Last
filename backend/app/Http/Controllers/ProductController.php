@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\Orders;
 use App\Models\Cart;
+use App\Models\Review;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -13,17 +14,9 @@ class ProductController extends Controller
     // Search function to find products based on user input
     public function search(Request $request)
     {
-        // Validate the search query input
-        // $request->validate([
-        //     'query' => 'required|string|min:3', // Ensure the input is a string and at least 3 characters long
-        // ]);
 
         // Get the search query from user input
         $searchQuery = $request->input('query');
-
-        // // Search the 'product' table for products that match the search query
-        // $products = Product::where('product_name', 'like', '%' . $searchQuery . '%')->get();
-
 
         $products = Product::where('product_name', 'like', '%' . $searchQuery . '%')
         ->select('product_id', 'product_name', 'total_product', 'product_price', 'product_img1', 'product_img2', 'product_img3', 'product_img4', 'product_img5', 'product_desc', 'vendor_id', 'category_id', 'sub_category_id') // Select only the desired fields
@@ -32,6 +25,33 @@ class ProductController extends Controller
         // Return the results (you can also return a view with these products)
         return response()->json($products);
     }
+
+    public function topproduct(Request $request)
+    {
+        // Fetch 12 random products
+        $products = Product::inRandomOrder()
+            ->select(
+                'product_id',
+                'product_name',
+                'total_product',
+                'product_price',
+                'product_img1',
+                'product_img2',
+                'product_img3',
+                'product_img4',
+                'product_img5',
+                'product_desc',
+                'vendor_id',
+                'category_id',
+                'sub_category_id'
+            )
+            ->limit(12)
+            ->get();
+    
+        return response()->json($products);
+    }
+    
+
 
     public function categorylist()
     {
@@ -42,25 +62,43 @@ class ProductController extends Controller
 
 
 
-public function productdetails($product_id)
-    {
-    $products = Product::where('product_id', $product_id)
-        ->select(
-            'product_id',
-            'product_name',
-            'product_price',
-            'product_img1',
-            'product_img2',
-            'product_img3',
-            'product_img4',
-            'product_img5',
-            'product_desc',
-            'vendor_id',
-        )
-        ->get();
 
-      return response()->json($products);
+    public function productdetails(Request $request) {
+        $validatedData = $request->validate([
+            'product_id' => 'required|integer',
+        ]);
+    
+        $reviews = Review::where('product_id', $validatedData['product_id'])
+            ->with(['user:user_id,name', 'product:product_id,product_name,product_desc,product_price,product_img1,product_img2,product_img3,product_img4,product_img5']) // Fetching related user and product
+            ->select('review_txt', 'rate', 'user_id', 'product_id') // Include user_id and product_id for reference
+            ->get();
+    
+       return response()->json([
+    'success' => true,
+    'data' => $reviews->map(function ($review) {
+        return [
+            'review_txt' => $review->review_txt,
+            'rate' => $review->rate,
+            'user_id' => $review->user_id,
+            'user_name' => $review->user->name,
+            'product_id' => $review->product_id,
+            'product_name' => $review->product->product_name,
+            'product_desc' => $review->product->product_desc,
+            'product_price' => $review->product->product_price,
+            'product_images' => $review->product->product_img1,
+            'product_img2' => $review->product->product_img2,
+            'product_img3' => $review->product->product_img3,
+            'product_img4' => $review->product->product_img4,
+            'product_img5' => $review->product->product_img5,
+            'created_at' => $review->created_at,
+                
+            
+        ];
+    }),
+]);
+   
     }
+
 
 
     public function addtocart(Request $request)
@@ -123,7 +161,8 @@ public function productdetails($product_id)
                 'product.product_price',
                 'cart.total_added',
                 'cart.cart_id',
-                'product.product_img1'
+                'product.product_img1',
+                'product.total_product',
             )
             ->get();
 

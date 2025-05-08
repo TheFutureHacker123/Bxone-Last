@@ -11,10 +11,9 @@ function Cart() {
   const [cartitems, setCartItems] = useState([]);
   const navigate = useNavigate();
 
-  
   const defaultFontSize = 'medium';
   const defaultFontColor = '#000000';
-  const defaultLanguage = 'english'; // Default language
+  const defaultLanguage = 'english';
 
   const [fontSize, setFontSize] = useState(() => localStorage.getItem('fontSize') || defaultFontSize);
   const [fontColor, setFontColor] = useState(() => localStorage.getItem('fontColor') || defaultFontColor);
@@ -29,11 +28,9 @@ function Cart() {
     localStorage.setItem('fontColor', fontColor);
     localStorage.setItem('language', language);
 
-    // Update content based on selected language
     setContent(Translation[language]);
   }, [fontSize, fontColor, language]);
   
-
   const toggleNav = () => {
     setNavOpen(!isNavOpen);
   };
@@ -92,7 +89,6 @@ function Cart() {
             autoClose: 3000,
           });
 
-          // Refresh cart
           fetchCartItems();
         } else {
           toast.error(result.message, {
@@ -111,6 +107,11 @@ function Cart() {
   function checkoutProcess() {
     navigate('/checkout');
   }
+
+  // Function to calculate total price
+  const calculateTotal = () => {
+    return cartitems.reduce((total, item) => total + item.product_price * item.total_added, 0).toFixed(2);
+  };
 
   return (
     <div>
@@ -191,7 +192,7 @@ function Cart() {
         {cartitems.length > 0 ? (
           <div className="summary">
             <h2 className="summary-title">Order Summary</h2>
-            <p className="summary-total">Total: <strong>${(20.00 * 2 + 30.00 * 1 + 15.00 * 3).toFixed(2)}</strong></p>
+            <p className="summary-total">Total: <strong>${calculateTotal()}</strong></p>
             <button onClick={checkoutProcess} className="btn btn-warning proceed-btn">Proceed to Checkout</button>
           </div>
         ) : (
@@ -199,9 +200,6 @@ function Cart() {
             <h3 className="no-products-text">There are no products in the cart!</h3>
           </div>
         )}
-
-
-
       </div>
 
       <ToastContainer />

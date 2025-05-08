@@ -60,10 +60,12 @@ Route::post('/shippeditems', [ProductController::class, 'shippeditems']);//done
 Route::post('/orderditems', [ProductController::class, 'orderditems']);//done
 Route::post('/refunditems', [ProductController::class, 'refunditems']);//done 
 Route::post('/completeditems', [ProductController::class, 'completeditems']);//done
-Route::post('/productdetails/{product_id}', [ProductController::class, 'productdetails']);//done
+Route::post('/productdetails', [ProductController::class, 'productdetails']);//done
 Route::post('/addtocart', [ProductController::class, 'addtocart']);//done
 Route::post('/removecartitems', [ProductController::class, 'removecartitems']);//done
 Route::post('/listcartitems', [ProductController::class, 'listcartitems']);//done
+Route::post('/topproduct', [ProductController::class, 'topproduct']);//done
+
 
 Route::post('/admin/login', [AdminController::class, 'loginadmin']);//done
 
@@ -108,4 +110,7 @@ Route::post('/admin/changeuserstatusadmin', [AdminController::class, 'changeuser
 
 Route::post('/vendor/listproduct', [VendorController::class, 'listproduct']);//done
 Route::post('/vendor/listreview', [VendorController::class, 'listreview']);//done
+
+
+
 
