@@ -1,153 +1,197 @@
-
 :root {
-    --font-size: medium; /* Default font size */
-    --font-color: #000000; /* Default font color */
-  }
-  
-  body {
-    font-size: var(--font-size);
-    color: var(--font-color);
-  }
-  
-  .vendor-info-container {
-    max-width: 600px;
-    margin: 40px auto;
-    padding: 20px;
-    transition: all 0.4s ease-in-out;
+  --font-size: medium;
+  --font-color: #000000;
+  --primary-color: #4CAF50;
+  --primary-hover: #45a049;
+  --secondary-color: #007bff;
+  --secondary-hover: #0056b3;
+  --disabled-color: #ccc;
+  --text-color: #333;
+  --white: #fff;
+  --shadow: 0 8px 20px rgba(0,0,0,0.1);
+  --transition: all 0.3s ease-in-out;
 }
 
+body {
+  font-size: var(--font-size);
+  color: var(--font-color);
+}
+
+.vendor-info-container {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 20px;
+  transition: var(--transition);
+}
+
+/* Tab buttons */
 .button-group {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 10px;
 }
 
 .button-group button {
-    flex: 1;
-    padding: 12px;
-    margin: 0 5px;
-    font-weight: bold;
-    border: none;
-    background-color: #f2f2f2;
-    color: #333;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+  flex: 1;
+  padding: 12px;
+  font-weight: bold;
+  border: none;
+  background-color: #f2f2f2;
+  color: var(--text-color);
+  cursor: pointer;
+  border-radius: 6px;
+  transition: var(--transition);
 }
 
 .button-group button:hover {
-    background-color: #ddd;
-    transform: scale(1.03);
+  background-color: #ddd;
+  transform: scale(1.03);
 }
 
 .button-group .active-tab {
-    background-color: #4CAF50;
-    color: white;
-    transform: scale(1.05);
+  background-color: var(--primary-color);
+  color: var(--white);
+  transform: scale(1.05);
 }
 
+.button-group button:disabled {
+  background: var(--disabled-color);
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Form cards */
 .form-card {
-    background-color: #fff;
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    transition: all 0.4s ease-in-out;
+  background-color: var(--white);
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  transition: var(--transition);
 }
 
-/* Fade-in animation */
-.fade-in {
-    animation: fadeIn 0.5s ease-in-out;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
+/* Form elements */
 form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+form label {
+  text-align: left;
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
 }
 
 input[type="text"] {
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    transition: border-color 0.3s;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  transition: border-color 0.3s;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 input[type="text"]:focus {
-    border-color: #4CAF50;
-    outline: none;
+  border-color: var(--primary-color);
+  outline: none;
 }
 
+input[type="file"] {
+  width: 100%;
+  padding: 8px 0;
+}
+
+/* Buttons */
 .submit-btn {
-    background-color: #4CAF50;
-    color: white;
-    padding: 12px;
-    border: none;
-    border-radius: 5px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+  background-color: var(--primary-color);
+  color: var(--white);
+  padding: 12px;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: var(--transition);
+  width: 100%;
 }
 
 .submit-btn:hover {
-    background-color: #45a049;
+  background-color: var(--primary-hover);
 }
 
-/* testone.css */
-.form-card {
-    padding: 20px;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    transition: all 0.3s ease-in-out;
+/* Navigation links */
+.form-navigation {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #eee;
+}
+
+.nav-left, .nav-right {
+  flex: 1;
+}
+
+.nav-right {
+  text-align: right;
+}
+
+.nav-link {
+  color: var(--secondary-color);
+  cursor: pointer;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: color 0.3s;
+  background: none;
+  border: none;
+  padding: 0;
+  font-weight: 500;
+}
+
+.nav-link:hover {
+  color: var(--secondary-hover);
+  text-decoration: underline;
+}
+
+.prev-link {
+  padding-left: 0;
+}
+
+.next-link {
+  padding-right: 0;
+}
+
+.submit-link {
+  color: var(--primary-color);
+  font-weight: bold;
+}
+
+.submit-link:hover {
+  color: var(--primary-hover);
+}
+
+/* Error messages */
+.error-message {
+  color: #d32f2f;
+  font-size: 0.85rem;
+  margin-top: -10px;
+  margin-bottom: 5px;
+  text-align: left;
+}
+
+/* Animations */
+.fade-in {
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
   }
-  
-  .button-group {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
-  
-  .button-group button {
-    padding: 10px 20px;
-    border: none;
-    background: #007bff;
-    color: white;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: 0.2s;
-  }
-  
-  .button-group button:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-  }
-  
-  .active-tab {
-    background: #28a745 !important;
-  }
-  
-  .fade-in {
-    animation: fadeIn 0.4s ease-in-out;
-  }
-  
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  
-  form label {
-    text-align: left;         /* align label text to the left */
-    display: block;           /* ensure they take full width */
-    margin-bottom: 5px;       /* small space below label */
 }

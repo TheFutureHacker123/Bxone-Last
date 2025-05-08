@@ -242,9 +242,7 @@ function Register() {
                                 <FaCheckCircle className="me-2" /> One special character
                             </li>
                         </ul>
-                        <small className="form-text text-muted">
-                            Password must contain at least 8 characters, one uppercase, one lowercase, one number and one special character
-                        </small>
+                        
                     </div>
                     <div className="mb-3">
                         <label htmlFor="password_confirmation" className="form-label text-start d-block">Confirm Password</label>

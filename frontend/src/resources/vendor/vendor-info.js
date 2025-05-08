@@ -10,6 +10,8 @@ const VendorInfo = () => {
   const navigate = useNavigate();
   const [personalData, setPersonalData] = useState({
     personal_name: "",
+    personal_middle_name: "",
+    personal_last_name: "",
     personal_address: "",
     personal_city: "",
     personal_state: "",
@@ -23,7 +25,7 @@ const VendorInfo = () => {
   const handlePersonalFileChange = (e) => {
     const { name, files } = e.target;
     setPersonalData({ ...personalData, [name]: files[0] });
-    setPersonalErrors({ ...personalErrors, [name]: "" }); // Clear error on change
+    setPersonalErrors({ ...personalErrors, [name]: "" });
   };
 
   const [businessData, setBusinessData] = useState({
@@ -43,10 +45,10 @@ const VendorInfo = () => {
     if (name === "otherProofImages") {
       const selectedFiles = Array.from(files).slice(0, 5);
       setBusinessData({ ...businessData, [name]: selectedFiles });
-      setBusinessErrors({ ...businessErrors, [name]: "" }); // Clear error on change
+      setBusinessErrors({ ...businessErrors, [name]: "" });
     } else {
       setBusinessData({ ...businessData, [name]: files[0] });
-      setBusinessErrors({ ...businessErrors, [name]: "" }); // Clear error on change
+      setBusinessErrors({ ...businessErrors, [name]: "" });
     }
   };
 
@@ -57,6 +59,24 @@ const VendorInfo = () => {
   });
   const [bankErrors, setBankErrors] = useState({});
 
+  const ethiopianBanks = [
+    "Commercial Bank of Ethiopia",
+    "Awash Bank",
+    "Dashen Bank",
+    "Bank of Abyssinia",
+    "Nib International Bank",
+    "Cooperative Bank of Oromia",
+  ];
+
+  const accountNumberLengths = {
+    "Awash Bank": [13, 16],
+    "Bank of Abyssinia": [13, 16],
+    "Commercial Bank of Ethiopia": [12, 16],
+    "Dashen Bank": [13, 16],
+    "Nib International Bank": [13, 16],
+    "Cooperative Bank of Oromia": [13, 16],
+  };
+
   useEffect(() => {
     const vendorInfo = JSON.parse(localStorage.getItem("vendor-info"));
     if (vendorInfo) {
@@ -64,19 +84,50 @@ const VendorInfo = () => {
     }
   }, []);
 
+  // Helper function to check for invalid characters
+  const containsInvalidChars = (str) => {
+    return !/^[a-zA-Z\s]*$/.test(str);
+  };
+
+  // Helper function to check for invalid characters including numbers
+  const containsInvalidCharsExtended = (str) => {
+    return !/^[a-zA-Z\s,.-]*$/.test(str); // Added ,.- for address
+  };
+
   const validatePersonal = () => {
     let errors = {};
     if (!personalData.personal_name.trim())
-      errors.personal_name = "Name is required";
+      errors.personal_name = "First Name is required";
+    else if (containsInvalidChars(personalData.personal_name))
+      errors.personal_name = "First Name cannot contain numbers or symbols";
+
+    if (personalData.personal_middle_name && containsInvalidChars(personalData.personal_middle_name)) {
+      errors.personal_middle_name = "Middle Name cannot contain numbers or symbols";
+    }
+
+    if (!personalData.personal_last_name.trim())
+      errors.personal_last_name = "Last Name is required";
+    else if (containsInvalidChars(personalData.personal_last_name))
+      errors.personal_last_name = "Last Name cannot contain numbers or symbols";
+
     if (!personalData.personal_address.trim())
       errors.personal_address = "Address is required";
+    else if (containsInvalidCharsExtended(personalData.personal_address))
+      errors.personal_address = "Address cannot contain symbols";
+
     if (!personalData.personal_city.trim())
       errors.personal_city = "City is required";
+    else if (containsInvalidChars(personalData.personal_city))
+      errors.personal_city = "City cannot contain numbers or symbols";
+
     if (!personalData.personal_state.trim())
       errors.personal_state = "State is required";
+    else if (containsInvalidChars(personalData.personal_state))
+      errors.personal_state = "State cannot contain numbers or symbols";
+
     if (!personalData.personal_phone.trim()) {
       errors.personal_phone = "Mobile number is required";
-    } else if (!/^\d+$/.test(personalData.personal_phone)) {
+    } else if (!/^\+?(\d[- ]?)*\d+$/.test(personalData.personal_phone)) {
       errors.personal_phone = "Invalid mobile number";
     }
     if (!personalData.personal_unique_id.trim())
@@ -88,28 +139,40 @@ const VendorInfo = () => {
     setPersonalErrors(errors);
     return Object.keys(errors).length === 0;
   };
-
   const validateBusiness = () => {
     let errors = {};
-    if (!businessData.business_name.trim())
+    if (!businessData.business_name.trim()) {
       errors.business_name = "Business Name is required";
-    if (!businessData.business_address.trim())
+    } else if (containsInvalidChars(businessData.business_name)) {
+      errors.business_name = "Business Name cannot contain numbers or symbols";
+    }
+    if (!businessData.business_address.trim()) {
       errors.business_address = "Business Address is required";
-    if (!businessData.business_city.trim())
+    }
+    if (!businessData.business_city.trim()) {
       errors.business_city = "Business City is required";
-    if (!businessData.business_state.trim())
+    } else if (containsInvalidChars(businessData.business_city)) {
+      errors.business_city = "Business City cannot contain numbers or symbols";
+    }
+    if (!businessData.business_state.trim()) {
       errors.business_state = "Business State is required";
+    } else if (containsInvalidChars(businessData.business_state)) {
+      errors.business_state = "Business State cannot contain numbers or symbols";
+    }
     if (!businessData.business_phone.trim()) {
       errors.business_phone = "Business Mobile is required";
     } else if (!/^\d+$/.test(businessData.business_phone)) {
       errors.business_phone = "Invalid business mobile number";
     }
-    if (!businessData.blicense_number.trim())
+    if (!businessData.blicense_number.trim()) {
       errors.blicense_number = "Business License Number is required";
-    if (!businessData.addressProofImage)
+    }
+    if (!businessData.addressProofImage) {
       errors.addressProofImage = "Address Proof Image is required";
-    if (businessData.otherProofImages.length > 5)
+    }
+    if (businessData.otherProofImages.length > 5) {
       errors.otherProofImages = "Maximum 5 other proof images are allowed";
+    }
     setBusinessErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -117,45 +180,109 @@ const VendorInfo = () => {
   const validateBank = () => {
     let errors = {};
     if (!bankData.bank_name.trim()) errors.bank_name = "Bank Name is required";
+    else if (containsInvalidChars(bankData.bank_name))
+      errors.bank_name = "Bank name cannot contain numbers or symbols";
+
     if (!bankData.account_name.trim())
       errors.account_name = "Account Holder Name is required";
+    else if (containsInvalidChars(bankData.account_name))
+      errors.account_name = "Account Holder Name cannot contain numbers or symbols";
+
     if (!bankData.account_number.trim())
       errors.account_number = "Account Number is required";
+    else if (bankData.bank_name && accountNumberLengths[bankData.bank_name]) {
+      const validLengths = accountNumberLengths[bankData.bank_name];
+      const numberLength = bankData.account_number.length;
+      if (!validLengths.includes(numberLength)) {
+        errors.account_number = `Account Number must be ${validLengths.join(
+          " or "
+        )} digits for ${bankData.bank_name}`;
+      }
+    }
     setBankErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
   const isPersonalComplete = () =>
     Object.keys(personalErrors).length === 0 &&
-    Object.entries(personalData).every(([key, val]) => {
-      if (typeof val === "string") return val.trim() !== "";
-      if (val instanceof File) return val !== null;
-      return true;
-    });
+    personalData.personal_name.trim() !== "" &&
+    !containsInvalidChars(personalData.personal_name) &&
+    personalData.personal_last_name.trim() !== "" &&
+    !containsInvalidChars(personalData.personal_last_name) &&
+    personalData.personal_address.trim() !== "" &&
+    !containsInvalidCharsExtended(personalData.personal_address) &&
+    personalData.personal_city.trim() !== "" &&
+    !containsInvalidChars(personalData.personal_city) &&
+    personalData.personal_state.trim() !== "" &&
+    !containsInvalidChars(personalData.personal_state) &&
+    personalData.personal_phone.trim() !== "" &&
+    personalData.personal_unique_id.trim() !== "" &&
+    personalData.idPhotoFront !== null &&
+    personalData.idPhotoBack !== null;
 
   const isBusinessComplete = () =>
     Object.keys(businessErrors).length === 0 &&
     businessData.business_name.trim() !== "" &&
+    !containsInvalidChars(businessData.business_name) &&
     businessData.business_address.trim() !== "" &&
     businessData.business_city.trim() !== "" &&
+    !containsInvalidChars(businessData.business_city) &&
     businessData.business_state.trim() !== "" &&
+    !containsInvalidChars(businessData.business_state) &&
     businessData.business_phone.trim() !== "" &&
     businessData.blicense_number.trim() !== "" &&
     businessData.addressProofImage !== null;
 
   const handlePersonalChange = (e) => {
     setPersonalData({ ...personalData, [e.target.name]: e.target.value });
-    setPersonalErrors({ ...personalErrors, [e.target.name]: "" }); // Clear error on change
+    setPersonalErrors({ ...personalErrors, [e.target.name]: "" });
   };
 
   const handleBusinessChange = (e) => {
     setBusinessData({ ...businessData, [e.target.name]: e.target.value });
-    setBusinessErrors({ ...businessErrors, [e.target.name]: "" }); // Clear error on change
+    setBusinessErrors({ ...businessErrors, [e.target.name]: "" });
   };
 
   const handleBankChange = (e) => {
-    setBankData({ ...bankData, [e.target.name]: e.target.value });
-    setBankErrors({ ...bankErrors, [e.target.name]: "" }); // Clear error on change
+    const { name, value } = e.target;
+    if (name === "bank_name" && value !== bankData.bank_name) {
+      setBankData({ ...bankData, [name]: value, account_name: "", account_number: "" });
+    } else {
+      setBankData({ ...bankData, [name]: value });
+    }
+    setBankErrors({ ...bankErrors, [name]: "" });
+  };
+
+  const handleNext = () => {
+    if (activeForm === "personal") {
+      const isValid = validatePersonal();
+      if (isValid) {
+        setActiveForm("business");
+      } else {
+        toast.error("Please fill all required fields correctly.", {
+          position: "top-right",
+          autoClose: 3000,
+        });
+      }
+    } else if (activeForm === "business") {
+      const isValid = validateBusiness();
+      if (isValid) {
+        setActiveForm("bank");
+      } else {
+        toast.error("Please fill all required fields correctly.", {
+          position: "top-right",
+          autoClose: 3000,
+        });
+      }
+    }
+  };
+
+  const handlePrevious = () => {
+    if (activeForm === "business") {
+      setActiveForm("personal");
+    } else if (activeForm === "bank") {
+      setActiveForm("business");
+    }
   };
 
   const handleVendorSubmit = async (e) => {
@@ -210,8 +337,8 @@ const VendorInfo = () => {
           position: "top-right",
           autoClose: 3000,
         });
-        // Optionally navigate to another page or clear the form
-        // navigate('/vendor/dashboard');
+        // Redirect to vendor dashboard after successful submission
+        navigate('/vendor/dashboard');
       } else {
         toast.error("Submission failed. Check your info.", {
           position: "top-right",
@@ -231,7 +358,7 @@ const VendorInfo = () => {
     <div className="form-card fade-in">
       <h3>Vendor Personal Information</h3>
       <form>
-        <label>Name</label>
+        <label>First Name</label>
         <input
           type="text"
           name="personal_name"
@@ -240,6 +367,28 @@ const VendorInfo = () => {
         />
         {personalErrors.personal_name && (
           <p className="error-message">{personalErrors.personal_name}</p>
+        )}
+
+        <label>Middle Name</label>
+        <input
+          type="text"
+          name="personal_middle_name"
+          value={personalData.personal_middle_name}
+          onChange={handlePersonalChange}
+        />
+        {personalErrors.personal_middle_name && (
+          <p className="error-message">{personalErrors.personal_middle_name}</p>
+        )}
+
+        <label>Last Name</label>
+        <input
+          type="text"
+          name="personal_last_name"
+          value={personalData.personal_last_name}
+          onChange={handlePersonalChange}
+        />
+        {personalErrors.personal_last_name && (
+          <p className="error-message">{personalErrors.personal_last_name}</p>
         )}
 
         <label>Address</label>
@@ -318,6 +467,17 @@ const VendorInfo = () => {
         {personalErrors.idPhotoBack && (
           <p className="error-message">{personalErrors.idPhotoBack}</p>
         )}
+
+        <div className="form-navigation">
+          <div className="nav-left">
+            {/* Empty on personal info page since there's no previous */}
+          </div>
+          <div className="nav-right">
+            <span className="nav-link next-link" onClick={handleNext}>
+              Next &rarr;
+            </span>
+          </div>
+        </div>
       </form>
     </div>
   );
@@ -414,6 +574,19 @@ const VendorInfo = () => {
         {businessErrors.otherProofImages && (
           <p className="error-message">{businessErrors.otherProofImages}</p>
         )}
+
+        <div className="form-navigation">
+          <div className="nav-left">
+            <span className="nav-link prev-link" onClick={handlePrevious}>
+              &larr; Previous
+            </span>
+          </div>
+          <div className="nav-right">
+            <span className="nav-link next-link" onClick={handleNext}>
+              Next &rarr;
+            </span>
+          </div>
+        </div>
       </form>
     </div>
   );
@@ -423,12 +596,18 @@ const VendorInfo = () => {
       <h3>Vendor Bank Information</h3>
       <form onSubmit={handleVendorSubmit}>
         <label>Bank Name</label>
-        <input
-          type="text"
+        <select
           name="bank_name"
           value={bankData.bank_name}
           onChange={handleBankChange}
-        />
+        >
+          <option value="">Select Bank</option>
+          {ethiopianBanks.map((bank) => (
+            <option key={bank} value={bank}>
+              {bank}
+              </option>
+          ))}
+        </select>
         {bankErrors.bank_name && (
           <p className="error-message">{bankErrors.bank_name}</p>
         )}
@@ -455,9 +634,18 @@ const VendorInfo = () => {
           <p className="error-message">{bankErrors.account_number}</p>
         )}
 
-        <button type="submit" className="submit-btn">
-          Submit
-        </button>
+        <div className="form-navigation">
+          <div className="nav-left">
+            <span className="nav-link prev-link" onClick={handlePrevious}>
+              &larr; Previous
+            </span>
+          </div>
+          <div className="nav-right">
+            <button type="submit" className="nav-link submit-link">
+              Submit
+            </button>
+          </div>
+        </div>
       </form>
     </div>
   );
@@ -480,8 +668,7 @@ const VendorInfo = () => {
           onClick={() => {
             if (canAccessBusiness) setActiveForm("business");
             else if (Object.keys(personalErrors).length > 0) {
-              toast.error("Please complete the Personal Info form correctly.", {
-                position: "top-right",
+              toast.error("Please complete the Personal Info form correctly.", {position: "top-right",
                 autoClose: 3000,
               });
             }
