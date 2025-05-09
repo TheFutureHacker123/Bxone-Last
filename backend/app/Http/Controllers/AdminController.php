@@ -39,8 +39,8 @@ class AdminController extends Controller
                 'message' => 'Login successful.',
                 'admin' => [
                 'admin_id' => $admin->admin_id,
-                'email' => $admin->email,
-                'password' => $admin->password, // Be careful exposing this!
+                //'email' => $admin->email,
+                //'password' => $admin->password, // Be careful exposing this!
                 'admin_role_id' => $admin->admin_role_id,
                  ], // Optional: You can return admin info
                 // 'token' => $token // Optional: If using Laravel Sanctum or Passport

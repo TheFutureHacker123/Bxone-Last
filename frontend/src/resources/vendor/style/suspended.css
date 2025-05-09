@@ -1,0 +1,13 @@
+.vendor-text-danger {
+    color: #dc3545; /* Bootstrap's red for danger */
+  }
+  
+  .vendor-btn-danger {
+    background-color: #dc3545;
+    color: white;
+  }
+  
+  .vendor-btn-danger:hover {
+    background-color: #c82333;
+  }
+  

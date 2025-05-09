@@ -74,6 +74,9 @@ import ProtectPathAdmin from "./resources/admin/protectpath"
 
 import AddProduct from "./resources/vendor/product/add-products"
 import AddCoupons from "./resources/vendor/product/add-coupons"
+import VendorUnderReview from "./resources/vendor/underreview"
+import VendorSuspended from "./resources/vendor/suspend"  
+import VendorSupport from "./resources/vendor/support"
 
 
 import ControlOrder from "./resources/vendor/order/new-orders"
@@ -134,6 +137,11 @@ function App() {
           <Route path="/vendor/review-messages" element={<ProtectPathVendor Cmp={ReviewMessages} />} />
           <Route path="/vendor/add-products" element={<ProtectPathVendor Cmp={AddProduct} />} />
           <Route path="/vendor/add-coupons" element={<ProtectPathVendor Cmp={AddCoupons} />} />
+
+          <Route path="/vendor/underreview/" element={<ProtectPathVendor Cmp={VendorUnderReview} />} />
+          <Route path="/vendor/suspend/" element={<ProtectPathVendor Cmp={VendorSuspended} />} />
+          <Route path="/vendor/support" element={<ProtectPathVendor Cmp={VendorSupport} />} />
+
 
           <Route path="/vendor/new-orders" element={<ProtectPathVendor Cmp={ControlOrder} />} />
           <Route path="/vendor/shipped" element={<ProtectPathVendor Cmp={Shipped} />} />

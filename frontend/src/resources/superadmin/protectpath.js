@@ -1,35 +1,38 @@
-
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
+
 function ProtectPathSAdmin(props) {
-    let Cmp = props.Cmp
-    const navigate = useNavigate();
-    useEffect(() => {
-        try {
-            const adminInfo = localStorage.getItem("admin-info");
+  const [isChecking, setIsChecking] = useState(true);
+  const navigate = useNavigate();
+  const Cmp = props.Cmp;
 
-            if (!adminInfo) {
-                navigate("/superadmin/login");
-            } else {
-                const admin = JSON.parse(adminInfo);
+  useEffect(() => {
+    try {
+      const adminInfo = localStorage.getItem("admin-info");
 
-                if (admin.admin_role_id === "Admin") {
-                    navigate("/admin/");
-                } else if (!admin.admin_role_id) {
-                    navigate("/");
-                }
-            }
-        } catch (err) {
-            console.error("Invalid admin-info in localStorage", err);
-            navigate("/admin/login");
-        }
+      if (!adminInfo) {
+        navigate("/superadmin/login");
+        return;
+      }
 
-    }, [])
-    return (
-        <div>
-            <Cmp />
-        </div>
-    );
+      const admin = JSON.parse(adminInfo);
+
+      if (admin.admin_role_id === "Admin") {
+        navigate("/admin/");
+      } else if (!admin.admin_role_id) {
+        navigate("/");
+      } else {
+        setIsChecking(false); // allow access
+      }
+    } catch (err) {
+      console.error("Invalid admin-info in localStorage", err);
+      navigate("/superadmin/login");
+    }
+  }, []);
+
+  if (isChecking) return null; // prevent flicker before redirect
+
+  return <Cmp />;
 }
 
 export default ProtectPathSAdmin;
