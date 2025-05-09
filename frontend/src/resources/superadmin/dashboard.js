@@ -1,6 +1,8 @@
 import React, { useState,useEffect } from "react";
 import { FaBars, FaChartLine, FaStore, FaThList, FaUsers, FaUser, FaUserShield, FaTools, FaEdit, FaTrash, } from "react-icons/fa";
-
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { Link, useNavigate } from "react-router-dom";
 import Translation from "../translations/lang.json";
 import "./style/dashboard.css";
 
@@ -17,6 +19,7 @@ function SAdminDashboard() {
   const [subcategories, setSubcategories] = useState([]);
   const toggleSidebar = () => setSidebarVisible(!sidebarVisible);
   const handleDropdown = (menu) => setOpenDropdown(openDropdown === menu ? null : menu);
+  const navigate = useNavigate();
 
   const defaultFontSize = 'medium';
   const defaultFontColor = '#000000';
@@ -41,6 +44,20 @@ function SAdminDashboard() {
   
 
   
+    function logout() {
+      localStorage.clear();
+      toast.success("Logout Successful!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      setTimeout(() => {
+        navigate("/admin/login");
+      }, 1000); // Delay the navigation for 3 seconds
+    }
   
   return (
     <div className="admin-dashboard-wrapper">
@@ -140,6 +157,7 @@ function SAdminDashboard() {
 
         {/* this is main content start here */}
       </div>
+       <ToastContainer />
     </div>
   );
 }

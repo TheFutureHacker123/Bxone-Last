@@ -89,8 +89,8 @@ class UserController extends Controller
             'message' => 'Logged in successfully',
             'storeData' => [
                 "user_id" => $user->user_id,
-                "name" => $user->name,
-                'email' => $user->email,
+                //"name" => $user->name,
+                //'email' => $user->email,
                 "user_role_id" => $user->user_role_id,
                 // Never include password in response
                 // 'token' => $token, // If using Sanctum/Passport
