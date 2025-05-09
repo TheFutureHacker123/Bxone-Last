@@ -2,11 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaUser, FaLock } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
-import Translation from "../translations/lang.json";
 import "react-toastify/dist/ReactToastify.css";
 import "./style/login.css";
 
-const LoginVendro = () => {
+const LoginVendor = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [emailError, setEmailError] = useState("");
@@ -18,18 +17,31 @@ const LoginVendro = () => {
         const vendorInfo = localStorage.getItem("vendor-info");
         const userInfo = localStorage.getItem("user-info");
         const adminInfo = localStorage.getItem("admin-info");
+        
         if (vendorInfo) {
             const vendor = JSON.parse(vendorInfo);
-            //status check
+            
+            // Status check with completed info condition
             if (vendor.status === "Pending") {
-                navigate("/underreview/");
+                navigate("/vendor/underreview/");
             } else if (vendor.status === "Rejected") {
-                navigate("/vendor-info/");
+                // Only redirect to vendor-info if they haven't completed their info
+                if (!vendor.has_completed_info) {
+                    navigate("/vendor/vendor-info/");
+                } else {
+                    navigate("/vendor/");
+                }
             } else if (vendor.status === "UnVerified") {
-                navigate("/vendor-info/");
+                // Only redirect to vendor-info if they haven't completed their info
+                if (!vendor.has_completed_info) {
+                    navigate("/vendor/vendor-info/");
+                } else {
+                    navigate("/vendor/");
+                }
             } else if (vendor.status === "Suspended") {
-                navigate("/suspend/");
+                navigate("/vendor/suspend/");
             } else {
+                // Verified vendor - go directly to dashboard
                 navigate("/vendor/");
             }
         }
@@ -119,15 +131,25 @@ const LoginVendro = () => {
                     } else if (result.storeData.status === "Verified") {
                         navigate("/vendor/");
                     } else if (result.storeData.status === "Rejected") {
-                        navigate("/vendor/vendor-info/");
+                        // Only redirect to vendor-info if they haven't completed their info
+                        if (!result.storeData.has_completed_info) {
+                            navigate("/vendor/vendor-info/");
+                        } else {
+                            navigate("/vendor/");
+                        }
                     } else if (result.storeData.status === "Suspended") {
                         navigate("/vendor/suspend/");
                     } else if (result.storeData.status === "UnVerified") {
-                        navigate("/vendor/vendor-info/");
+                        // Only redirect to vendor-info if they haven't completed their info
+                        if (!result.storeData.has_completed_info) {
+                            navigate("/vendor/vendor-info/");
+                        } else {
+                            navigate("/vendor/");
+                        }
                     }
                 }, 1000);
             } else {
-                toast.error("Login Failed. Please check your credentials.", {
+                toast.error(result.message || "Login Failed. Please check your credentials.", {
                     position: "top-right",
                     autoClose: 3000,
                     hideProgressBar: false,
@@ -202,4 +224,4 @@ const LoginVendro = () => {
     );
 };
 
-export default LoginVendro;
+export default LoginVendor;

@@ -101,8 +101,12 @@ const VendorInfo = () => {
     else if (containsInvalidChars(personalData.personal_name))
       errors.personal_name = "First Name cannot contain numbers or symbols";
 
-    if (personalData.personal_middle_name && containsInvalidChars(personalData.personal_middle_name)) {
-      errors.personal_middle_name = "Middle Name cannot contain numbers or symbols";
+    if (
+      personalData.personal_middle_name &&
+      containsInvalidChars(personalData.personal_middle_name)
+    ) {
+      errors.personal_middle_name =
+        "Middle Name cannot contain numbers or symbols";
     }
 
     if (!personalData.personal_last_name.trim())
@@ -127,8 +131,18 @@ const VendorInfo = () => {
 
     if (!personalData.personal_phone.trim()) {
       errors.personal_phone = "Mobile number is required";
-    } else if (!/^\+?(\d[- ]?)*\d+$/.test(personalData.personal_phone)) {
-      errors.personal_phone = "Invalid mobile number";
+    } else if (personalData.personal_phone.startsWith("+251")) {
+      if (!/^\+251\d{9}$/.test(personalData.personal_phone)) {
+        errors.personal_phone =
+          "Invalid +251 format. Should be +251 followed by 9 digits (13 total)";
+      }
+    } else if (personalData.personal_phone.startsWith("09")) {
+      if (!/^09\d{8}$/.test(personalData.personal_phone)) {
+        errors.personal_phone =
+          "Invalid 09 format. Should be 09 followed by 8 digits (10 total)";
+      }
+    } else {
+      errors.personal_phone = "Mobile number must start with +251 or 09";
     }
     if (!personalData.personal_unique_id.trim())
       errors.personal_unique_id = "Unique ID is required";
@@ -157,12 +171,23 @@ const VendorInfo = () => {
     if (!businessData.business_state.trim()) {
       errors.business_state = "Business State is required";
     } else if (containsInvalidChars(businessData.business_state)) {
-      errors.business_state = "Business State cannot contain numbers or symbols";
+      errors.business_state =
+        "Business State cannot contain numbers or symbols";
     }
     if (!businessData.business_phone.trim()) {
       errors.business_phone = "Business Mobile is required";
-    } else if (!/^\d+$/.test(businessData.business_phone)) {
-      errors.business_phone = "Invalid business mobile number";
+    } else if (businessData.business_phone.startsWith("+251")) {
+      if (!/^\+251\d{9}$/.test(businessData.business_phone)) {
+        errors.business_phone =
+          "Invalid +251 format. Should be +251 followed by 9 digits (13 total)";
+      }
+    } else if (businessData.business_phone.startsWith("09")) {
+      if (!/^09\d{8}$/.test(businessData.business_phone)) {
+        errors.business_phone =
+          "Invalid 09 format. Should be 09 followed by 8 digits (10 total)";
+      }
+    } else {
+      errors.business_phone = "Mobile number must start with +251 or 09";
     }
     if (!businessData.blicense_number.trim()) {
       errors.blicense_number = "Business License Number is required";
@@ -186,7 +211,8 @@ const VendorInfo = () => {
     if (!bankData.account_name.trim())
       errors.account_name = "Account Holder Name is required";
     else if (containsInvalidChars(bankData.account_name))
-      errors.account_name = "Account Holder Name cannot contain numbers or symbols";
+      errors.account_name =
+        "Account Holder Name cannot contain numbers or symbols";
 
     if (!bankData.account_number.trim())
       errors.account_number = "Account Number is required";
@@ -246,7 +272,12 @@ const VendorInfo = () => {
   const handleBankChange = (e) => {
     const { name, value } = e.target;
     if (name === "bank_name" && value !== bankData.bank_name) {
-      setBankData({ ...bankData, [name]: value, account_name: "", account_number: "" });
+      setBankData({
+        ...bankData,
+        [name]: value,
+        account_name: "",
+        account_number: "",
+      });
     } else {
       setBankData({ ...bankData, [name]: value });
     }
@@ -338,7 +369,7 @@ const VendorInfo = () => {
           autoClose: 3000,
         });
         // Redirect to vendor dashboard after successful submission
-        navigate('/vendor/dashboard');
+        navigate("/vendor/dashboard");
       } else {
         toast.error("Submission failed. Check your info.", {
           position: "top-right",
@@ -605,7 +636,7 @@ const VendorInfo = () => {
           {ethiopianBanks.map((bank) => (
             <option key={bank} value={bank}>
               {bank}
-              </option>
+            </option>
           ))}
         </select>
         {bankErrors.bank_name && (
@@ -668,7 +699,8 @@ const VendorInfo = () => {
           onClick={() => {
             if (canAccessBusiness) setActiveForm("business");
             else if (Object.keys(personalErrors).length > 0) {
-              toast.error("Please complete the Personal Info form correctly.", {position: "top-right",
+              toast.error("Please complete the Personal Info form correctly.", {
+                position: "top-right",
                 autoClose: 3000,
               });
             }
