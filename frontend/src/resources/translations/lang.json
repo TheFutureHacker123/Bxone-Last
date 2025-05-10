@@ -33,7 +33,10 @@
     "product_details": "Product Details",
     "rating": "Rating",
     "write_review": "Write Review",
-    "related_products": "Related Products"
+    "related_products": "Related Products",
+    "setting": "Setting",
+    "notification": "Notification",
+    "help_center": "Help Center"
   },
   "amharic": {
     "welcome": "ወደ ሱቅና እንኳን ደህና መጡ!",
@@ -69,7 +72,10 @@
     "product_details": "የምርት ዝርዝሮች",
     "rating": "ደረጃ",
     "write_review": "ግምገማ ጻፍ",
-    "related_products": "የተዛመዱ ምርቶች"
+    "related_products": "የተዛመዱ ምርቶች",
+    "setting":"ቅንብር",
+    "notification": "ማስታወቂያ",
+    "help_center": "የደንበኛ አገልግሎት"
   },
   "afan_oromo": {
     "welcome": "Baga nagaan dhuftan!",
@@ -105,7 +111,10 @@
     "product_details": "Ibsa Dabalataa Oomishaa",
     "rating": "Sadarkaa Kennuu",
     "write_review": "Gamaggama Barreessi",
-    "related_products": "Meeshaalee Wal Fakkaatan"
+    "related_products": "Meeshaalee Wal Fakkaatan",
+    "setting": "Qindeessa",
+    "notification": "Beeksisa",
+    "help_center": "Giddugala Gargaarsaa"
   },
   "ethiopian_somali": {
     "welcome": "Ku soo dhawoow Suuqaheenna!",
@@ -141,7 +150,10 @@
     "product_details": "Faahfaahin Alaabta",
     "rating": "Qiimaynta",
     "write_review": "Faallo Qor",
-    "related_products": "Alaabta La Xiriira"
+    "related_products": "Alaabta La Xiriira",
+    "setting": "dejinta",
+    "notification": "Ogeysiin",
+    "help_center": "Xarunta caawinta"
   },
   "tigrinya": {
     "welcome": "እንቋዕ ብደሓን መጻእኩም ናብ ዕዳጋና!",
@@ -177,6 +189,9 @@
     "product_details": "ዝርዝር ፍርዪ",
     "rating": "ደረጃ",
     "write_review": "ርእይቶ ጽሓፍ",
-    "related_products": "ተዛማዲ ፍርያት"
+    "related_products": "ተዛማዲ ፍርያት",
+    "setting": "ምምላእ",
+    "notification": "መፍለጢ",
+    "help_center": "ማእከል ሓገዝ"
   }
 }

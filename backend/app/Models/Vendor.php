@@ -5,16 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Laravel\Sanctum\HasApiTokens;
-use App\Models\PersonalInfo;
 
 class Vendor extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
-    
+
     protected $primaryKey = 'vendor_id';
     protected $table = 'vendors';
+    public $timestamps = false;
 
     protected $fillable = [
         'vendor_id',
@@ -22,19 +23,47 @@ class Vendor extends Authenticatable
         'password',
         'status',
         'time_stamp',
-        'vendor_role_id'
+        'vendor_role_id',
+        'logo', // Added logo to fillable
+        'is_featured', // Added is_featured to fillable
     ];
-
-    public $timestamps = false;
 
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'is_featured' => 'boolean', // Cast is_featured to boolean
     ];
 
-    public function personalInfo()
-{
-    return $this->hasOne(personalInfo::class, 'vendor_id', 'vendor_id');
-}
+    public function personalInfo(): HasOne
+    {
+        return $this->hasOne(PersonalInfo::class, 'vendor_id', 'vendor_id');
+    }
 
+    /**
+     * Get the products associated with the vendor.
+     */
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class, 'vendor_id', 'vendor_id');
+    }
+
+    public function businessInfo(): HasOne
+    {
+        return $this->hasOne(BusinessInfo::class, 'vendor_id', 'vendor_id');
+    }
+
+    public function bankInfo(): HasOne
+    {
+        return $this->hasOne(BankInfo::class, 'vendor_id', 'vendor_id');
+    }
+
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class, 'vendor_id', 'vendor_id');
+    }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Orders::class, 'vendor_id', 'vendor_id');
+    }
 }
