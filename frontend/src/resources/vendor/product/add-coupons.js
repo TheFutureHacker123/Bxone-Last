@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaBars, FaChartLine, FaBox, FaUser, FaPen, FaTimes } from "react-icons/fa";
+import { FaBars, FaChartLine, FaBox, FaUser, FaPen, FaTimes ,FaShoppingCart,FaComments} from "react-icons/fa";
 import { Container, Row, Col, Card, Button, Modal, Form, Image } from "react-bootstrap";
 import { ToastContainer, toast } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
@@ -257,12 +257,40 @@ function AddCoupons() {
                 </div>
 
                 <div className="dropdown">
+                    <div className="custom-link" onClick={() => handleDropdown("orders")}>
+                        <FaShoppingCart className="me-2" /> Manage Orders
+                    </div>
+                    {openDropdown === "orders" && (
+                        <ul className="dropdown-menu custom-dropdown-menu">
+                            <li><a href="/vendor/new-orders" className="dropdown-item-vendor">New Order</a></li>
+                            <li><a href="/vendor/shipped" className="dropdown-item-vendor">Shipped</a></li>
+                            <li><a href="/vendor/refunds" className="dropdown-item-vendor">Refund</a></li>
+                            <li><a href="/vendor/completed" className="dropdown-item-vendor">Completed</a></li>
+                        </ul>
+                    )}
+                </div>
+
+                <div className="dropdown">
+                    <div className="custom-link" onClick={() => handleDropdown("messages")}>
+                        <FaComments className="me-2" /> Manage Messages
+                    </div>
+                    {openDropdown === "messages" && (
+                        <ul className="dropdown-menu custom-dropdown-menu">
+                            <li><a href="/vendor/user-messages" className="dropdown-item-vendor">User Message</a></li>
+                            <li><a href="/vendor/admin-messages" className="dropdown-item-vendor">Admin Message</a></li>
+                            <li><a href="/vendor/review-messages " className="dropdown-item-vendor">Review Message</a></li>
+                            <li><a href="/vendor/notifications" className="dropdown-item-vendor">Notification</a></li>
+                        </ul>
+                    )}
+                </div>
+
+                <div className="dropdown">
                     <div className="custom-link" onClick={() => handleDropdown("profile")}>
                         <FaUser className="me-2" /> Profile
                     </div>
                     {openDropdown === "profile" && (
                         <ul className="dropdown-menu custom-dropdown-menu">
-                            <li><a href="/vendor/manage-profile" className="dropdown-item-vendor">Update Password</a></li>
+                            <li><a href="/vendor/manage-profile" className="dropdown-item-vendor">Updated Password</a></li>
                             <li><a onClick={logout} className="dropdown-item-vendor">Logout</a></li>
                         </ul>
                     )}

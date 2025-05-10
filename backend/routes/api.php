@@ -117,13 +117,13 @@ Route::get('/vendor/{vendorId}', [VendorController::class, 'getVendorDetails']);
 Route::get('/vendor/{vendorId}/products', [VendorController::class, 'getVendorProducts']);
 Route::get('/vendor/{vendorId}/categories', [VendorController::class, 'getVendorCategories']);
 
-<<<<<<< HEAD
+
 Route::get('/best-selling-vendors', [HomeController::class, 'getBestSellingVendors']);
-=======
+
 
 
 Route::post('/product/addcoupon', [ProductController::class, 'addCoupon']);//done
 Route::post('/product/listcoupon', [ProductController::class, 'listCoupon']);//done
 Route::post('/product/deletecoupon', [ProductController::class, 'deleteCoupon']);//done
 Route::post('/product/editcoupon', [ProductController::class, 'editCoupon']);//done
-
+Route::post('/product/onevendorproducts', [ProductController::class, 'onevendorproducts']);//done
