@@ -369,7 +369,7 @@ const VendorInfo = () => {
           autoClose: 3000,
         });
         // Redirect to vendor dashboard after successful submission
-        navigate("/vendor/dashboard");
+        navigate("/vendor/underreview/");
       } else {
         toast.error("Submission failed. Check your info.", {
           position: "top-right",
@@ -377,7 +377,7 @@ const VendorInfo = () => {
         });
       }
     } catch (error) {
-      console.error("🔥 Error submitting vendor info:", error);
+      console.error(" Error submitting vendor info:", error);
       toast.error("Something went wrong. Try again later.", {
         position: "top-right",
         autoClose: 3000,

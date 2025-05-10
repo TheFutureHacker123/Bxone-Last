@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Orders;
 use App\Models\Cart;
 use App\Models\Review;
+use App\Models\Coupon;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -63,41 +64,58 @@ class ProductController extends Controller
 
 
 
-    public function productdetails(Request $request) {
-        $validatedData = $request->validate([
-            'product_id' => 'required|integer',
+   public function productdetails(Request $request) {
+    $validatedData = $request->validate([
+        'product_id' => 'required|integer',
+    ]);
+
+    // Fetch the product info
+    $product = Product::select(
+        'product_id', 'product_name', 'product_desc',
+        'product_price', 'product_img1', 'product_img2',
+        'product_img3', 'product_img4', 'product_img5'
+    )->where('product_id', $validatedData['product_id'])->first();
+
+    if (!$product) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Product not found.',
         ]);
-    
-        $reviews = Review::where('product_id', $validatedData['product_id'])
-            ->with(['user:user_id,name', 'product:product_id,product_name,product_desc,product_price,product_img1,product_img2,product_img3,product_img4,product_img5']) // Fetching related user and product
-            ->select('review_txt', 'rate', 'user_id', 'product_id') // Include user_id and product_id for reference
-            ->get();
-    
-       return response()->json([
-    'success' => true,
-    'data' => $reviews->map(function ($review) {
-        return [
-            'review_txt' => $review->review_txt,
-            'rate' => $review->rate,
-            'user_id' => $review->user_id,
-            'user_name' => $review->user->name,
-            'product_id' => $review->product_id,
-            'product_name' => $review->product->product_name,
-            'product_desc' => $review->product->product_desc,
-            'product_price' => $review->product->product_price,
-            'product_images' => $review->product->product_img1,
-            'product_img2' => $review->product->product_img2,
-            'product_img3' => $review->product->product_img3,
-            'product_img4' => $review->product->product_img4,
-            'product_img5' => $review->product->product_img5,
-            'created_at' => $review->created_at,
-                
-            
-        ];
-    }),
-]);
-   
     }
+
+    // Fetch reviews with user info (may be empty)
+    $reviews = Review::where('product_id', $validatedData['product_id'])
+        ->with(['user:user_id,name'])
+        ->select('review_txt', 'rate', 'user_id', 'product_id', 'created_at')
+        ->get();
+
+    return response()->json([
+        'success' => true,
+        'data' => [
+            'product' => [
+                'product_id' => $product->product_id,
+                'product_name' => $product->product_name,
+                'product_desc' => $product->product_desc,
+                'product_price' => $product->product_price,
+                'product_images' => $product->product_img1,
+                'product_img2' => $product->product_img2,
+                'product_img3' => $product->product_img3,
+                'product_img4' => $product->product_img4,
+                'product_img5' => $product->product_img5,
+            ],
+            'reviews' => $reviews->map(function ($review) {
+                return [
+                    'review_txt' => $review->review_txt,
+                    'rate' => $review->rate,
+                    'user_id' => $review->user_id,
+                    'user_name' => $review->user->name ?? 'Unknown',
+                    'created_at' => $review->created_at,
+                ];
+            }),
+        ]
+    ]);
+}
+
 
 
 
@@ -284,6 +302,142 @@ class ProductController extends Controller
   
          return response()->json(['success' => true, 'refund_items' => $orders]);
     }
+
+
+
+
+
+public function addCoupon(Request $request)
+{
+    // Validate the incoming request data
+    $request->validate([
+        'product_id' => 'required|exists:product,product_id',
+        'vendor_id' => 'required|exists:vendors,vendor_id', // Ensure the vendor exists
+        'product_name' => 'required|string|max:255',
+        'coupon_code' => 'required|string|max:255|unique:coupons,coupon_code',
+        'discount_price' => 'required|numeric|min:0',
+        'expiry_date' => 'required|date|after:today',
+        'status' => 'required|in:active,inactive',
+    ]);
+
+    // Create a new coupon using the validated data
+    $coupon = Coupon::create([
+        'product_id' => $request->product_id,
+        'vendor_id' => $request->vendor_id, // Assign vendor ID
+        'product_name' => $request->product_name,
+        'coupon_code' => $request->coupon_code,
+        'discount_price' => $request->discount_price,
+        'expiry_date' => $request->expiry_date,
+        'status' => $request->status,
+    ]);
+
+    // Return a response indicating success
+    return response()->json([
+        'message' => 'Coupon added successfully!',
+        'coupon' => $coupon
+    ], 201);
+}
+
+public function listCoupon(Request $request)
+    {
+        // Validate the incoming request data
+        $request->validate([
+            'vendor_id' => 'required|exists:vendors,vendor_id',  // Ensure the vendor exists
+        ]);
+
+        // Get the vendor_id from the request
+        $vendorId = $request->vendor_id;
+
+        // Fetch all coupons for the specified vendor with related product information
+        $coupons = Coupon::with('product')  // Eager load the related product data
+                        ->where('vendor_id', $vendorId)  // Filter by vendor_id
+                        ->get();
+
+        // Return a response with the list of coupons
+        return response()->json([
+            'message' => 'Coupons retrieved successfully.',
+            'coupons' => $coupons
+        ]);
+    }
+
+
+
+
+
+
+
+public function deleteCoupon(Request $request)
+{
+    // Validate the request
+    $request->validate([
+        'coupon_id' => 'required|exists:coupons,coupon_id',
+    ]);
+
+    // Find the coupon
+    $coupon = Coupon::find($request->coupon_id);
+
+    if (!$coupon) {
+        return response()->json([
+            'message' => 'Coupon not found.'
+        ], 404);
+    }
+
+    // Delete the coupon
+    $coupon->delete();
+
+    return response()->json([
+        'message' => 'Coupon deleted successfully.'
+    ]);
+}
+
+
+
+
+
+
+public function editCoupon(Request $request)
+    {
+       
+        // Validate the incoming request data
+        $request->validate([
+            'coupon_id'      => 'required|exists:coupons,coupon_id', // Validate the coupon ID
+            'product_id'     => 'required|exists:product,product_id', // Validate the product ID
+            'product_name'   => 'required|string|max:255', // Validate the product name
+            'coupon_code'    => 'required|string|max:255', // Validate the coupon code
+            'discount_price' => 'required|numeric|min:0', // Validate the discount price
+            'expiry_date'    => 'required|date|after_or_equal:today', // Validate the expiry date
+            'status'         => 'required|in:active,inactive', // Validate the status
+        ]);
+        // Find the coupon by its ID
+        $coupon = Coupon::find($request->coupon_id);
+
+        if (!$coupon) {
+            return response()->json([
+                'message' => 'Coupon not found.',
+            ], 404);
+        }
+
+        // Update the coupon fields
+        $coupon->product_id = $request->product_id;
+        $coupon->product_name = $request->product_name;
+        $coupon->coupon_code = $request->coupon_code;
+        $coupon->discount_price = $request->discount_price;
+        $coupon->expiry_date = $request->expiry_date;
+        $coupon->status = $request->status;
+
+        // Save the updated coupon to the database
+        $coupon->save();
+
+        // Return a response confirming the update
+        return response()->json([
+            'message' => 'Coupon updated successfully.',
+            'coupon' => $coupon
+        ]);
+    }
+
+
+
+
 
 
 }

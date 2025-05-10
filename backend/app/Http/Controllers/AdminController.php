@@ -124,8 +124,8 @@ class AdminController extends Controller
     {
         // Validate the incoming request
         $validator = Validator::make($request->all(), [
-            'vendor_id' => 'required|exists:users,user_id',
-            'status' => 'required|in:Pending,Verified,Rejected,Suspended',
+            'vendor_id' => 'required|exists:vendors,vendor_id',
+            'status' => 'required|in:UnVerified,Pending,Verified,Rejected,Suspended',
         ]);
 
         if ($validator->fails()) {
@@ -246,7 +246,7 @@ class AdminController extends Controller
     {
         // Fetch all vendors with their personal info
            $vendors = Vendor::with('personalInfo')
-           ->where('status', 'Pending') // Filter by status
+           ->where('status', 'UnVerified') // Filter by status
            ->get();
     
         // Prepare response data

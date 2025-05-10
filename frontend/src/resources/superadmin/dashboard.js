@@ -144,7 +144,7 @@ function SAdminDashboard() {
           {openDropdown === "profile" && (
             <ul className="dropdown-menu admin-custom-dropdown-menu">
               <li><a href="/superadmin/manage-profile" className="dropdown-item-admin">Manage Profile</a></li>
-              <li><a href="/superadmin/login" className="dropdown-item-admin">Logout</a></li>
+              <li><a onClick={logout} className="dropdown-item-admin">Logout</a></li>
             </ul>
           )}
         </div>

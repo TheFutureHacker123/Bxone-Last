@@ -77,6 +77,7 @@ function ListVendor() {
 
   const changeUserStatus = async () => {
     try {
+      console.log("Changing status for user ID:", selectedUserId, "to status:", userStatus);
       const response = await fetch("http://localhost:8000/api/admin/changevendorstatus", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

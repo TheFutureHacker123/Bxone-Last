@@ -34,7 +34,6 @@ class UserController extends Controller
                     ->mixedCase()
                     ->numbers()
                     ->symbols()
-                    ->uncompromised(),
             ],
         ], [
             'name.regex' => 'Name can only contain letters and spaces',
