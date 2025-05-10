@@ -1,35 +1,34 @@
-
 :root {
-    --font-size: medium; /* Default font size */
-    --font-color: #000000; /* Default font color */
-  }
-  
-  body {
+    --font-size: 14px;
+    --font-color: #000000;
+}
+
+body {
     font-size: var(--font-size);
     color: var(--font-color);
-  
     font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-  }
+    background-color: #ffffff; /* Set body background to white */
+}
 
 .login-container {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    
 }
 
 .login-form {
     background-color: #ffffff;
-    padding: 60px; /* Increased padding */
+    padding: 60px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 500px; /* Increased width */
+    width: 500px;
+    position: relative; /* To position the back button relative to this */
 }
 
 .login-form h2 {
     margin-bottom: 20px;
+    font-size: 1.5em;
 }
 
 .login-form a {
@@ -41,32 +40,44 @@
 }
 
 .forgot-password {
-    color: #007bff; /* Bootstrap primary color */
+    color: #007bff;
 }
 
 .forgot-password:hover {
     text-decoration: underline;
 }
 
-/* Ensure labels are left-aligned */
 .form-label {
-    text-align: left; /* Align labels to the left */
-    margin-bottom: 0.5rem; /* Optional: space below labels */
+    text-align: left;
+    margin-bottom: 0.5rem;
 }
 
-.custom-form-control  {
-    width: 100%; /* Ensure inputs take full width */
-    padding: 7px; /* Add padding for better touch target */
-    border: 1px solid #ced4da; /* Default border color */
-    border-radius: 0.25rem; /* Bootstrap's default border radius */
-    font-size: 16px; /* Increase font size for better readability */
-    text-align: left; /* Align text to the left */
-    box-sizing: border-box; /* Include padding and border in element's total width */
-    transition: border-color 0.3s ease, box-shadow 0.3s ease; /* Smooth transition for border and shadow */
+.custom-form-control {
+    width: 100%;
+    padding: 7px;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    font-size: 16px;
+    text-align: left;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .custom-form-control:focus {
-    outline: none; /* Remove default outline */
-    border-color: #80bdff; /* Bootstrap's focus border color */
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Bootstrap's focus shadow */
+    outline: none;
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.back-button {
+    position: absolute; /* Position it within the login-form */
+    top: 5px;          /* Adjust as needed */
+    left: 5px;         /* Adjust as needed */
+    z-index: 10;        /* Ensure it's above other content */
+}
+
+.back-button svg { /* Style the SVG icon */
+    font-size: 1.2em; /* Adjust size of the arrow */
+    cursor: pointer;
+    color: #121d80;      /* Optional: arrow color */
 }
