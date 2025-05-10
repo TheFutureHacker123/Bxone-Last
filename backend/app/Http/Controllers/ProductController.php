@@ -338,6 +338,7 @@ public function addCoupon(Request $request)
     ], 201);
 }
 
+
 public function listCoupon(Request $request)
     {
         // Validate the incoming request data
@@ -394,50 +395,76 @@ public function deleteCoupon(Request $request)
 
 
 
-
 public function editCoupon(Request $request)
-    {
-       
-        // Validate the incoming request data
-        $request->validate([
-            'coupon_id'      => 'required|exists:coupons,coupon_id', // Validate the coupon ID
-            'product_id'     => 'required|exists:product,product_id', // Validate the product ID
-            'product_name'   => 'required|string|max:255', // Validate the product name
-            'coupon_code'    => 'required|string|max:255', // Validate the coupon code
-            'discount_price' => 'required|numeric|min:0', // Validate the discount price
-            'expiry_date'    => 'required|date|after_or_equal:today', // Validate the expiry date
-            'status'         => 'required|in:active,inactive', // Validate the status
-        ]);
-        // Find the coupon by its ID
-        $coupon = Coupon::find($request->coupon_id);
+{
+    // Validate the incoming request data
+    $request->validate([
+        'coupon_id'      => 'required|exists:coupons,coupon_id',
+        'product_id'     => 'required|exists:product,product_id',
+        'product_name'   => 'required|string|max:255',
+        'coupon_code'    => 'required|string|max:255',
+        'discount_price' => 'required|numeric|min:0',
+        'expiry_date'    => 'required|date|after_or_equal:today',
+        'status'         => 'required|in:active,inactive',
+        'vendor_id'      => 'required|exists:vendors,vendor_id' // Validate vendor_id if needed
+    ]);
 
-        if (!$coupon) {
-            return response()->json([
-                'message' => 'Coupon not found.',
-            ], 404);
-        }
+    $vendor_id = $request->vendor_id; // Define vendor_id
 
-        // Update the coupon fields
-        $coupon->product_id = $request->product_id;
-        $coupon->product_name = $request->product_name;
-        $coupon->coupon_code = $request->coupon_code;
-        $coupon->discount_price = $request->discount_price;
-        $coupon->expiry_date = $request->expiry_date;
-        $coupon->status = $request->status;
+    // Find the coupon by its ID
+    $coupon = Coupon::find($request->coupon_id);
 
-        // Save the updated coupon to the database
-        $coupon->save();
-
-        // Return a response confirming the update
+    if (!$coupon) {
         return response()->json([
-            'message' => 'Coupon updated successfully.',
-            'coupon' => $coupon
+            'message' => 'Coupon not found.',
+        ], 404);
+    }
+
+    // Update the coupon fields
+    $coupon->product_id = $request->product_id;
+    $coupon->product_name = $request->product_name;
+    $coupon->coupon_code = $request->coupon_code;
+    $coupon->discount_price = $request->discount_price;
+    $coupon->expiry_date = $request->expiry_date;
+    $coupon->status = $request->status;
+
+    // Save the updated coupon
+    $coupon->save();
+
+    // Retrieve the coupons
+    $coupons = Coupon::with('product')
+                     ->where('vendor_id', $vendor_id) // Use the defined vendor_id
+                     ->get();
+
+    // Return the response
+    return response()->json([
+        'message' => 'Coupons retrieved successfully.',
+        'coupon' => $coupons
+    ]);
+}
+
+
+
+public function oneVendorProducts(Request $request)
+    {
+        // Validate the incoming request
+        $request->validate([
+            'vendor_id' => 'required|integer|exists:vendors,vendor_id',
         ]);
+
+        // Get the vendor_id from the request
+        $vendorId = $request->input('vendor_id');
+
+        // Retrieve product IDs and names for the specified vendor
+        $products = Product::where('vendor_id', $vendorId)
+            ->select('product_id', 'product_name')
+            ->get();
+
+        // Return the products as a JSON response
+        return response()->json($products);
     }
 
 
-
-
-
+    
 
 }
