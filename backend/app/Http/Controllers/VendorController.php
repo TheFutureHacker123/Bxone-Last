@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -102,6 +103,93 @@ class VendorController extends Controller
         ], 200); // Changed from 201 to 200 for successful login
     }
 
+
+    /**
+     * Get vendor details by ID
+     *
+     * @param int $id Vendor ID
+     * @return JsonResponse
+     */
+    public function getVendorDetails(int $id): JsonResponse
+    {
+        $vendor = Vendor::with('personalInfo')->findOrFail($id);
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'vendor' => $vendor
+            ]
+        ]);
+    }
+
+    /**
+     * Get products for a specific vendor
+     *
+     * @param int $id Vendor ID
+     * @return JsonResponse
+     */
+    public function getVendorProducts(int $id): JsonResponse
+    {
+        $products = Product::where('vendor_id', $id)->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'products' => $products
+            ]
+        ]);
+    }
+
+    /**
+     * Get all featured vendors
+     *
+     * @return JsonResponse
+     */
+    public function getFeaturedVendors(): JsonResponse
+    {
+        $featuredVendors = Vendor::with('personalInfo')
+            ->where('is_featured', true)
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'featured_vendors' => $featuredVendors
+            ]
+        ]);
+    }
+
+    /**
+     * Get all categories
+     *
+     * @return JsonResponse
+     */
+    public function getCategories(): JsonResponse
+    {
+        $categories = Category::all();
+
+        return response()->json([
+            'success' => true,
+            'data' => $categories
+        ]);
+    }
+
+    /**
+     * Get categories associated with a vendor's products
+     *
+     * @param int $id Vendor ID
+     * @return JsonResponse
+     */
+    public function getVendorCategories(int $id): JsonResponse
+    {
+        $vendor = Vendor::findOrFail($id);
+        $categories = $vendor->products()->distinct()->pluck('category_id');
+        $vendorCategories = Category::whereIn('category_id', $categories)->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $vendorCategories
+        ]);
+    }
     public function updatepassword(Request $request)
     {
         // Validate the incoming request to ensure passwords are valid

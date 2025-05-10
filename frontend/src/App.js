@@ -77,6 +77,7 @@ import AddCoupons from "./resources/vendor/product/add-coupons"
 import VendorUnderReview from "./resources/vendor/underreview"
 import VendorSuspended from "./resources/vendor/suspend"  
 import VendorSupport from "./resources/vendor/support"
+import VendorStore from "./resources/vendor/VendorStore"
 
 
 import ControlOrder from "./resources/vendor/order/new-orders"
@@ -128,6 +129,7 @@ function App() {
           <Route path="/vendor/login" element={<LoginVendor />} />
           <Route path="/vendor/register" element={<RegisterVendor />} />
           <Route path="/vendor/reset" element={<RestePassword />} />
+          <Route path="/vendor/:id" element={<VendorStore />} />
 
           <Route path="/vendor/manage-profile" element={<ProtectPathVendor Cmp={ManageProfile} />}  />
 
