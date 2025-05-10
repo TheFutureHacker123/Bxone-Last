@@ -6,7 +6,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/ProductDetail.css';
 
 function ProductDetail() {
-  const [mainImage, setMainImage] = useState('');
+  const [mainImage, setMainImage] = useState(null);
   const [productInfo, setProductInfo] = useState(null);
   const [reviews, setReviews] = useState([]);
   const navigate = useNavigate();
@@ -33,7 +33,7 @@ function ProductDetail() {
   useEffect(() => {
     async function listProductDetail(product_id) {
       try {
-        let response = await fetch(`http://localhost:8000/api/productdetails`, {
+        const response = await fetch(`http://localhost:8000/api/productdetails`, {
           method: 'POST',
           body: JSON.stringify({ product_id }),
           headers: {
@@ -41,11 +41,16 @@ function ProductDetail() {
             "Accept": 'application/json'
           }
         });
-        let result = await response.json();
-        if (result.success && result.data.length > 0) {
-          setProductInfo(result.data[0]); // Use first item for product info
-          setReviews(result.data);
-          setMainImage(`http://localhost:8000/storage/${result.data[0].product_images}`);
+
+        const result = await response.json();
+        if (result.success) {
+          setProductInfo(result.data.product);
+          setReviews(result.data.reviews || []);
+          setMainImage(
+            result.data.product.product_images
+              ? `http://localhost:8000/storage/${result.data.product.product_images}`
+              : null
+          );
         }
       } catch (error) {
         console.error("Fetch error:", error);
@@ -63,29 +68,26 @@ function ProductDetail() {
     navigate('/ChatVendor');
   };
 
-  const thumbnails = [
-    productInfo?.product_images && `http://localhost:8000/storage/${productInfo.product_images}`,
-    productInfo?.product_img2 && `http://localhost:8000/storage/${productInfo.product_img2}`,
-    productInfo?.product_img3 && `http://localhost:8000/storage/${productInfo.product_img3}`,
-    productInfo?.product_img4 && `http://localhost:8000/storage/${productInfo.product_img4}`,
-    productInfo?.product_img5 && `http://localhost:8000/storage/${productInfo.product_img5}`
-  ].filter(Boolean);
-
-
-
+  const thumbnails = productInfo
+    ? [
+        productInfo.product_images,
+        productInfo.product_img2,
+        productInfo.product_img3,
+        productInfo.product_img4,
+        productInfo.product_img5,
+      ]
+        .filter(img => !!img)
+        .map(img => `http://localhost:8000/storage/${img}`)
+    : [];
 
   const addToCart = async (productid) => {
     const storedUser = localStorage.getItem("user-info");
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
-
-
-
-      let items = { product_id: productid, user_id: parsedUser.user_id };
-      console.warn("Fuck Items", items)
+      const items = { product_id: productid, user_id: parsedUser.user_id };
 
       try {
-        let response = await fetch("http://localhost:8000/api/addtocart", {
+        const response = await fetch("http://localhost:8000/api/addtocart", {
           method: 'POST',
           body: JSON.stringify(items),
           headers: {
@@ -94,7 +96,7 @@ function ProductDetail() {
           }
         });
 
-        let result = await response.json();
+        const result = await response.json();
 
         if (result.success) {
           toast.success("Product added to cart!", {
@@ -128,12 +130,19 @@ function ProductDetail() {
     <div className="container my-5 p-4 bg-white rounded shadow">
       <div className="row">
         <div className="d-flex justify-content-end">
-          <button className="btn btn-warning contact-seller" onClick={handleContactSeller}>Contact Seller</button>
+          {/* <button className="btn btn-warning contact-seller" onClick={handleContactSeller}>Contact Seller</button> */}
         </div>
+
         <div className="col-md-6 mt-5">
           <div className="product-image text-center">
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-              <img src={mainImage} alt="Main Product" style={{ width: '250px', height: '300px', objectFit: 'contain' }} />
+              {mainImage && (
+                <img
+                  src={mainImage}
+                  alt="Main Product"
+                  style={{ width: '250px', height: '300px', objectFit: 'contain' }}
+                />
+              )}
             </div>
 
             <div className="thumbnails d-flex justify-content-center mt-2">
@@ -143,6 +152,7 @@ function ProductDetail() {
             </div>
           </div>
         </div>
+
         <div className="col-md-6 mt-4">
           <h3 className="mt-3">Product Name</h3>
           <p><strong>{productInfo?.product_name || "Loading..."}</strong></p>
@@ -152,16 +162,23 @@ function ProductDetail() {
           </div>
           <div className="d-flex justify-content-between align-items-center mt-4">
             <h3>Product Reviews</h3>
-            <div className="rating">★ {Math.round((reviews.reduce((acc, r) => acc + r.rate, 0) / reviews.length) * 10) / 10 || 0} / 5</div>
+            <div className="rating">
+              ★ {reviews.length > 0 ? Math.round((reviews.reduce((acc, r) => acc + r.rate, 0) / reviews.length) * 10) / 10 : 0} / 5
+            </div>
           </div>
           <div className="reviews-section mt-4 text-start">
-            {reviews.map((review, index) => (
-              <div key={index} className="review mb-2">
-                <p><strong>{review.user_name}:</strong> {review.review_txt} ({'★'.repeat(review.rate)}{'☆'.repeat(5 - review.rate)})</p>
-              </div>
-            ))}
+            {reviews.length > 0 ? (
+              reviews.map((review, index) => (
+                <div key={index} className="review mb-2">
+                  <p><strong>{review.user_name}:</strong> {review.review_txt} ({'★'.repeat(review.rate)}{'☆'.repeat(5 - review.rate)})</p>
+                </div>
+              ))
+            ) : (
+              <p>No reviews yet.</p>
+            )}
           </div>
         </div>
+
         <div className="product-info mt-4 d-flex flex-column align-items-center text-center">
           <h2>Product Price</h2>
           <p><strong>Price:</strong> ${productInfo?.product_price || 'N/A'}</p>
@@ -169,12 +186,11 @@ function ProductDetail() {
             className="btn btn-warning add-to-cart-button"
             onClick={(e) => {
               e.stopPropagation();
-              addToCart(productInfo?.product_id); // Use productInfo or correct object
+              addToCart(productInfo?.product_id);
             }}
           >
             Add to Cart
           </button>
-
         </div>
         <ToastContainer />
       </div>

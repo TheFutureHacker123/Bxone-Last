@@ -114,3 +114,8 @@ Route::post('/vendor/listreview', [VendorController::class, 'listreview']);//don
 
 
 
+Route::post('/product/addcoupon', [ProductController::class, 'addCoupon']);//done
+Route::post('/product/listcoupon', [ProductController::class, 'listCoupon']);//done
+Route::post('/product/deletecoupon', [ProductController::class, 'deleteCoupon']);//done
+Route::post('/product/editcoupon', [ProductController::class, 'editCoupon']);//done
+
