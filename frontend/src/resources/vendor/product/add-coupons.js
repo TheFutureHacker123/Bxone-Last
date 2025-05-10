@@ -1,185 +1,217 @@
-import React, { useState,useEffect } from "react";
-import { FaBars, FaChartLine, FaBox, FaShoppingCart, FaComments, FaUser, FaPen, FaTimes, } from "react-icons/fa";
-import { Container, Row, Col, Card, ListGroup, Button, Modal, Form, Image, } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import { FaBars, FaChartLine, FaBox, FaUser, FaPen, FaTimes } from "react-icons/fa";
+import { Container, Row, Col, Card, Button, Modal, Form, Image } from "react-bootstrap";
 import { ToastContainer, toast } from 'react-toastify';
-import { Link, useNavigate } from "react-router-dom";
-import Translation from "../../translations/lang.json";
+import { useNavigate } from "react-router-dom";
 import "../style/add-coupons.css";
 
 function AddCoupons() {
     const [sidebarVisible, setSidebarVisible] = useState(true);
     const [openDropdown, setOpenDropdown] = useState(null);
     const [showAddCouponModal, setShowAddCouponModal] = useState(false);
+    const [showEditCouponModal, setShowEditCouponModal] = useState(false);
+    const [coupons, setCoupons] = useState([]);
+    const [products, setProducts] = useState([]);
     const [productName, setProductName] = useState("");
+    const [productId, setProductId] = useState(""); // New state for product ID
     const [couponCode, setCouponCode] = useState("");
     const [discountPrice, setDiscountPrice] = useState("");
     const [expiryDate, setExpiryDate] = useState("");
-    const [status, setStatus] = useState("active"); // New state for status
-    const [productImages, setProductImages] = useState({ selectedproductImages: [] });
-    const [entries, setEntries] = useState(10);
-    const [currentPage, setCurrentPage] = useState(1);
-    const couponCodes = 100; // Example coupon code count
-    const totalPages = Math.ceil(couponCodes / entries);
-    const [selectedFilesCount, setSelectedFilesCount] = useState(0);
+    const [status, setStatus] = useState("active");
+    const [selectedCoupon, setSelectedCoupon] = useState(null);
     const navigate = useNavigate();
-    const [selectedProduct, setSelectedProduct] = useState(null);
-    const [showEditProductModal, setShowEditProductModal] = useState(false);
 
-  
-    const defaultFontSize = 'medium';
-    const defaultFontColor = '#000000';
-    const defaultLanguage = 'english'; // Default language
-  
-    const [fontSize, setFontSize] = useState(() => localStorage.getItem('fontSize') || defaultFontSize);
-    const [fontColor, setFontColor] = useState(() => localStorage.getItem('fontColor') || defaultFontColor);
-    const [language, setLanguage] = useState(() => localStorage.getItem('language') || defaultLanguage);
-    const [content, setContent] = useState(Translation[language]);
-  
     useEffect(() => {
-      document.documentElement.style.setProperty('--font-size', fontSize);
-      document.documentElement.style.setProperty('--font-color', fontColor);
-      
-      localStorage.setItem('fontSize', fontSize);
-      localStorage.setItem('fontColor', fontColor);
-      localStorage.setItem('language', language);
-  
-      // Update content based on selected language
-      setContent(Translation[language]);
-    }, [fontSize, fontColor, language]);
-    
-  
+        const vendorInfo = JSON.parse(localStorage.getItem('vendor-info'));
+        const vendorId = vendorInfo?.vendor_id;
 
-    const deleteProduct = (productId) => {
-        console.warn("FUCK ID:", productId);
+        if (vendorId) {
+            fetchCoupons(vendorId);
+            fetchProducts(vendorId);
+        }
+    }, []);
+
+    const fetchCoupons = async (vendorId) => {
+        try {
+            const response = await fetch("http://localhost:8000/api/product/listcoupon", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ vendor_id: vendorId })
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setCoupons(data.coupons);
+            } else {
+                toast.error(data.message);
+            }
+        } catch (error) {
+            console.error("Error fetching coupons:", error);
+            toast.error("Failed to fetch coupons.");
+        }
     };
-    const handleCloseEditProductModal = () => {
-        setShowEditProductModal(false);
-        setSelectedProduct(null);
+
+    const fetchProducts = async (vendorId) => {
+        try {
+            const response = await fetch("http://localhost:8000/api/product/onevendorproducts", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ vendor_id: vendorId })
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setProducts(data);
+            } else {
+                toast.error(data.message);
+            }
+        } catch (error) {
+            console.error("Error fetching products:", error);
+            toast.error("Failed to fetch products.");
+        }
     };
-    const toggleSidebar = () => {
-        setSidebarVisible(!sidebarVisible);
+
+    const handleCloseAddCouponModal = () => {
+        setShowAddCouponModal(false);
+        resetForm();
+    };
+
+    const handleCloseEditCouponModal = () => {
+        setShowEditCouponModal(false);
+        resetForm();
+    };
+
+    const resetForm = () => {
+        setProductName("");
+        setProductId(""); // Reset product ID
+        setCouponCode("");
+        setDiscountPrice("");
+        setExpiryDate("");
+        setStatus("active");
+        setSelectedCoupon(null);
+    };
+
+    const addCoupon = async (e) => {
+        e.preventDefault();
+        const vendorInfo = JSON.parse(localStorage.getItem('vendor-info'));
+        const vendorId = vendorInfo?.vendor_id;
+
+        try {
+            const response = await fetch("http://localhost:8000/api/product/addcoupon", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    product_id: productId,
+                    vendor_id: vendorId,
+                    product_name: productName,
+                    coupon_code: couponCode,
+                    discount_price: discountPrice,
+                    expiry_date: expiryDate,
+                    status: status
+                })
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                // Fetch coupons again to refresh the list
+                fetchCoupons(vendorId);
+                toast.success(data.message);
+                handleCloseAddCouponModal();
+            } else {
+                toast.error(data.message);
+            }
+        } catch (error) {
+            console.error("Error adding coupon:", error);
+            toast.error("Failed to add coupon.");
+        }
     };
 
     const handleDropdown = (menu) => {
         setOpenDropdown(openDropdown === menu ? null : menu);
     };
 
-    const handleImageChange = (e) => {
-        const { name, files } = e.target;
-        if (name === "selectedproductImages") {
-            const slicedFiles = Array.from(files).slice(0, 5); // Limit to 5 files
-            setProductImages({
-                ...productImages,
-                selectedproductImages: slicedFiles
+    const handleEditClick = (coupon) => {
+        setSelectedCoupon(coupon);
+        setProductName(coupon.product_name || "");
+        setProductId(coupon.product_id || ""); // Set product ID
+        setCouponCode(coupon.coupon_code || "");
+        setDiscountPrice(coupon.discount_price || "");
+        setExpiryDate(coupon.expiry_date || "");
+        setStatus(coupon.status || "active");
+        setShowEditCouponModal(true);
+    };
+
+    const handleProductChange = (e) => {
+        const selectedProduct = products.find(product => product.product_name === e.target.value);
+        setProductName(e.target.value);
+        setProductId(selectedProduct ? selectedProduct.product_id : ""); // Update product ID based on selection
+    };
+
+    const editCoupon = async (e) => {
+        e.preventDefault();
+        if (!selectedCoupon) {
+            toast.error("Selected coupon is invalid.");
+            return;
+        }
+        try {
+            const vendorInfo = JSON.parse(localStorage.getItem('vendor-info'));
+            const vendorId = vendorInfo?.vendor_id;
+            const response = await fetch("http://localhost:8000/api/product/editcoupon", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    vendor_id: vendorId,
+                    coupon_id: selectedCoupon.coupon_id,
+                    product_id: productId, // Use updated product ID
+                    product_name: productName,
+                    coupon_code: couponCode,
+                    discount_price: discountPrice,
+                    expiry_date: expiryDate,
+                    status: status
+                })
             });
-            setSelectedFilesCount(slicedFiles.length); // Update the count of selected files
+            const data = await response.json();
+            if (response.ok) {
+                fetchCoupons(vendorId); // Refresh the coupons list after a successful update
+                toast.success(data.message);
+                handleCloseEditCouponModal();
+            } else {
+                toast.error(data.message);
+            }
+        } catch (error) {
+            console.error("Error editing coupon:", error);
+            toast.error("Failed to edit coupon.");
         }
     };
 
-    const addCoupon = (e) => {
-        e.preventDefault();
-        const newProduct = { productName, couponCode, discountPrice, expiryDate, status, productImages };
-        console.log("Product Added:", newProduct);
-        handleCloseAddCouponModal();
-    };
-    const products = [
-        {
-            id: 1,
-            name: "Smartphone",
-            couponCode: "Bxone",
-            price: "$699",
-            image: "https://www.beyiddondolo.com/media/5679-84.jpg",
-            expiryDate: "2025-05-01",
-            status: "active"
-        },
-        {
-            id: 2,
-            name: "Laptop",
-            couponCode: "Bxone",
-            price: "$999",
-            image: "https://www.beyiddondolo.com/media/5679-84.jpg",
-            expiryDate: "2025-06-15",
-            status: "inactive"
-        },
-        {
-            id: 3,
-            name: "Headphones",
-            couponCode: "Bxone",
-            price: "$199",
-            image: "https://www.beyiddondolo.com/media/5679-84.jpg",
-            expiryDate: "2025-04-25",
-            status: "active"
-        },
-        {
-            id: 4,
-            name: "Smartwatch",
-            couponCode: "Bxone",
-            price: "$249",
-            image: "https://www.beyiddondolo.com/media/5679-84.jpg",
-            expiryDate: "2025-05-10",
-            status: "inactive"
-        },
-        {
-            id: 5,
-            name: "Men's T-Shirt",
-            couponCode: "Bxone",
-            price: "$29",
-            image: "https://www.beyiddondolo.com/media/5679-84.jpg",
-            expiryDate: "2025-04-30",
-            status: "active"
-        },
-        {
-            id: 6,
-            name: "Women's Dress",
-            couponCode: "Bxone",
-            price: "$49",
-            image: "https://www.beyiddondolo.com/media/5679-84.jpg",
-            expiryDate: "2025-07-01",
-            status: "inactive"
-        },
-        {
-            id: 7,
-            name: "Kids' Backpack",
-            couponCode: "Bxone",
-            price: "$39",
-            image: "https://www.beyiddondolo.com/media/5679-84.jpg",
-            expiryDate: "2025-05-20",
-            status: "active"
-        },
-        {
-            id: 8,
-            name: "Bluetooth Speaker",
-            couponCode: "Bxone",
-            price: "$89",
-            image: "https://www.beyiddondolo.com/media/5679-84.jpg",
-            expiryDate: "2025-06-10",
-            status: "inactive"
-        },
-    ];
-    const handleCloseAddCouponModal = () => {
-        setShowAddCouponModal(false);
-        setProductName("");
-        setCouponCode("");
-        setDiscountPrice("");
-        setExpiryDate("");
-        setStatus("active"); // Reset status
-        setProductImages({ selectedproductImages: [] });
-    };
+    const deleteCoupon = async (couponId) => {
+        try {
+            const response = await fetch("http://localhost:8000/api/product/deletecoupon", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ coupon_id: couponId })
+            });
 
-    // Get today's date in YYYY-MM-DD format
-    const today = new Date();
+            const data = await response.json();
 
-    // Adjust the date by ensuring it’s in local time format
-    const minDate = today.toLocaleDateString("en-CA");
-
-    const openEditProductModal = (product) => {
-        setSelectedProduct(product);
-        setProductName(product.name); // Set current product name
-        setCouponCode(product.couponCode); // Set current coupon code
-        setDiscountPrice(product.price); // Set current discount price
-        setExpiryDate(product.expiryDate); // Set current expiry date
-        setStatus(product.status); // Set current status
-        setShowEditProductModal(true); // Show the modal
+            if (response.ok) {
+                setCoupons(coupons.filter(coupon => coupon.coupon_id !== couponId));
+                toast.success(data.message);
+            } else {
+                toast.error(data.message);
+            }
+        } catch (error) {
+            console.error("Error deleting coupon:", error);
+            toast.error("Failed to delete coupon.");
+        }
     };
 
     function logout() {
@@ -194,12 +226,12 @@ function AddCoupons() {
         });
         setTimeout(() => {
             navigate("/vendor/login");
-        }, 1000); // Delay the navigation for 3 seconds
+        }, 1000);
     }
 
     return (
         <div className="dashboard-wrapper">
-            <button className="hamburger-btn" onClick={toggleSidebar}>
+            <button className="hamburger-btn" onClick={() => setSidebarVisible(!sidebarVisible)}>
                 <FaBars />
             </button>
 
@@ -225,40 +257,12 @@ function AddCoupons() {
                 </div>
 
                 <div className="dropdown">
-                    <div className="custom-link" onClick={() => handleDropdown("orders")}>
-                        <FaShoppingCart className="me-2" /> Manage Orders
-                    </div>
-                    {openDropdown === "orders" && (
-                        <ul className="dropdown-menu custom-dropdown-menu">
-                            <li><a href="/vendor/new-orders" className="dropdown-item-vendor">New Order</a></li>
-                            <li><a href="/vendor/shipped" className="dropdown-item-vendor">Shipped</a></li>
-                            <li><a href="/vendor/refunds" className="dropdown-item-vendor">Refund</a></li>
-                            <li><a href="/vendor/completed" className="dropdown-item-vendor">Completed</a></li>
-                        </ul>
-                    )}
-                </div>
-
-                <div className="dropdown">
-                    <div className="custom-link" onClick={() => handleDropdown("messages")}>
-                        <FaComments className="me-2" /> Manage Messages
-                    </div>
-                    {openDropdown === "messages" && (
-                        <ul className="dropdown-menu custom-dropdown-menu">
-                            <li><a href="/vendor/user-messages" className="dropdown-item-vendor">User Message</a></li>
-                            <li><a href="/vendor/admin-messages" className="dropdown-item-vendor">Admin Message</a></li>
-                            <li><a href="/vendor/review-messages " className="dropdown-item-vendor">Review Message</a></li>
-                            <li><a href="/vendor/notifications" className="dropdown-item-vendor">Notification</a></li>
-                        </ul>
-                    )}
-                </div>
-
-                <div className="dropdown">
                     <div className="custom-link" onClick={() => handleDropdown("profile")}>
                         <FaUser className="me-2" /> Profile
                     </div>
                     {openDropdown === "profile" && (
                         <ul className="dropdown-menu custom-dropdown-menu">
-                            <li><a href="/vendor/manage-profile" className="dropdown-item-vendor">Updated Password</a></li>
+                            <li><a href="/vendor/manage-profile" className="dropdown-item-vendor">Update Password</a></li>
                             <li><a onClick={logout} className="dropdown-item-vendor">Logout</a></li>
                         </ul>
                     )}
@@ -269,13 +273,11 @@ function AddCoupons() {
                 <div className="custom-header text-center">
                     <h1 className="h4 mb-0">Coupon Lists</h1>
                 </div>
-
-                {/* Main Content Starts Here */}
                 <Container fluid>
                     <Row>
                         <Col lg={12} className="p-4">
                             <Row className="mt-3">
-                                <Col lg={12} className=" d-flex justify-content-end">
+                                <Col lg={12} className="d-flex justify-content-end">
                                     <Button
                                         variant="primary"
                                         className="add-product-btn"
@@ -286,29 +288,30 @@ function AddCoupons() {
                                 </Col>
                             </Row>
 
-                            {/* Product Cards Grid */}
                             <Row className="mt-3">
-                                {products.map((product) => (
-                                    <Col xs={12} md={6} lg={3} key={product.id}>
+                                {coupons.map((coupon) => (
+                                    <Col xs={12} md={6} lg={3} key={coupon.coupon_id}>
                                         <Card className="shadow-sm rounded-4 p-3 product-card-vendor">
                                             <Image
-                                                src={product.image}
-                                                alt={product.name}
+                                                src={`http://localhost:8000/storage/${coupon.product?.product_img1}`}
+                                                alt={coupon.product?.product_name || "Product Image"}
                                                 fluid
                                                 rounded
                                                 className="mb-3"
-                                                style={{ height: "150px", objectFit: "contain" }} // Updated style
+                                                style={{ height: "150px", objectFit: "contain" }}
                                             />
-                                            <h5 className="fw-bold">{product.name}</h5>
-                                            <p>Coupon Code: {product.couponCode}</p>
-                                            <p>Discount Price: {product.price}</p>
-                                            <p>Expiry Date: {product.expiryDate}</p> {/* Showing expiry date */}
-                                            <p>Status: {product.status}</p>
+                                            <h5 className="fw-bold">{coupon.product?.product_name || "Unknown Product"}</h5>
+                                            <p>Coupon Code: {coupon.coupon_code}</p>
+                                            <p>Discount Price: ${coupon.discount_price}</p>
+                                            <p>Expiry Date: {coupon.expiry_date}</p>
+                                            <p>Status: {coupon.status}</p>
                                             <div className="d-flex justify-content-between mt-3">
-                                                <Button variant="warning" size="sm" onClick={() => openEditProductModal(product)}>
+                                                <Button variant="warning" size="sm" onClick={() => handleEditClick(coupon)}>
                                                     <FaPen />
                                                 </Button>
-                                                <Button variant="danger" size="sm" onClick={() => deleteProduct(product.id)}><FaTimes /></Button>
+                                                <Button variant="danger" size="sm" onClick={() => deleteCoupon(coupon.coupon_id)}>
+                                                    <FaTimes />
+                                                </Button>
                                             </div>
                                         </Card>
                                     </Col>
@@ -323,17 +326,28 @@ function AddCoupons() {
                             <Modal.Title>Add New Coupon</Modal.Title>
                         </Modal.Header>
                         <Modal.Body>
-                            <Form onSubmit={addCoupon}>
+                            <Form onSubmit={addCoupon}> {/* Call addCoupon on form submit */}
                                 <Form.Group controlId="productName">
                                     <Form.Label>Product Name</Form.Label>
-                                    <Form.Control type="text" value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="Enter product name" />
+                                    <Form.Control
+                                        as="select"
+                                        value={productName}
+                                        onChange={handleProductChange}
+                                    >
+                                        <option value="">Select a product</option>
+                                        {products.map((product) => (
+                                            <option key={product.product_id} value={product.product_name}>
+                                                {product.product_name}
+                                            </option>
+                                        ))}
+                                    </Form.Control>
                                 </Form.Group>
                                 <Form.Group controlId="couponCode">
                                     <Form.Label>Coupon Code</Form.Label>
                                     <Form.Control type="text" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} placeholder="Enter coupon code" />
                                 </Form.Group>
                                 <Form.Group controlId="discountPrice">
-                                    <Form.Label>Discount Percent</Form.Label>
+                                    <Form.Label>Discount Price</Form.Label>
                                     <Form.Control type="text" value={discountPrice} onChange={(e) => setDiscountPrice(e.target.value)} placeholder="Enter discount price" />
                                 </Form.Group>
                                 <Form.Group controlId="expiryDate">
@@ -342,8 +356,6 @@ function AddCoupons() {
                                         type="date"
                                         value={expiryDate}
                                         onChange={(e) => setExpiryDate(e.target.value)}
-                                        min={minDate} // Prevent past dates from being selected
-                                        placeholder="Select expiry date"
                                     />
                                 </Form.Group>
                                 <Form.Group controlId="status">
@@ -357,70 +369,71 @@ function AddCoupons() {
                                         <option value="inactive">Inactive</option>
                                     </Form.Control>
                                 </Form.Group>
+                                <Modal.Footer>
+                                    <Button variant="secondary" onClick={handleCloseAddCouponModal}>Close</Button>
+                                    <Button variant="primary" type="submit">Save Coupon</Button>
+                                </Modal.Footer>
+                            </Form>
+                        </Modal.Body>
+                    </Modal>
 
+                    {/* Edit Coupon Modal */}
+                    <Modal show={showEditCouponModal} onHide={handleCloseEditCouponModal} centered>
+                        <Modal.Header closeButton>
+                            <Modal.Title>Edit Coupon</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                            <Form >
+                                <Form.Group controlId="productName">
+                                    <Form.Label>Product Name</Form.Label>
+                                    <Form.Control
+                                        as="select"
+                                        value={productName}
+                                        onChange={handleProductChange} // Update handler
+                                    >
+                                        <option value="">Select a product</option>
+                                        {products.map((product) => (
+                                            <option key={product.product_id} value={product.product_name}>
+                                                {product.product_name}
+                                            </option>
+                                        ))}
+                                    </Form.Control>
+                                </Form.Group>
+                                <Form.Group controlId="couponCode">
+                                    <Form.Label>Coupon Code</Form.Label>
+                                    <Form.Control type="text" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} placeholder="Enter coupon code" />
+                                </Form.Group>
+                                <Form.Group controlId="discountPrice">
+                                    <Form.Label>Discount Price</Form.Label>
+                                    <Form.Control type="text" value={discountPrice} onChange={(e) => setDiscountPrice(e.target.value)} placeholder="Enter discount price" />
+                                </Form.Group>
+                                <Form.Group controlId="expiryDate">
+                                    <Form.Label>Expiry Date</Form.Label>
+                                    <Form.Control
+                                        type="date"
+                                        value={expiryDate}
+                                        onChange={(e) => setExpiryDate(e.target.value)}
+                                    />
+                                </Form.Group>
+                                <Form.Group controlId="status">
+                                    <Form.Label>Status</Form.Label>
+                                    <Form.Control
+                                        as="select"
+                                        value={status}
+                                        onChange={(e) => setStatus(e.target.value)}
+                                    >
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                    </Form.Control>
+                                </Form.Group>
                             </Form>
                         </Modal.Body>
                         <Modal.Footer>
-                            <Button variant="secondary" onClick={handleCloseAddCouponModal}>Close</Button>
-                            <Button variant="primary" onClick={addCoupon}>Save Coupon</Button>
+                            <Button variant="secondary" onClick={handleCloseEditCouponModal}>Close</Button>
+                            <Button variant="primary" onClick={editCoupon} type="submit">Save Changes</Button>
                         </Modal.Footer>
                     </Modal>
                 </Container>
-                {/* Main Content Ends Here */}
-                <Modal show={showEditProductModal} onHide={handleCloseEditProductModal} centered>
-                    <Modal.Header closeButton>
-                        <Modal.Title>Edit Coupon</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <Form onSubmit={addCoupon}> {/* Replace addCoupon with editCoupon */}
-                            <Form.Group controlId="couponCode">
-                                <Form.Label>Coupon Code</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    value={couponCode}
-                                    onChange={(e) => setCouponCode(e.target.value)}
-                                    placeholder="Enter coupon code"
-                                />
-                            </Form.Group>
-                            <Form.Group controlId="discountPrice">
-                                <Form.Label>Discount Price</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    value={discountPrice}
-                                    onChange={(e) => setDiscountPrice(e.target.value)}
-                                    placeholder="Enter discount price"
-                                />
-                            </Form.Group>
-                            <Form.Group controlId="expiryDate">
-                                <Form.Label>Expiry Date</Form.Label>
-                                <Form.Control
-                                    type="date"
-                                    value={expiryDate}
-                                    onChange={(e) => setExpiryDate(e.target.value)}
-                                    min={minDate} // Prevent past dates from being selected
-                                    placeholder="Select expiry date"
-                                />
-                            </Form.Group>
-                            <Form.Group controlId="status">
-                                <Form.Label>Status</Form.Label>
-                                <Form.Control
-                                    as="select"
-                                    value={status}
-                                    onChange={(e) => setStatus(e.target.value)}
-                                >
-                                    <option value="active">Active</option>
-                                    <option value="inactive">Inactive</option>
-                                </Form.Control>
-                            </Form.Group>
-
-                        </Form>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <Button variant="secondary" onClick={handleCloseEditProductModal}>Close</Button>
-                        <Button variant="primary" onClick={() => addCoupon()}>Save Changes</Button>
-                    </Modal.Footer>
-                </Modal>
-
             </div>
         </div>
     );
