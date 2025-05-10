@@ -6,6 +6,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\HomeController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -111,6 +112,4 @@ Route::post('/admin/changeuserstatusadmin', [AdminController::class, 'changeuser
 Route::post('/vendor/listproduct', [VendorController::class, 'listproduct']);//done
 Route::post('/vendor/listreview', [VendorController::class, 'listreview']);//done
 
-
-
-
+Route::get('/featured-vendors', [HomeController::class, 'getFeaturedVendors']);
