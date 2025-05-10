@@ -113,3 +113,8 @@ Route::post('/vendor/listproduct', [VendorController::class, 'listproduct']);//d
 Route::post('/vendor/listreview', [VendorController::class, 'listreview']);//done
 
 Route::get('/featured-vendors', [HomeController::class, 'getFeaturedVendors']);
+Route::get('/vendor/{vendorId}', [VendorController::class, 'getVendorDetails']);
+Route::get('/vendor/{vendorId}/products', [VendorController::class, 'getVendorProducts']);
+Route::get('/vendor/{vendorId}/categories', [VendorController::class, 'getVendorCategories']);
+
+Route::get('/best-selling-vendors', [HomeController::class, 'getBestSellingVendors']);
