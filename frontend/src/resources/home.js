@@ -291,12 +291,12 @@ function Home() {
                                             </li>
                                             <li>
                                                 <Link className="dropdown-item" to="/settings">
-                                                    {content?.setting || "Setting"}
+                                                    {content?.settings || "Setting"}
                                                 </Link>
                                             </li>
                                             <li>
                                                 <Link className="dropdown-item" to="/notification">
-                                                    {content?.notification || "Notification"}
+                                                    {content?.notifications || "Notification"}
                                                 </Link>
                                             </li>
                                             <li>
