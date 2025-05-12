@@ -23,14 +23,14 @@ function Cart() {
   useEffect(() => {
     document.documentElement.style.setProperty('--font-size', fontSize);
     document.documentElement.style.setProperty('--font-color', fontColor);
-    
+
     localStorage.setItem('fontSize', fontSize);
     localStorage.setItem('fontColor', fontColor);
     localStorage.setItem('language', language);
 
     setContent(Translation[language]);
   }, [fontSize, fontColor, language]);
-  
+
   const toggleNav = () => {
     setNavOpen(!isNavOpen);
   };
@@ -117,7 +117,7 @@ function Cart() {
     <div>
       <nav className="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
         <div className="container-fluid">
-          <a className="navbar-brand text-warning" href="/">Dashboard</a>
+          <a className="navbar-brand text-warning" href="/">{content?.home || 'Dashboard'}</a>
           <button className="navbar-toggler" type="button" onClick={toggleNav}>
             <span className="navbar-toggler-icon"></span>
           </button>
@@ -125,17 +125,17 @@ function Cart() {
             <ul className="navbar-nav mx-auto">
               <li className="nav-item">
                 <div className="search-bar d-flex align-items-center flex-grow-1 mt-2">
-                  <input type="text" className="form-control" placeholder="Search products..." />
-                  <button className="btn btn-warning ms-2">Search</button>
+                  <input type="text" className="form-control" placeholder={`${content?.search_products || 'Search products...'}`} />
+                  <button className="btn btn-warning ms-2">{content?.search || 'Search'}</button>
                 </div>
               </li>
             </ul>
             <ul className="navbar-nav">
-              <li className="nav-item"><a className="nav-link" href="/">Home</a></li>
-              <li className="nav-item"><a className="nav-link" href="/ordereditems">Ordered</a></li>
-              <li className="nav-item"><a className="nav-link" href="/shippeditems">Shipped</a></li>
-              <li className="nav-item"><a className="nav-link" href="/refunditems">Refunded</a></li>
-              <li className="nav-item"><a className="nav-link" href="/completeditems">Completed</a></li>
+              <li className="nav-item"><a className="nav-link" href="/">{content?.home || 'Home'}</a></li>
+              <li className="nav-item"><a className="nav-link" href="/ordereditems">{content?.ordereditems || 'Ordered'}</a></li>
+              <li className="nav-item"><a className="nav-link" href="/shippeditems">{content?.shippeditems || 'Shipped'}</a></li>
+              <li className="nav-item"><a className="nav-link" href="/refunditems">{content?.refunditems || 'Refunded'}</a></li>
+              <li className="nav-item"><a className="nav-link" href="/completeditems">{content?.completeditems || 'Completed'}</a></li>
             </ul>
           </div>
         </div>
@@ -143,18 +143,18 @@ function Cart() {
 
       <div className="main-content mt-5">
         <div className="headers mt-5">
-          <h1>Your Shopping Cart</h1>
+          <h1>{content?.cart || 'Your Shopping Cart'}</h1>
         </div>
 
         <table className="cart-table">
           {cartitems.length > 0 && (
             <thead>
               <tr>
-                <th>Product</th>
-                <th>Price</th>
-                <th>Quantity</th>
-                <th>Coupon</th>
-                <th>Action</th>
+                <th>{content?.product_name || 'Product'}</th>
+                <th>{content?.price || 'Price'}</th>
+                <th>{content?.quantity || 'Quantity'}</th>
+                <th>{content?.discount || 'Coupon'}</th>
+                <th>{content?.remove || 'Action'}</th>
               </tr>
             </thead>
           )}
@@ -177,12 +177,12 @@ function Cart() {
                 </td>
                 <td>
                   <div className="coupon-container">
-                    <input type="text" placeholder="Enter coupon code" />
-                    <button>Apply</button>
+                    <input type="text" placeholder={`${content?.discount || 'Enter coupon code'}`} />
+                    <button>{content?.apply || 'Apply'}</button>
                   </div>
                 </td>
                 <td>
-                  <button className="remove-btn" onClick={() => removeItems(item.cart_id)}>Remove</button>
+                  <button className="remove-btn" onClick={() => removeItems(item.cart_id)}>{content?.remove || 'Remove'}</button>
                 </td>
               </tr>
             ))}
@@ -191,13 +191,13 @@ function Cart() {
 
         {cartitems.length > 0 ? (
           <div className="summary">
-            <h2 className="summary-title">Order Summary</h2>
-            <p className="summary-total">Total: <strong>${calculateTotal()}</strong></p>
-            <button onClick={checkoutProcess} className="btn btn-warning proceed-btn">Proceed to Checkout</button>
+            <h2 className="summary-title">{content?.order_summary || 'Order Summary'}</h2>
+            <p className="summary-total">{content?.total || 'Total'}: <strong>${calculateTotal()}</strong></p>
+            <button onClick={checkoutProcess} className="btn btn-warning proceed-btn">{content?.checkout || 'Proceed to Checkout'}</button>
           </div>
         ) : (
           <div className="empty-cart-message mt-5 text-center">
-            <h3 className="no-products-text">There are no products in the cart!</h3>
+            <h3 className="no-products-text">{content?.cart_empty || 'There are no products in the cart!'}</h3>
           </div>
         )}
       </div>
