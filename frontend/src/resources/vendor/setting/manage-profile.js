@@ -1,8 +1,8 @@
-import React, { useState,useEffect } from "react";
-import {  FaBars,  FaChartLine,  FaBox,  FaShoppingCart,  FaComments,  FaUser,} from "react-icons/fa";
+import React, { useState, useEffect } from "react";
+import { FaBars, FaChartLine, FaBox, FaShoppingCart, FaComments, FaUser, } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
-import Translation from "../../translations/lang.json";
+import Translation from "../../translations/vendor.json";
 import "react-toastify/dist/ReactToastify.css";
 import "../style/manage-profile.css";
 
@@ -14,7 +14,7 @@ function ManageProfile() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  
+
   const defaultFontSize = 'medium';
   const defaultFontColor = '#000000';
   const defaultLanguage = 'english'; // Default language
@@ -27,7 +27,7 @@ function ManageProfile() {
   useEffect(() => {
     document.documentElement.style.setProperty('--font-size', fontSize);
     document.documentElement.style.setProperty('--font-color', fontColor);
-    
+
     localStorage.setItem('fontSize', fontSize);
     localStorage.setItem('fontColor', fontColor);
     localStorage.setItem('language', language);
@@ -35,7 +35,7 @@ function ManageProfile() {
     // Update content based on selected language
     setContent(Translation[language]);
   }, [fontSize, fontColor, language]);
-  
+
 
   const toggleSidebar = () => {
     setSidebarVisible(!sidebarVisible);
@@ -47,31 +47,31 @@ function ManageProfile() {
 
   const handleUpdatePassword = async (e) => {
     e.preventDefault();
-  
+
     if (!currentPassword || !newPassword || !confirmPassword) {
       toast.error("All fields are required.");
       return;
     }
-  
+
     if (newPassword !== confirmPassword) {
       toast.error("New password and confirmation do not match.");
       return;
     }
-  
+
     if (newPassword === currentPassword) {
       toast.error("New password cannot be the same as the current password.");
       return;
     }
-  
+
     // Get vendor_id from localStorage
     const userInfo = JSON.parse(localStorage.getItem("vendor-info"));
     const vendor_id = userInfo?.vendor_id;
-  
+
     if (!vendor_id) {
       toast.error("Vendor ID not found. Please login again.");
       return;
     }
-  
+
     try {
       const response = await fetch("http://localhost:8000/api/vendor/updatepassword", {
         method: "POST",
@@ -86,9 +86,9 @@ function ManageProfile() {
           password_confirmation: confirmPassword,
         }),
       });
-  
+
       const result = await response.json();
-  
+
       if (response.ok) {
         toast.success("Password updated successfully.");
         setCurrentPassword("");
@@ -101,7 +101,7 @@ function ManageProfile() {
       toast.error("Something went wrong. Try again later.");
     }
   };
-  
+
   function logout() {
     localStorage.clear();
     toast.success("Logout Successful!", {
@@ -116,8 +116,8 @@ function ManageProfile() {
       navigate("/vendor/login");
     }, 1000); // Delay the navigation for 3 seconds
   }
-  
-  
+
+
 
   return (
     <div className="dashboard-wrapper">
@@ -125,64 +125,61 @@ function ManageProfile() {
         <FaBars />
       </button>
 
-     {/* Sidebar */}
+      {/* Sidebar */}
       <div className={`custom-sidebar ${sidebarVisible ? "show" : "hide"}`}>
-        <div className="d-flex align-items-center mb-3">
-          <h2 className="text-center custom-css flex-grow-1 mt-2 ms-4">Vendor Dashboard</h2>
-        </div>
-
-        <a href="/vendor" className="custom-link">
-          <FaChartLine className="me-2" /> Analytics
-        </a>
+        <h2 className="text-center custom-css flex-grow-1 mt-2 ms-4">{content?.vendor_dashboard || "Vendor Dashboard"}</h2>
+        <Link to="/vendor" className="custom-link">
+          <FaChartLine className="me-2" /> {content?.analytics || "Analytics"}
+        </Link>
 
         <div className="dropdown">
           <div className="custom-link" onClick={() => handleDropdown("products")}>
-            <FaBox className="me-2" /> Manage Products
+            <FaBox className="me-2" /> {content?.manage_products || "Manage Products"}
           </div>
           {openDropdown === "products" && (
             <ul className="dropdown-menu custom-dropdown-menu">
-              <li><a href="/vendor/add-products" className="dropdown-item-vendor">Add Products</a></li>
-              <li><a href="/vendor/add-coupons" className="dropdown-item-vendor">Add Coupons</a></li>
+              <li><Link to="/vendor/add-products" className="dropdown-item-vendor">{content?.add_products || "Add Products"}</Link></li>
+              <li><Link to="/vendor/add-coupons" className="dropdown-item-vendor">{content?.add_coupons || "Add Coupons"}</Link></li>
             </ul>
           )}
         </div>
 
         <div className="dropdown">
           <div className="custom-link" onClick={() => handleDropdown("orders")}>
-            <FaShoppingCart className="me-2" /> Manage Orders
+            <FaShoppingCart className="me-2" /> {content?.manage_orders || "Manage Orders"}
           </div>
           {openDropdown === "orders" && (
             <ul className="dropdown-menu custom-dropdown-menu">
-              <li><a href="/vendor/new-orders" className="dropdown-item-vendor">New Order</a></li>
-              <li><a href="/vendor/shipped" className="dropdown-item-vendor">Shipped</a></li>
-              <li><a href="/vendor/refunds" className="dropdown-item-vendor">Refund</a></li>
-              <li><a href="/vendor/completed" className="dropdown-item-vendor">Completed</a></li>
+              <li><Link to="/vendor/new-orders" className="dropdown-item-vendor">{content?.new_orders || "New Order"}</Link></li>
+              <li><Link to="/vendor/shipped" className="dropdown-item-vendor">{content?.shipped || "Shipped"}</Link></li>
+              <li><Link to="/vendor/refunds" className="dropdown-item-vendor">{content?.refunds || "Refund"}</Link></li>
+              <li><Link to="/vendor/completed" className="dropdown-item-vendor">{content?.completed || "Completed"}</Link></li>
             </ul>
           )}
         </div>
 
         <div className="dropdown">
           <div className="custom-link" onClick={() => handleDropdown("messages")}>
-            <FaComments className="me-2" /> Manage Messages
+            <FaComments className="me-2" /> {content?.manage_messages || "Manage Messages"}
           </div>
           {openDropdown === "messages" && (
             <ul className="dropdown-menu custom-dropdown-menu">
-              <li><a href="/vendor/user-messages" className="dropdown-item-vendor">User Message</a></li>
-              <li><a href="/vendor/admin-messages" className="dropdown-item-vendor">Admin Message</a></li>
-              <li><a href="/vendor/review-messages " className="dropdown-item-vendor">Review Message</a></li>
-              <li><a href="/vendor/notifications" className="dropdown-item-vendor">Notification</a></li>
+              <li><Link to="/vendor/user-messages" className="dropdown-item-vendor">{content?.user_message || "User Message"}</Link></li>
+              <li><Link to="/vendor/admin-messages" className="dropdown-item-vendor">{content?.admin_message || "Admin Message"}</Link></li>
+              <li><Link to="/vendor/review-messages" className="dropdown-item-vendor">{content?.review_message || "Review Message"}</Link></li>
+              <li><Link to="/vendor/notifications" className="dropdown-item-vendor">{content?.notifications || "Notification"}</Link></li>
             </ul>
           )}
         </div>
 
         <div className="dropdown">
           <div className="custom-link" onClick={() => handleDropdown("profile")}>
-            <FaUser className="me-2" /> Profile
+            <FaUser className="me-2" /> {content?.profile || "Profile"}
           </div>
           {openDropdown === "profile" && (
             <ul className="dropdown-menu custom-dropdown-menu">
-              <li><a href="/vendor/manage-profile" className="dropdown-item-vendor">Updated Password</a></li>
-              <li><a onClick={logout} className="dropdown-item-vendor">Logout</a></li>
+              <li><Link to="/vendor/manage-profile" className="dropdown-item-vendor">{content?.update_password || "Updated Password"}</Link></li>
+              <li><a onClick={logout} className="dropdown-item-vendor">{content?.logout || "Logout"}</a></li>
             </ul>
           )}
         </div>
