@@ -11,8 +11,6 @@ function RefundItems() {
   const navigate = useNavigate(); // Initialize useNavigate
   const [refunditems, setRefundItems] = useState([]);
 
-  
-  
   const defaultFontSize = 'medium';
   const defaultFontColor = '#000000';
   const defaultLanguage = 'english'; // Default language
@@ -25,7 +23,7 @@ function RefundItems() {
   useEffect(() => {
     document.documentElement.style.setProperty('--font-size', fontSize);
     document.documentElement.style.setProperty('--font-color', fontColor);
-    
+
     localStorage.setItem('fontSize', fontSize);
     localStorage.setItem('fontColor', fontColor);
     localStorage.setItem('language', language);
@@ -33,12 +31,10 @@ function RefundItems() {
     // Update content based on selected language
     setContent(Translation[language]);
   }, [fontSize, fontColor, language]);
-  
 
   const toggleNav = () => {
     setNavOpen(!isNavOpen);
   };
-
 
   const fetchRefundItems = async () => {
     const storedUser = localStorage.getItem("user-info");
@@ -72,14 +68,13 @@ function RefundItems() {
     fetchRefundItems();
   }, []);
 
-
   return (
     <div>
       {/* Navigation Bar */}
       <nav className="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
         <div className="container-fluid">
           <a className="navbar-brand text-warning" href="/">
-            Dashboard
+            {content?.home || 'Dashboard'}
           </a>
           <button
             className="navbar-toggler"
@@ -98,27 +93,27 @@ function RefundItems() {
                   <input
                     type="text"
                     className="form-control"
-                    placeholder="Search products..."
+                    placeholder={`${content?.search_products || 'Search products...'}`}
                   />
-                  <button className="btn btn-warning ms-2">Search</button>
+                  <button className="btn btn-warning ms-2">{content?.search || 'Search'}</button>
                 </div>
               </li>
             </ul>
             <ul className="navbar-nav">
               <li className="nav-item">
-                <a className="nav-link" href="/">Home</a>
+                <a className="nav-link" href="/">{content?.home || 'Home'}</a>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href="/cart">Cart</a>
+                <a className="nav-link" href="/cart">{content?.cart || 'Cart'}</a>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href="/ordereditems">Ordered</a>
+                <a className="nav-link" href="/ordereditems">{content?.ordereditems || 'Ordered'}</a>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href="/shippeditems">Shipped</a>
+                <a className="nav-link" href="/shippeditems">{content?.shippeditems || 'Shipped'}</a>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href="/completeditems">Completed</a>
+                <a className="nav-link" href="/completeditems">{content?.completeditems || 'Completed'}</a>
               </li>
             </ul>
           </div>
@@ -128,7 +123,7 @@ function RefundItems() {
       {/* Main Content */}
       <div className="toppush container-fluid mt-5">
         <div className="bg-warning text-center p-4 rounded mb-4">
-          <h1 className="text-dark">Your Refund Items</h1>
+          <h1 className="text-dark">{content?.refunditems || 'Your Refund Items'}</h1>
         </div>
 
         {/* Ordered Items List */}
@@ -141,24 +136,21 @@ function RefundItems() {
                   <span className="product-name">{listrefunditems.product_name}</span>
                 </div>
                 <div className="details text-end">
-                  <p>Price: {listrefunditems.total_paid}</p>
-                  <p>Quantity: {listrefunditems.orderd_quantity}</p>
-                  <p>Subtotal: {listrefunditems.total_paid}</p>
-                  <a href="#" className="view-details btn btn-warning">View Details</a>
+                  <p>{content?.price || 'Price'}: {listrefunditems.total_paid}</p>
+                  <p>{content?.quantity || 'Quantity'}: {listrefunditems.orderd_quantity}</p>
+                  <p>{content?.total || 'Subtotal'}: {listrefunditems.total_paid}</p>
+                  <a href="#" className="view-details btn btn-warning">{content?.view_details || 'View Details'}</a>
                 </div>
               </li>
-
             ))
           }
 
-          {refunditems.length < 0 && (
+          {refunditems.length === 0 && (
             <div className="empty-cart-message mt-5 text-center">
-              <h3 className="no-products-text">There are no Refunded products!</h3>
+              <h3 className="no-products-text">{content?.no_refunded_items || 'There are no Refunded products!'}</h3>
             </div>
           )}
-
         </ul>
-
       </div>
     </div>
   );
