@@ -1,11 +1,10 @@
-import React, { useState,useEffect } from "react";
-import { FaBars, FaChartLine, FaStore, FaUsers, FaUser, } from "react-icons/fa";
-import Translation from "../translations/lang.json";
+import React, { useState, useEffect } from "react";
+import { FaBars, FaChartLine, FaStore, FaUsers, FaUser } from "react-icons/fa";
+import Translation from "../translations/admin.json";
 import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import "./style/admindashboard.css";
-
 
 function AdminDashboard() {
   const [sidebarVisible, setSidebarVisible] = useState(true);
@@ -13,7 +12,7 @@ function AdminDashboard() {
 
   const defaultFontSize = 'medium';
   const defaultFontColor = '#000000';
-  const defaultLanguage = 'english'; // Default language
+  const defaultLanguage = 'english';
 
   const [fontSize, setFontSize] = useState(() => localStorage.getItem('fontSize') || defaultFontSize);
   const [fontColor, setFontColor] = useState(() => localStorage.getItem('fontColor') || defaultFontColor);
@@ -28,10 +27,8 @@ function AdminDashboard() {
     localStorage.setItem('fontColor', fontColor);
     localStorage.setItem('language', language);
 
-    // Update content based on selected language
     setContent(Translation[language]);
   }, [fontSize, fontColor, language]);
-  
 
   const navigate = useNavigate();
   const toggleSidebar = () => {
@@ -42,21 +39,17 @@ function AdminDashboard() {
     setOpenDropdown(openDropdown === menu ? null : menu);
   };
 
-
   function logout() {
     localStorage.clear();
-    toast.success("Logout Successful!", {
+    toast.success(content?.logout || "Logout Successful!", {
       position: "top-right",
       autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
     });
     setTimeout(() => {
       navigate("/admin/login");
-    }, 1000); // Delay the navigation for 3 seconds
+    }, 1000);
   }
+
   return (
     <div className="admin-dashboard-wrapper">
       <button className="admin-hamburger-btn" onClick={toggleSidebar}>
@@ -65,49 +58,49 @@ function AdminDashboard() {
 
       <div className={`admin-custom-sidebar ${sidebarVisible ? "show" : "hide"}`}>
         <div className="d-flex align-items-center mb-3">
-          <h2 className="text-center admin-custom-css flex-grow-1 mt-2 ms-4">Admin Dashboard</h2>
+          <h2 className="text-center admin-custom-css flex-grow-1 mt-2 ms-4">{content?.admin_dashboard_title || "Admin Dashboard"}</h2>
         </div>
 
-        <a href="/admin/" className="admin-custom-link">
-          <FaChartLine className="me-2" /> Dashboard
-        </a>
+        <Link to="/admin/" className="admin-custom-link">
+          <FaChartLine className="me-2" /> {content?.dashboard || "Dashboard"}
+        </Link>
 
         <div className="dropdown">
           <div className="admin-custom-link" onClick={() => handleDropdown("products")}>
-            <FaUsers className="me-2" /> User Management
+            <FaUsers className="me-2" /> {content?.user_management || "User Management"}
           </div>
           {openDropdown === "products" && (
             <ul className="dropdown-menu admin-custom-dropdown-menu">
-              <li><a href="/admin/list-users" className="dropdown-item-admin">List Users</a></li>
-              <li><a href="/admin/user-messages" className="dropdown-item-admin">User Messages</a></li>
+              <li><Link to="/admin/list-users" className="dropdown-item-admin">{content?.list_users || "List Users"}</Link></li>
+              <li><Link to="/admin/user-messages" className="dropdown-item-admin">{content?.user_messages || "User Messages"}</Link></li>
             </ul>
           )}
         </div>
 
         <div className="dropdown">
           <div className="admin-custom-link" onClick={() => handleDropdown("orders")}>
-            <FaStore className="me-2" /> Vendor Management
+            <FaStore className="me-2" /> {content?.vendor_management || "Vendor Management"}
           </div>
           {openDropdown === "orders" && (
             <ul className="dropdown-menu admin-custom-dropdown-menu">
-              <li><a href="/admin/new-vendors" className="dropdown-item-admin">New Vendors</a></li>
-              <li><a href="/admin/list-vendors" className="dropdown-item-admin">List of Vendors</a></li>
-              <li><a href="/admin/manage-products" className="dropdown-item-admin">Manage Products</a></li>
-              <li><a href="/admin/manage-orders" className="dropdown-item-admin">Manage Orders</a></li>
-              <li><a href="/admin/approve-payout" className="dropdown-item-admin">Approve Payout</a></li>
-              <li><a href="/admin/vendor-messages" className="dropdown-item-admin">Vendor Messages</a></li>
+              <li><Link to="/admin/new-vendors" className="dropdown-item-admin">{content?.new_vendors || "New Vendors"}</Link></li>
+              <li><Link to="/admin/list-vendors" className="dropdown-item-admin">{content?.list_of_vendors || "List of Vendors"}</Link></li>
+              <li><Link to="/admin/manage-products" className="dropdown-item-admin">{content?.manage_products || "Manage Products"}</Link></li>
+              <li><Link to="/admin/manage-orders" className="dropdown-item-admin">{content?.manage_orders || "Manage Orders"}</Link></li>
+              <li><Link to="/admin/approve-payout" className="dropdown-item-admin">{content?.approve_payout || "Approve Payout"}</Link></li>
+              <li><Link to="/admin/vendor-messages" className="dropdown-item-admin">{content?.vendor_messages || "Vendor Messages"}</Link></li>
             </ul>
           )}
         </div>
 
         <div className="dropdown">
           <div className="admin-custom-link" onClick={() => handleDropdown("profile")}>
-            <FaUser className="me-2" /> Profile
+            <FaUser className="me-2" /> {content?.profile || "Profile"}
           </div>
           {openDropdown === "profile" && (
             <ul className="dropdown-menu admin-custom-dropdown-menu">
-              <li><a href="/admin/manage-password" className="dropdown-item-admin">Update Password</a></li>
-              <li><a onClick={logout} className="dropdown-item-admin">Logout</a></li>
+              <li><Link to="/admin/manage-password" className="dropdown-item-admin">{content?.update_password || "Update Password"}</Link></li>
+              <li><a onClick={logout} className="dropdown-item-admin">{content?.logout || "Logout"}</a></li>
             </ul>
           )}
         </div>
@@ -115,11 +108,10 @@ function AdminDashboard() {
 
       <div className={`admin-main-content ${sidebarVisible ? "with-sidebar" : "full-width"}`}>
         <div className="admin-custom-header text-center">
-          <h1 className="h4 mb-0">Welcome to the Admin Dashboard</h1>
+          <h1 className="h4 mb-0">{content?.welcome || "Welcome to the Admin Dashboard"}</h1>
         </div>
 
         {/* Main content for updating password */}
-
 
       </div>
       <ToastContainer />

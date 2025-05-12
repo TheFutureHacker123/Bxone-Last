@@ -129,7 +129,7 @@ function Login() {
                     pauseOnHover: true,
                     draggable: true,
                 });
-                localStorage.clear();
+              //  localStorage.clear();
                 localStorage.setItem("user-info", JSON.stringify(result.storeData));
                 setTimeout(() => {
                     navigate("/");

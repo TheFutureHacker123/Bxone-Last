@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { FaBars, FaChartLine, FaStore, FaThList, FaUsers, FaUser, FaUserShield, FaTools, FaEdit, FaTrash, } from "react-icons/fa";
+import { FaBars, FaChartLine, FaStore, FaThList, FaUsers, FaUserShield, FaTools,FaUser } from "react-icons/fa";
 import { Row, Col, Button, Form, Modal } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { toast,ToastContainer } from "react-toastify";
-import Translation from "../../translations/lang.json";
+import { toast, ToastContainer } from "react-toastify";
+import Translation from "../../translations/superadmin.json";
 import "../style/list-vendors.css";
 
 function SAdminListVendor() {
@@ -39,7 +39,6 @@ function SAdminListVendor() {
     setContent(Translation[language]);
   }, [fontSize, fontColor, language]);
   
-
   const toggleSidebar = () => setSidebarVisible(!sidebarVisible);
   const handleDropdown = (menu) => setOpenDropdown(openDropdown === menu ? null : menu);
   const handleEntriesChange = (newEntries) => {
@@ -57,7 +56,7 @@ function SAdminListVendor() {
 
   const logout = () => {
     localStorage.clear();
-    toast.success("Logout Successful!", { position: "top-right", autoClose: 3000 });
+    toast.success(content?.logout || "Logout Successful!", { position: "top-right", autoClose: 3000 });
     setTimeout(() => navigate("/admin/login"), 1000);
   };
 
@@ -67,7 +66,7 @@ function SAdminListVendor() {
       const data = await response.json();
       setUsers(data.users);
     } catch {
-      toast.error("Failed to fetch users.");
+      toast.error(content?.fetch_failed || "Failed to fetch users.");
     }
   };
 
@@ -85,14 +84,14 @@ function SAdminListVendor() {
       
       const result = await response.json();
       if (result.success) {
-        toast.success("Vendor status updated successfully!");
+        toast.success(content?.status_updated || "Vendor status updated successfully!");
         setShowEditModal(false);
         fetchUsers();
       } else {
-        toast.error("Failed to update status.");
+        toast.error(content?.update_failed || "Failed to update status.");
       }
     } catch {
-      toast.error("An error occurred. Please try again.");
+      toast.error(content?.error_occurred || "An error occurred. Please try again.");
     }
   };
 
@@ -114,84 +113,84 @@ function SAdminListVendor() {
 
       <div className={`admin-custom-sidebar ${sidebarVisible ? "show" : "hide"}`}>
         <div className="d-flex align-items-center mb-3">
-          <h2 className="text-center admin-custom-css flex-grow-1 mt-2 ms-4">SAdmin Dashboard</h2>
+          <h2 className="text-center admin-custom-css flex-grow-1 mt-2 ms-4">{content?.admin_dashboard || "SAdmin Dashboard"}</h2>
         </div>
 
         <a href="/superadmin/dashboard" className="admin-custom-link">
-          <FaChartLine className="me-2" /> Dashboard
+          <FaChartLine className="me-2" /> {content?.dashboard || "Dashboard"}
         </a>
 
         <div className="dropdown">
-          <div className="admin-custom-link" onClick={() => handleDropdown("products")}>
-            <FaUsers className="me-2" /> User Management
+          <div className="admin-custom-link" onClick={() => handleDropdown("user_management")}>
+            <FaUsers className="me-2" /> {content?.user_management || "User Management"}
           </div>
-          {openDropdown === "products" && (
+          {openDropdown === "user_management" && (
             <ul className="dropdown-menu admin-custom-dropdown-menu">
-              <li><a href="/superadmin/list-users" className="dropdown-item-admin">List Users</a></li>
-              <li><a href="/superadmin/user-messages" className="dropdown-item-admin">User Messages</a></li>
+              <li><a href="/superadmin/list-users" className="dropdown-item-admin">{content?.list_users || "List Users"}</a></li>
+              <li><a href="/superadmin/user-messages" className="dropdown-item-admin">{content?.user_messages || "User Messages"}</a></li>
             </ul>
           )}
         </div>
 
         <div className="dropdown">
-          <div className="admin-custom-link" onClick={() => handleDropdown("orders")}>
-            <FaStore className="me-2" /> Vendor Management
+          <div className="admin-custom-link" onClick={() => handleDropdown("vendor_management")}>
+            <FaStore className="me-2" /> {content?.vendor_management || "Vendor Management"}
           </div>
-          {openDropdown === "orders" && (
+          {openDropdown === "vendor_management" && (
             <ul className="dropdown-menu admin-custom-dropdown-menu">
-              <li><a href="/superadmin/new-Vendors" className="dropdown-item-admin">New Vendors</a></li>
-              <li><a href="/superadmin/list-vendors" className="dropdown-item-admin">List of Vendors</a></li>
-              <li><a href="/superadmin/manage-products" className="dropdown-item-admin">Manage Products</a></li>
-              <li><a href="/superadmin/manage-orders" className="dropdown-item-admin">Manage Orders</a></li>
-              <li><a href="/superadmin/approve-payout" className="dropdown-item-admin">Approve Payout</a></li>
-              <li><a href="/superadmin/vendor-messages" className="dropdown-item-admin">Vendor Messages</a></li>
+              <li><a href="/superadmin/new-vendors" className="dropdown-item-admin">{content?.new_vendors || "New Vendors"}</a></li>
+              <li><a href="/superadmin/list-vendors" className="dropdown-item-admin">{content?.list_of_vendors || "List of Vendors"}</a></li>
+              <li><a href="/superadmin/manage-products" className="dropdown-item-admin">{content?.manage_products || "Manage Products"}</a></li>
+              <li><a href="/superadmin/manage-orders" className="dropdown-item-admin">{content?.manage_orders || "Manage Orders"}</a></li>
+              <li><a href="/superadmin/approve-payout" className="dropdown-item-admin">{content?.approve_payout || "Approve Payout"}</a></li>
+              <li><a href="/superadmin/vendor-messages" className="dropdown-item-admin">{content?.vendor_messages || "Vendor Messages"}</a></li>
             </ul>
           )}
         </div>
 
         <div className="dropdown">
-          <div className="admin-custom-link" onClick={() => handleDropdown("admin management")}>
-            <FaUserShield className="me-2" /> Admin Management
+          <div className="admin-custom-link" onClick={() => handleDropdown("admin_management")}>
+            <FaUserShield className="me-2" /> {content?.admin_management || "Admin Management"}
           </div>
-          {openDropdown === "admin management" && (
+          {openDropdown === "admin_management" && (
             <ul className="dropdown-menu admin-custom-dropdown-menu">
-              <li><a href="/superadmin/list-admins" className="dropdown-item-admin">List of Admins</a></li>
+              <li><a href="/superadmin/list-admins" className="dropdown-item-admin">{content?.list_of_admins || "List of Admins"}</a></li>
             </ul>
           )}
         </div>
 
         <div className="dropdown">
-          <div className="admin-custom-link" onClick={() => handleDropdown("catalog management")}>
-            <FaThList className="me-2" /> Catalog Management
+          <div className="admin-custom-link" onClick={() => handleDropdown("catalog_management")}>
+            <FaThList className="me-2" /> {content?.catalog_management || "Catalog Management"}
           </div>
-          {openDropdown === "catalog management" && (
+          {openDropdown === "catalog_management" && (
             <ul className="dropdown-menu admin-custom-dropdown-menu">
-              <li><a href="/superadmin/add-category" className="dropdown-item-admin">Add Categories</a></li>
-              <li><a href="/superadmin/add-subcategory" className="dropdown-item-admin">Sub Categories</a></li>
+              <li><a href="/superadmin/add-category" className="dropdown-item-admin">{content?.add_categories || "Add Categories"}</a></li>
+              <li><a href="/superadmin/add-subcategory" className="dropdown-item-admin">{content?.sub_categories || "Sub Categories"}</a></li>
             </ul>
           )}
         </div>
 
         <div className="dropdown">
-          <div className="admin-custom-link" onClick={() => handleDropdown("platform management")}>
-            <FaTools className="me-2" /> Platform Management
+          <div className="admin-custom-link" onClick={() => handleDropdown("platform_management")}>
+            <FaTools className="me-2" /> {content?.platform_management || "Platform Management"}
           </div>
-          {openDropdown === "platform management" && (
+          {openDropdown === "platform_management" && (
             <ul className="dropdown-menu admin-custom-dropdown-menu">
-              <li><a href="/superadmin/add-banner" className="dropdown-item-admin">List Banner</a></li>
-              <li><a href="/superadmin/add-payment" className="dropdown-item-admin">Payment Method</a></li>
+              <li><a href="/superadmin/add-banner" className="dropdown-item-admin">{content?.list_banner || "List Banner"}</a></li>
+              <li><a href="/superadmin/add-payment" className="dropdown-item-admin">{content?.payment_method || "Payment Method"}</a></li>
             </ul>
           )}
         </div>
 
         <div className="dropdown">
           <div className="admin-custom-link" onClick={() => handleDropdown("profile")}>
-            <FaUser className="me-2" /> Profile
+            <FaUser className="me-2" /> {content?.profile || "Profile"}
           </div>
           {openDropdown === "profile" && (
             <ul className="dropdown-menu admin-custom-dropdown-menu">
-              <li><a href="/superadmin/manage-profile" className="dropdown-item-admin">Manage Profile</a></li>
-              <li><a onClick={logout} className="dropdown-item-admin">Logout</a></li>
+              <li><a href="/superadmin/manage-profile" className="dropdown-item-admin">{content?.manage_profile || "Manage Profile"}</a></li>
+              <li><a onClick={logout} className="dropdown-item-admin">{content?.logout || "Logout"}</a></li>
             </ul>
           )}
         </div>
@@ -199,13 +198,13 @@ function SAdminListVendor() {
 
       <div className={`main-content ${sidebarVisible ? "with-sidebar" : "full-width"}`}>
         <div className="custom-header text-center">
-          <h1 className="h4 mb-0">Vendor List</h1>
+          <h1 className="h4 mb-0">{content?.vendor_list || "Vendor List"}</h1>
         </div>
 
         <div style={{ width: '100%', maxWidth: '800px', margin: '0 auto' }}>
           <Row className="mb-3 d-flex justify-content-between align-items-center">
             <Col xs="auto" className="d-flex align-items-center">
-              <label className="me-2">Show</label>
+              <label className="me-2">{content?.show || "Show"}</label>
               <Form.Select
                 value={entries}
                 onChange={(e) => handleEntriesChange(Number(e.target.value))}
@@ -215,14 +214,14 @@ function SAdminListVendor() {
                   <option key={num} value={num}>{num}</option>
                 ))}
               </Form.Select>
-              <label className="ms-2">Entries</label>
+              <label className="ms-2">{content?.entries || "Entries"}</label>
             </Col>
 
             <Col xs="auto" className="d-flex align-items-center mt-3 mt-sm-0">
-              <label className="me-2">Search:</label>
+              <label className="me-2">{content?.search || "Search:"}</label>
               <Form.Control
                 type="text"
-                placeholder="Search"
+                placeholder={content?.search_placeholder || "Search"}
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
@@ -277,13 +276,13 @@ function SAdminListVendor() {
                           setShowEditModal(true);
                         }}
                       >
-                        Edit
+                        {content?.edit || "Edit"}
                       </Button>
                     </div>
                   </div>
                 ))
               ) : (
-                <p>No users found.</p>
+                <p>{content?.no_users_found || "No users found."}</p>
               )}
             </div>
 
@@ -304,13 +303,13 @@ function SAdminListVendor() {
               }}
             >
               <Button variant="secondary" onClick={handlePrevious} disabled={currentPage === 1}>
-                Previous
+                {content?.previous || "Previous"}
               </Button>
               <div>
-                Page {currentPage} of {totalPages || 1}
+                {content?.page || "Page"} {currentPage} {content?.of || "of"} {totalPages || 1}
               </div>
               <Button variant="secondary" onClick={handleNext} disabled={currentPage === totalPages || totalPages === 0}>
-                Next
+                {content?.next || "Next"}
               </Button>
             </div>
           </div>
@@ -320,29 +319,27 @@ function SAdminListVendor() {
       {/* Edit Status Modal */}
       <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Edit User Status</Modal.Title>
+          <Modal.Title>{content?.edit_user_status || "Edit User Status"}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form.Group controlId="userStatus">
-            <Form.Label>Select Status</Form.Label>
+            <Form.Label>{content?.select_status || "Select Status"}</Form.Label>
             <Form.Control
               as="select"
               value={userStatus}
               onChange={(e) => setUserStatus(e.target.value)}
             >
-              <option value="Pending">Pending</option>
-              <option value="Verified">Verified</option>
-              <option value="Rejected">Rejected</option>
-              <option value="Suspended">Suspended</option>
+              <option value="Active">{content?.active || "Active"}</option>
+              <option value="Suspended">{content?.suspended || "Suspended"}</option>
             </Form.Control>
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowEditModal(false)}>
-            Close
+            {content?.close || "Close"}
           </Button>
           <Button variant="primary" onClick={changeUserStatus}>
-            Save Changes
+            {content?.save_changes || "Save Changes"}
           </Button>
         </Modal.Footer>
       </Modal>

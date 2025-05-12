@@ -1,8 +1,8 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { ToastContainer, toast } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
-import Translation from "../translations/lang.json";
-import "./style/login.css"; // Import the custom CSS
+import Translation from "../translations/admin.json";
+import "./style/login.css";
 
 function LoginAdmin() {
   const [email, setEmail] = useState("");
@@ -12,7 +12,7 @@ function LoginAdmin() {
 
   const defaultFontSize = 'medium';
   const defaultFontColor = '#000000';
-  const defaultLanguage = 'english'; // Default language
+  const defaultLanguage = 'english';
 
   const [fontSize, setFontSize] = useState(() => localStorage.getItem('fontSize') || defaultFontSize);
   const [fontColor, setFontColor] = useState(() => localStorage.getItem('fontColor') || defaultFontColor);
@@ -27,19 +27,16 @@ function LoginAdmin() {
     localStorage.setItem('fontColor', fontColor);
     localStorage.setItem('language', language);
 
-    // Update content based on selected language
     setContent(Translation[language]);
   }, [fontSize, fontColor, language]);
-  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (email === "" || password === "") {
-      setError("Please fill in all fields.");
+      setError(content?.error_fill_fields || "Please fill in all fields.");
     } else {
-      const payload = { email, password }; // Prepare the payload
+      const payload = { email, password };
       try {
-        console.warn("Payload:", payload); // Log the payload for debugging
         let response = await fetch("http://localhost:8000/api/admin/login", {
           method: 'POST',
           body: JSON.stringify(payload),
@@ -52,18 +49,12 @@ function LoginAdmin() {
         let result = await response.json();
 
         if (result.success) {
-          toast.success("Login successful!", {
+          toast.success(content?.login_success || "Login successful!", {
             position: "top-right",
             autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
           });
-          
-          localStorage.clear();
-          localStorage.setItem("admin-info", JSON.stringify(result.admin)); // Store admin info
-        
+          localStorage.setItem("admin-info", JSON.stringify(result.admin));
+
           setTimeout(() => {
             if (result.admin.admin_role_id === "SuperAdmin") {
               navigate("/superadmin/");
@@ -72,17 +63,13 @@ function LoginAdmin() {
             }
           }, 1000);
         } else {
-          toast.error("Login failed. Please try again.", {
+          toast.error(content?.login_failed || "Login failed. Please try again.", {
             position: "top-right",
             autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
           });
         }
       } catch (error) {
-        toast.error('An error occurred. Please try again later.');
+        toast.error(content?.error_occurred || 'An error occurred. Please try again later.');
       }
     }
   };
@@ -90,33 +77,33 @@ function LoginAdmin() {
   return (
     <div className="login-container">
       <div className="login-box">
-        <h2>Login</h2>
+        <h2>{content?.login_title || "Login"}</h2>
         {error && <div className="alert-superadmin">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Email address</label>
+            <label>{content?.email_label || "Email address"}</label>
             <input
               className="form-control-superadmin"
               type="email"
-              placeholder="Enter email"
+              placeholder={content?.email_placeholder || "Enter email"}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 
           <div className="form-group">
-            <label>Password</label>
+            <label>{content?.password_label || "Password"}</label>
             <input
               className="form-control-superadmin"
               type="password"
-              placeholder="Password"
+              placeholder={content?.password_placeholder || "Password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
           <button className="btn-superadmin" type="submit">
-            Login
+            {content?.login_button || "Login"}
           </button>
         </form>
       </div>

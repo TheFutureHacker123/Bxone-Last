@@ -3,7 +3,7 @@ import { FaBars, FaChartLine, FaStore, FaThList, FaUsers, FaUser, FaUserShield, 
 import { Button, Modal, Form, ListGroup } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
-import Translation from "../../translations/lang.json";
+import Translation from "../../translations/superadmin.json";
 import "../style/add-subcategory.css";
 
 function AddSubCategory() {
@@ -224,84 +224,84 @@ function AddSubCategory() {
 
       <div className={`admin-custom-sidebar ${sidebarVisible ? "show" : "hide"}`}>
         <div className="d-flex align-items-center mb-3">
-          <h2 className="text-center admin-custom-css flex-grow-1 mt-2 ms-4">SAdmin Dashboard</h2>
+          <h2 className="text-center admin-custom-css flex-grow-1 mt-2 ms-4">{content?.admin_dashboard || "SAdmin Dashboard"}</h2>
         </div>
 
         <a href="/superadmin/dashboard" className="admin-custom-link">
-          <FaChartLine className="me-2" /> Dashboard
+          <FaChartLine className="me-2" /> {content?.dashboard || "Dashboard"}
         </a>
 
         <div className="dropdown">
-          <div className="admin-custom-link" onClick={() => handleDropdown("products")}>
-            <FaUsers className="me-2" /> User Management
+          <div className="admin-custom-link" onClick={() => handleDropdown("user_management")}>
+            <FaUsers className="me-2" /> {content?.user_management || "User Management"}
           </div>
-          {openDropdown === "products" && (
+          {openDropdown === "user_management" && (
             <ul className="dropdown-menu admin-custom-dropdown-menu">
-              <li><a href="/superadmin/list-users" className="dropdown-item-admin">List Users</a></li>
-              <li><a href="/superadmin/user-messages" className="dropdown-item-admin">User Messages</a></li>
+              <li><a href="/superadmin/list-users" className="dropdown-item-admin">{content?.list_users || "List Users"}</a></li>
+              <li><a href="/superadmin/user-messages" className="dropdown-item-admin">{content?.user_messages || "User Messages"}</a></li>
             </ul>
           )}
         </div>
 
         <div className="dropdown">
-          <div className="admin-custom-link" onClick={() => handleDropdown("orders")}>
-            <FaStore className="me-2" /> Vendor Management
+          <div className="admin-custom-link" onClick={() => handleDropdown("vendor_management")}>
+            <FaStore className="me-2" /> {content?.vendor_management || "Vendor Management"}
           </div>
-          {openDropdown === "orders" && (
+          {openDropdown === "vendor_management" && (
             <ul className="dropdown-menu admin-custom-dropdown-menu">
-              <li><a href="/superadmin/new-Vendors" className="dropdown-item-admin">New Vendors</a></li>
-              <li><a href="/superadmin/list-vendors" className="dropdown-item-admin">List of Vendors</a></li>
-              <li><a href="/superadmin/manage-products" className="dropdown-item-admin">Manage Products</a></li>
-              <li><a href="/superadmin/manage-orders" className="dropdown-item-admin">Manage Orders</a></li>
-              <li><a href="/superadmin/approve-payout" className="dropdown-item-admin">Approve Payout</a></li>
-              <li><a href="/superadmin/vendor-messages" className="dropdown-item-admin">Vendor Messages</a></li>
+              <li><a href="/superadmin/new-vendors" className="dropdown-item-admin">{content?.new_vendors || "New Vendors"}</a></li>
+              <li><a href="/superadmin/list-vendors" className="dropdown-item-admin">{content?.list_of_vendors || "List of Vendors"}</a></li>
+              <li><a href="/superadmin/manage-products" className="dropdown-item-admin">{content?.manage_products || "Manage Products"}</a></li>
+              <li><a href="/superadmin/manage-orders" className="dropdown-item-admin">{content?.manage_orders || "Manage Orders"}</a></li>
+              <li><a href="/superadmin/approve-payout" className="dropdown-item-admin">{content?.approve_payout || "Approve Payout"}</a></li>
+              <li><a href="/superadmin/vendor-messages" className="dropdown-item-admin">{content?.vendor_messages || "Vendor Messages"}</a></li>
             </ul>
           )}
         </div>
 
         <div className="dropdown">
-          <div className="admin-custom-link" onClick={() => handleDropdown("admin management")}>
-            <FaUserShield className="me-2" /> Admin Management
+          <div className="admin-custom-link" onClick={() => handleDropdown("admin_management")}>
+            <FaUserShield className="me-2" /> {content?.admin_management || "Admin Management"}
           </div>
-          {openDropdown === "admin management" && (
+          {openDropdown === "admin_management" && (
             <ul className="dropdown-menu admin-custom-dropdown-menu">
-              <li><a href="/superadmin/list-admins" className="dropdown-item-admin">List of Admins</a></li>
+              <li><a href="/superadmin/list-admins" className="dropdown-item-admin">{content?.list_of_admins || "List of Admins"}</a></li>
             </ul>
           )}
         </div>
 
         <div className="dropdown">
-          <div className="admin-custom-link" onClick={() => handleDropdown("catalog management")}>
-            <FaThList className="me-2" /> Catalog Management
+          <div className="admin-custom-link" onClick={() => handleDropdown("catalog_management")}>
+            <FaThList className="me-2" /> {content?.catalog_management || "Catalog Management"}
           </div>
-          {openDropdown === "catalog management" && (
+          {openDropdown === "catalog_management" && (
             <ul className="dropdown-menu admin-custom-dropdown-menu">
-              <li><a href="/superadmin/add-category" className="dropdown-item-admin">Add Categories</a></li>
-              <li><a href="/superadmin/add-subcategory" className="dropdown-item-admin">Sub Categories</a></li>
+              <li><a href="/superadmin/add-category" className="dropdown-item-admin">{content?.add_categories || "Add Categories"}</a></li>
+              <li><a href="/superadmin/add-subcategory" className="dropdown-item-admin">{content?.sub_categories || "Sub Categories"}</a></li>
             </ul>
           )}
         </div>
 
         <div className="dropdown">
-          <div className="admin-custom-link" onClick={() => handleDropdown("platform management")}>
-            <FaTools className="me-2" /> Platform Management
+          <div className="admin-custom-link" onClick={() => handleDropdown("platform_management")}>
+            <FaTools className="me-2" /> {content?.platform_management || "Platform Management"}
           </div>
-          {openDropdown === "platform management" && (
+          {openDropdown === "platform_management" && (
             <ul className="dropdown-menu admin-custom-dropdown-menu">
-              <li><a href="/superadmin/add-banner" className="dropdown-item-admin">List Banner</a></li>
-              <li><a href="/superadmin/add-payment" className="dropdown-item-admin">Payment Method</a></li>
+              <li><a href="/superadmin/add-banner" className="dropdown-item-admin">{content?.list_banner || "List Banner"}</a></li>
+              <li><a href="/superadmin/add-payment" className="dropdown-item-admin">{content?.payment_method || "Payment Method"}</a></li>
             </ul>
           )}
         </div>
 
         <div className="dropdown">
           <div className="admin-custom-link" onClick={() => handleDropdown("profile")}>
-            <FaUser className="me-2" /> Profile
+            <FaUser className="me-2" /> {content?.profile || "Profile"}
           </div>
           {openDropdown === "profile" && (
             <ul className="dropdown-menu admin-custom-dropdown-menu">
-              <li><a href="/superadmin/manage-profile" className="dropdown-item-admin">Manage Profile</a></li>
-              <li><a href="/superadmin/login" className="dropdown-item-admin">Logout</a></li>
+              <li><a href="/superadmin/manage-profile" className="dropdown-item-admin">{content?.manage_profile || "Manage Profile"}</a></li>
+              <li><a onClick={logout} className="dropdown-item-admin">{content?.logout || "Logout"}</a></li>
             </ul>
           )}
         </div>
@@ -309,7 +309,8 @@ function AddSubCategory() {
 
       <div className={`admin-main-content ${sidebarVisible ? "with-sidebar" : "full-width"}`}>
         <div className="admin-custom-header text-center">
-          <h1 className="h4 mb-0">Welcome to Super Admin Dashboard</h1>
+
+          <h1 className="h4 mb-0">{content?.add_subcategory || "Add Subcategories"}</h1>
         </div>
 
         <div className="admin-category-container">
@@ -319,98 +320,98 @@ function AddSubCategory() {
             onClick={() => setShowAddSubcategoryModal(true)}
             style={{ float: "right" }}
           >
-            Add Subcategory
+            {content?.add_subcategory || "Add Subcategory"}
           </Button>
 
           {/* Add Subcategory Modal */}
           <Modal show={showAddSubcategoryModal} onHide={() => setShowAddSubcategoryModal(false)}>
             <Modal.Header closeButton>
-              <Modal.Title>Add Subcategory</Modal.Title>
+              <Modal.Title>{content?.add_subcategory || "Add Subcategory"}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
               <Form>
                 <Form.Group>
-                  <Form.Label>Select Category</Form.Label>
+                  <Form.Label> {content?.select_category || "Select Category"}</Form.Label>
                   <Form.Control
                     as="select"
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
                   >
-                    <option value="">Select a category</option>
+                    <option value="">{content?.select_category || "Select a category"}</option>
                     {categories.map((cat) => (
                       <option key={cat.category_id} value={cat.category_id}>{cat.category_name}</option>
                     ))}
                   </Form.Control>
                 </Form.Group>
                 <Form.Group className="mt-3">
-                  <Form.Label>Subcategory Name</Form.Label>
+                  <Form.Label>{content?.subcategory_name || "Subcategory Name"}</Form.Label>
                   <Form.Control
                     type="text"
                     value={subcategoryName}
                     onChange={(e) => setSubcategoryName(e.target.value)}
-                    placeholder="Enter subcategory name"
+                    placeholder={content?.subcategory_name || "Enter subcategory name"}
                   />
                 </Form.Group>
               </Form>
             </Modal.Body>
             <Modal.Footer>
-              <Button variant="secondary" onClick={() => setShowAddSubcategoryModal(false)}>Close</Button>
-              <Button variant="primary" onClick={handleAddSubcategory}>Add Subcategory</Button>
+              <Button variant="secondary" onClick={() => setShowAddSubcategoryModal(false)}>{content?.close || "Close"}</Button>
+              <Button variant="primary" onClick={handleAddSubcategory}>{content?.add_subcategory || "Add Subcategory"}</Button>
             </Modal.Footer>
           </Modal>
 
           {/* Edit Subcategory Modal */}
           <Modal show={showEditSubcategoryModal} onHide={() => setShowEditSubcategoryModal(false)}>
             <Modal.Header closeButton>
-              <Modal.Title>Edit Subcategory</Modal.Title>
+              <Modal.Title> {content?.edit_subcategory || "Edit Subcategory"}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
               <Form>
                 <Form.Group>
-                  <Form.Label>Select Category</Form.Label>
+                  <Form.Label>{content?.select_category || "Select Category"}</Form.Label>
                   <Form.Control
                     as="select"
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
                   >
-                    <option value="">Select a category</option>
+                    <option value="">{content?.select_category || "Select a category"}</option>
                     {categories.map((cat) => (
                       <option key={cat.category_id} value={cat.category_id}>{cat.category_name}</option>
                     ))}
                   </Form.Control>
                 </Form.Group>
                 <Form.Group className="mt-3">
-                  <Form.Label>Subcategory Name</Form.Label>
+                  <Form.Label>{content?.subcategory_name || "Subcategory Name"}</Form.Label>
                   <Form.Control
                     type="text"
                     value={subcategoryName}
                     onChange={(e) => setSubcategoryName(e.target.value)}
-                    placeholder="Edit subcategory name"
+                    placeholder={content?.subcategory_name || "Edit subcategory name"}
                   />
                 </Form.Group>
               </Form>
             </Modal.Body>
             <Modal.Footer>
-              <Button variant="secondary" onClick={() => setShowEditSubcategoryModal(false)}>Close</Button>
-              <Button variant="primary" onClick={handleEditSubcategory}>Save Changes</Button>
+              <Button variant="secondary" onClick={() => setShowEditSubcategoryModal(false)}>{content?.close || "Close"}</Button>
+              <Button variant="primary" onClick={handleEditSubcategory}>{content?.save_changes || "Save Changes"}</Button>
             </Modal.Footer>
           </Modal>
 
           {/* Confirm Delete Modal */}
           <Modal show={showConfirmDeleteModal} onHide={() => setShowConfirmDeleteModal(false)}>
             <Modal.Header closeButton>
-              <Modal.Title>Delete Subcategory</Modal.Title>
+              <Modal.Title>{content?.delete_subcategory || "Delete Subcategory"}</Modal.Title>
             </Modal.Header>
-            <Modal.Body>Are you sure you want to delete this subcategory?</Modal.Body>
+            <Modal.Body>{content?.delete_subcategory_confirmation || "Are you sure you want to delete this subcategory?"}</Modal.Body>
             <Modal.Footer>
-              <Button variant="secondary" onClick={() => setShowConfirmDeleteModal(false)}>Cancel</Button>
-              <Button variant="danger" onClick={handleDeleteSubcategory}>Delete</Button>
+              <Button variant="secondary" onClick={() => setShowConfirmDeleteModal(false)}>{content?.cancel || "Cancel"}</Button>
+              <Button variant="danger" onClick={handleDeleteSubcategory}>{content?.delete || "Delete"}</Button>
             </Modal.Footer>
           </Modal>
 
           {/* Subcategory List */}
           <div className="category-list mt-4">
-            <h3>Subcategories</h3>
+            <h3> {content?.sub_categories || "Subcategories"}</h3>
             <ListGroup>
               {subcategories.map((sub) => (
                 <ListGroup.Item key={sub.sub_category_id}>

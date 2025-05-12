@@ -3,7 +3,7 @@ import { FaBars, FaChartLine, FaStore, FaUsers, FaUser } from "react-icons/fa";
 import { Row, Col, Button, Form, Modal } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import Translation from "../../translations/lang.json";
+import Translation from "../../translations/admin.json";
 import "../style/new-vendors.css";
 
 function NewVendors() {
@@ -19,13 +19,13 @@ function NewVendors() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showImageModal, setShowImageModal] = useState(false);
   const [selectedImage, setSelectedImage] = useState("");
-  const [vendors, setVendors] = useState([]); // State for vendors
-  const [vendorDetails, setVendorDetails] = useState(null); // State for vendor details
+  const [vendors, setVendors] = useState([]);
+  const [vendorDetails, setVendorDetails] = useState(null);
   const navigate = useNavigate();
 
   const defaultFontSize = 'medium';
   const defaultFontColor = '#000000';
-  const defaultLanguage = 'english'; // Default language
+  const defaultLanguage = 'english';
 
   const [fontSize, setFontSize] = useState(() => localStorage.getItem('fontSize') || defaultFontSize);
   const [fontColor, setFontColor] = useState(() => localStorage.getItem('fontColor') || defaultFontColor);
@@ -40,11 +40,8 @@ function NewVendors() {
     localStorage.setItem('fontColor', fontColor);
     localStorage.setItem('language', language);
 
-    // Update content based on selected language
     setContent(Translation[language]);
   }, [fontSize, fontColor, language]);
-  
-
 
   async function fetchVendors() {
     try {
@@ -58,14 +55,13 @@ function NewVendors() {
 
       const result = await response.json();
       if (result.success) {
-        setVendors(result.data); // Set fetched vendors
+        setVendors(result.data);
       }
     } catch (error) {
       console.error("Fetch error:", error);
     }
   }
 
-  
   useEffect(() => {
     fetchVendors();
   }, []);
@@ -82,9 +78,9 @@ function NewVendors() {
       });
 
       const result = await response.json();
-      setVendorDetails(result); // Store the result in the state
-      setShowDetailModal(true); // Show the modal after fetching details
-      setCurrentSlide(0); // Reset to first slide
+      setVendorDetails(result);
+      setShowDetailModal(true);
+      setCurrentSlide(0);
     } catch (error) {
       console.error('Error fetching vendor details:', error);
     }
@@ -92,7 +88,7 @@ function NewVendors() {
 
   const slides = vendorDetails ? [
     {
-      title: "Personal Info",
+      title: content?.personal_info || "Personal Info",
       content: (
         <ul>
           <li>Name: {vendorDetails["Personal Info"].personal_name}</li>
@@ -110,7 +106,6 @@ function NewVendors() {
                 setSelectedImage(vendorDetails["Personal Info"].id_front_side);
                 setShowImageModal(true);
               }}
-
             />
           </li>
           <li>
@@ -128,7 +123,7 @@ function NewVendors() {
       ),
     },
     {
-      title: "Business Information",
+      title: content?.business_info || "Business Information",
       content: (
         <ul>
           <li>Business Name: {vendorDetails["Business Information"].business_name}</li>
@@ -159,7 +154,7 @@ function NewVendors() {
                   setSelectedImage(img);
                   setShowImageModal(true);
                 }}
-                style={{ margin: '5px', cursor: 'pointer', width: '50px', height: 'auto' }} // Add styling as needed
+                style={{ margin: '5px', cursor: 'pointer', width: '50px', height: 'auto' }}
               />
             ))}
           </li>
@@ -167,7 +162,7 @@ function NewVendors() {
       ),
     },
     {
-      title: "Bank Info",
+      title: content?.bank_info || "Bank Info",
       content: (
         <ul>
           <li>Bank Name: {vendorDetails["Bank Info"].bank_name}</li>
@@ -176,7 +171,7 @@ function NewVendors() {
         </ul>
       ),
     },
-  ] : []; // Safeguard against undefined slides
+  ] : [];
 
   const handleNextSlide = () => {
     if (currentSlide < slides.length - 1) {
@@ -214,7 +209,6 @@ function NewVendors() {
     };
 
     try {
-      console.warn("Payload:", payload); // Debugging line
       const response = await fetch("http://localhost:8000/api/admin/changevendorstatus", {
         method: 'POST',
         body: JSON.stringify(payload),
@@ -226,26 +220,22 @@ function NewVendors() {
 
       const result = await response.json();
       if (result.success) {
-        toast.success("Vendor status updated successfully!");
+        toast.success(content?.change_success || "Vendor status updated successfully!");
         setShowEditModal(false);
-        fetchVendors()
+        fetchVendors();
       } else {
-        toast.error("Failed to update status.");
+        toast.error(content?.change_failed || "Failed to update status.");
       }
     } catch {
-      toast.error("An error occurred. Please try again.");
+      toast.error(content?.change_failed || "An error occurred. Please try again.");
     }
   };
 
   function logout() {
     localStorage.clear();
-    toast.success("Logout Successful!", {
+    toast.success(content?.logout || "Logout Successful!", {
       position: "top-right",
       autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
     });
     setTimeout(() => {
       navigate("/admin/login");
@@ -260,49 +250,49 @@ function NewVendors() {
 
       <div className={`admin-custom-sidebar ${sidebarVisible ? "show" : "hide"}`}>
         <div className="d-flex align-items-center mb-3">
-          <h2 className="text-center admin-custom-css flex-grow-1 mt-2 ms-4">Admin Dashboard</h2>
+          <h2 className="text-center admin-custom-css flex-grow-1 mt-2 ms-4">{content?.admin_dashboard_title || "Admin Dashboard"}</h2>
         </div>
 
         <a href="/admin/" className="admin-custom-link">
-          <FaChartLine className="me-2" /> Dashboard
+          <FaChartLine className="me-2" /> {content?.dashboard}
         </a>
 
         <div className="dropdown">
           <div className="admin-custom-link" onClick={() => handleDropdown("products")}>
-            <FaUsers className="me-2" /> User Management
+            <FaUsers className="me-2" /> {content?.user_management}
           </div>
           {openDropdown === "products" && (
             <ul className="dropdown-menu admin-custom-dropdown-menu">
-              <li><a href="/admin/list-users" className="dropdown-item-admin">List Users</a></li>
-              <li><a href="/admin/user-messages" className="dropdown-item-admin">User Messages</a></li>
+              <li><a href="/admin/list-users" className="dropdown-item-admin">{content?.list_users}</a></li>
+              <li><a href="/admin/user-messages" className="dropdown-item-admin">{content?.user_messages}</a></li>
             </ul>
           )}
         </div>
 
         <div className="dropdown">
           <div className="admin-custom-link" onClick={() => handleDropdown("orders")}>
-            <FaStore className="me-2" /> Vendor Management
+            <FaStore className="me-2" /> {content?.vendor_management}
           </div>
           {openDropdown === "orders" && (
             <ul className="dropdown-menu admin-custom-dropdown-menu">
-              <li><a href="/admin/new-vendors" className="dropdown-item-admin">New Vendor Requests</a></li>
-              <li><a href="/admin/list-vendors" className="dropdown-item-admin">List of Vendors</a></li>
-              <li><a href="/admin/manage-products" className="dropdown-item-admin">Manage Products</a></li>
-              <li><a href="/admin/manage-orders" className="dropdown-item-admin">Manage Orders</a></li>
-              <li><a href="/admin/approve-payout" className="dropdown-item-admin">Approve Payout</a></li>
-              <li><a href="/admin/vendor-messages" className="dropdown-item-admin">Vendor Messages</a></li>
+              <li><a href="/admin/new-vendors" className="dropdown-item-admin">{content?.new_vendor_requests}</a></li>
+              <li><a href="/admin/list-vendors" className="dropdown-item-admin">{content?.list_of_vendors}</a></li>
+              <li><a href="/admin/manage-products" className="dropdown-item-admin">{content?.manage_products}</a></li>
+              <li><a href="/admin/manage-orders" className="dropdown-item-admin">{content?.manage_orders}</a></li>
+              <li><a href="/admin/approve-payout" className="dropdown-item-admin">{content?.approve_payout}</a></li>
+              <li><a href="/admin/vendor-messages" className="dropdown-item-admin">{content?.vendor_messages}</a></li>
             </ul>
           )}
         </div>
 
         <div className="dropdown">
           <div className="admin-custom-link" onClick={() => handleDropdown("profile")}>
-            <FaUser className="me-2" /> Profile
+            <FaUser className="me-2" /> {content?.profile}
           </div>
           {openDropdown === "profile" && (
             <ul className="dropdown-menu admin-custom-dropdown-menu">
-              <li><a href="/admin/manage-password" className="dropdown-item-admin">Update Password</a></li>
-              <li><a onClick={logout} className="dropdown-item-admin">Logout</a></li>
+              <li><a href="/admin/manage-password" className="dropdown-item-admin">{content?.update_password}</a></li>
+              <li><a onClick={logout} className="dropdown-item-admin">{content?.logout}</a></li>
             </ul>
           )}
         </div>
@@ -310,13 +300,13 @@ function NewVendors() {
 
       <div className={`main-content ${sidebarVisible ? "with-sidebar" : "full-width"}`}>
         <div className="custom-header text-center">
-          <h1 className="h4 mb-0">New Vendor Requested</h1>
+          <h1 className="h4 mb-0">{content?.new_vendor_requests || "New Vendor Requests"}</h1>
         </div>
 
         <div style={{ width: '100%', maxWidth: '800px', margin: '0 auto' }}>
           <Row className="mb-3 d-flex justify-content-between align-items-center">
             <Col xs="auto" className="d-flex align-items-center">
-              <label className="me-2">Show</label>
+              <label className="me-2">{content?.show || "Show"}</label>
               <Form.Select
                 value={entries}
                 onChange={(e) => handleEntriesChange(Number(e.target.value))}
@@ -327,14 +317,14 @@ function NewVendors() {
                 <option value={50}>50</option>
                 <option value={100}>100</option>
               </Form.Select>
-              <label className="ms-2">Entries</label>
+              <label className="ms-2">{content?.entries || "Entries"}</label>
             </Col>
 
             <Col xs="auto" className="d-flex align-items-center mt-3 mt-sm-0">
-              <label className="me-2">Search:</label>
+              <label className="me-2">{content?.search || "Search:"}</label>
               <Form.Control
                 type="text"
-                placeholder="Search"
+                placeholder={content?.search_placeholder || "Search"}
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
@@ -375,18 +365,18 @@ function NewVendors() {
                           handleSeeDetails(vendor.vendor_id);
                         }}
                       >
-                        see details
+                        {content?.see_details || "See Details"}
                       </span>
                       <Button variant="primary" size="sm" onClick={() => {
                         setSelectedUserId(vendor.vendor_id);
-                        setUserStatus("Pending"); // Default status
+                        setUserStatus("Pending");
                         setShowEditModal(true);
-                      }}>Edit</Button>
+                      }}>{content?.edit || "Edit"}</Button>
                     </div>
                   </div>
                 ))
               ) : (
-                <p>No vendors found.</p>
+                <p>{content?.no_vendors_found || "No vendors found."}</p>
               )}
             </div>
 
@@ -409,15 +399,15 @@ function NewVendors() {
               <Button variant="secondary" onClick={() => {
                 if (currentPage > 1) setCurrentPage(currentPage - 1);
               }} disabled={currentPage === 1}>
-                Previous
+                {content?.previous || "Previous"}
               </Button>
               <div>
-                Page {currentPage} of {totalPages}
+                {content?.page || "Page"} {currentPage} {content?.of || "of"} {totalPages}
               </div>
               <Button variant="secondary" onClick={() => {
                 if (currentPage < totalPages) setCurrentPage(currentPage + 1);
               }} disabled={currentPage === totalPages || totalPages === 0}>
-                Next
+                {content?.next || "Next"}
               </Button>
             </div>
           </div>
@@ -427,27 +417,27 @@ function NewVendors() {
       {/* Edit User Status Modal */}
       <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Edit User Status</Modal.Title>
+          <Modal.Title>{content?.user_status || "User Status"}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
             <Form.Group controlId="userStatus">
-              <Form.Label>Select Status</Form.Label>
+              <Form.Label>{content?.select_status || "Select Status"}</Form.Label>
               <Form.Control as="select" value={userStatus} onChange={(e) => setUserStatus(e.target.value)}>
-                <option value="Pending">Pending</option>
-                <option value="Verified">Verified</option>
-                <option value="Rejected">Rejected</option>
-                <option value="Suspended">Suspended</option>
+                <option value="Pending">{content?.pending || "Pending"}</option>
+                <option value="Verified">{content?.verified || "Verified"}</option>
+                <option value="Rejected">{content?.rejected || "Rejected"}</option>
+                <option value="Suspended">{content?.suspended || "Suspended"}</option>
               </Form.Control>
             </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowEditModal(false)}>
-            Close
+            {content?.close || "Close"}
           </Button>
           <Button variant="primary" onClick={changeUserStatus}>
-            Save Changes
+            {content?.save_changes || "Save Changes"}
           </Button>
         </Modal.Footer>
       </Modal>
@@ -455,20 +445,20 @@ function NewVendors() {
       {/* Detail Modal */}
       <Modal show={showDetailModal} onHide={() => setShowDetailModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>{slides.length > 0 ? slides[currentSlide].title : "Vendor Details"}</Modal.Title>
+          <Modal.Title>{slides.length > 0 ? slides[currentSlide].title : content?.vendor_details || "Vendor Details"}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {slides.length > 0 ? slides[currentSlide].content : <p>No details available.</p>}
+          {slides.length > 0 ? slides[currentSlide].content : <p>{content?.no_details_available || "No details available."}</p>}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handlePreviousSlide} disabled={currentSlide === 0}>
-            Previous
+            {content?.previous || "Previous"}
           </Button>
           <Button variant="secondary" onClick={handleNextSlide} disabled={currentSlide === slides.length - 1}>
-            Next
+            {content?.next || "Next"}
           </Button>
           <Button variant="primary" onClick={() => setShowDetailModal(false)}>
-            Close
+            {content?.close || "Close"}
           </Button>
         </Modal.Footer>
       </Modal>
@@ -476,14 +466,14 @@ function NewVendors() {
       {/* Image Modal */}
       <Modal show={showImageModal} onHide={() => setShowImageModal(false)} size="lg">
         <Modal.Header closeButton>
-          <Modal.Title>Image Preview</Modal.Title>
+          <Modal.Title>{content?.image_preview || "Image Preview"}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <img src={"http://localhost:8000/storage/" + selectedImage} alt="Large View" style={{ width: '100%', height: 'auto' }} />
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowImageModal(false)}>
-            Close
+            {content?.close || "Close"}
           </Button>
         </Modal.Footer>
       </Modal>
