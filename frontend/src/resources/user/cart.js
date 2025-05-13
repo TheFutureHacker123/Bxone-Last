@@ -9,6 +9,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 function Cart() {
   const [isNavOpen, setNavOpen] = useState(true);
   const [cartitems, setCartItems] = useState([]);
+  const [updating, setUpdating] = useState(false); // Prevent rapid clicks
   const navigate = useNavigate();
 
   const defaultFontSize = 'medium';
@@ -104,11 +105,53 @@ function Cart() {
     }
   }
 
+  const updateCartQuantity = async (cart_id, newQuantity) => {
+    const storedUser = localStorage.getItem("user-info");
+    if (!storedUser) {
+      navigate("/login");
+      return;
+    }
+    const parsedUser = JSON.parse(storedUser);
+    setUpdating(true);
+    try {
+      let response = await fetch("http://localhost:8000/api/updateCartQuantity", {
+        method: 'POST',
+        body: JSON.stringify({
+          user_id: parsedUser.user_id,
+          cart_id: cart_id,
+          total_added: newQuantity
+        }),
+        headers: {
+          "Content-Type": 'application/json',
+          "Accept": 'application/json'
+        }
+      });
+      let result = await response.json();
+      if (result.success) {
+        setCartItems(prev =>
+          prev.map(item =>
+            item.cart_id === cart_id ? { ...item, total_added: newQuantity } : item
+          )
+        );
+      } else {
+        toast.error(result.message || "Failed to update quantity");
+      }
+    } catch (error) {
+      toast.error('An error occurred. Please try again later.');
+    }
+    setUpdating(false);
+  };
+
+  const handleQuantityChange = (cart_id, currentQuantity, delta) => {
+    const newQuantity = currentQuantity + delta;
+    if (newQuantity < 1) return;
+    updateCartQuantity(cart_id, newQuantity);
+  };
+
   function checkoutProcess() {
     navigate('/checkout');
   }
 
-  // Function to calculate total price
   const calculateTotal = () => {
     return cartitems.reduce((total, item) => total + item.product_price * item.total_added, 0).toFixed(2);
   };
@@ -167,12 +210,20 @@ function Cart() {
                     <span className="product-name">{item.product_name}</span>
                   </div>
                 </td>
-                <td>${item.product_price}</td>
+                <td>${(item.product_price * item.total_added).toFixed(2)}</td>
                 <td>
                   <div className="quantity-container">
-                    <button className="quantity-btn">-</button>
+                    <button
+                      className="quantity-btn"
+                      disabled={item.total_added <= 1 || updating}
+                      onClick={() => handleQuantityChange(item.cart_id, item.total_added, -1)}
+                    >-</button>
                     <span className="quantity-value">{item.total_added}</span>
-                    <button className="quantity-btn">+</button>
+                    <button
+                      className="quantity-btn"
+                      disabled={updating}
+                      onClick={() => handleQuantityChange(item.cart_id, item.total_added, 1)}
+                    >+</button>
                   </div>
                 </td>
                 <td>

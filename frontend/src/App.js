@@ -19,6 +19,8 @@ import Test from "./resources/user/test"
 import ProtectPath from "./resources/user/protectpath"
 import Notification from "./resources/user/notification"
 
+import OrderConfirmation from "./resources/user/OrderConfirmation";
+
 
 import AdminDashboard from "./resources/admin/dashboard"
 import SAdminDashboard from "./resources/superadmin/dashboard"
@@ -164,6 +166,7 @@ function App() {
           <Route path="/helpcenter" element={<ChatAdmin />} />
           <Route path="/checkout" element={<ProtectPath Cmp={CheckOut} />} />
           <Route path="/ordereditems" element={<ProtectPath Cmp={OrderedItems} />} />
+          <Route path="/order-confirmation" element={<ProtectPath Cmp={OrderConfirmation} />} />
           <Route path="/productdetails/:product_id" element={<ProductDetails />} />
           <Route path="/refunditems" element={<ProtectPath Cmp={RefudnItems} />} />
           <Route path="/settings" element={<ProtectPath Cmp={Settings} />} />

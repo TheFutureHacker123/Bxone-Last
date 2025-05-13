@@ -31,12 +31,9 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 });
 
-
-
-
 Route::post('register',[UserController::class,'register']);//done
 Route::post('login',[UserController::class,'login']);//done
-Route::post('/addadress',[UserController::class,'addadress']);//done
+Route::post('/addaddress',[UserController::class,'addaddress']);
 
 Route::post('vendor/register',[VendorController::class,'register']);//done
 Route::post('/vendor/login',[VendorController::class,'login']);//done
@@ -51,9 +48,7 @@ Route::post('/get-subcategories-by-category/{category_id}', [VendorController::c
 
 Route::post('/vendor/editproduct', [VendorController::class, 'editproduct']);//one
 
-
 Route::post('/vendor/vendorinfo',[VendorController::class,'vendorinfo']);
-
 
 Route::post('/search', [ProductController::class, 'search']);//done
 Route::post('/categorylist', [ProductController::class, 'categorylist']);//done
@@ -67,9 +62,7 @@ Route::post('/removecartitems', [ProductController::class, 'removecartitems']);/
 Route::post('/listcartitems', [ProductController::class, 'listcartitems']);//done
 Route::post('/topproduct', [ProductController::class, 'topproduct']);//done
 
-
 Route::post('/admin/login', [AdminController::class, 'loginadmin']);//done
-
 
 Route::get('/admin/listusers', [AdminController::class, 'listusers']);//done
 Route::post('/admin/changeuserstatus', [AdminController::class, 'changeuserstatus']);//done
@@ -94,9 +87,6 @@ Route::post('/edit-subcategory', [AdminController::class, 'editSubCategory']);//
 
 Route::post('/superadmin/addadmins', [AdminController::class, 'addAdmins']);
 
-
-
-
 Route::post('/admin/addnotification', [AdminController::class, 'addNotification']);//done
 Route::post('/getnotifications', [UserController::class, 'getNotifications']);//done
 Route::post('/deletenotification', [UserController::class, 'deleteNotification']);//done
@@ -108,7 +98,6 @@ Route::post('/vendor/addnotification', [VendorController::class, 'addNotificatio
 Route::get('/admin/listadmins', [AdminController::class, 'listadmins']);//done
 Route::post('/admin/changeuserstatusadmin', [AdminController::class, 'changeuserstatusadmin']);//done
 
-
 Route::post('/vendor/listproduct', [VendorController::class, 'listproduct']);//done
 Route::post('/vendor/listreview', [VendorController::class, 'listreview']);//done
 
@@ -117,13 +106,14 @@ Route::get('/vendor/{vendorId}', [VendorController::class, 'getVendorDetails']);
 Route::get('/vendor/{vendorId}/products', [VendorController::class, 'getVendorProducts']);
 Route::get('/vendor/{vendorId}/categories', [VendorController::class, 'getVendorCategories']);
 
-
 Route::get('/best-selling-vendors', [HomeController::class, 'getBestSellingVendors']);
-
-
 
 Route::post('/product/addcoupon', [ProductController::class, 'addCoupon']);//done
 Route::post('/product/listcoupon', [ProductController::class, 'listCoupon']);//done
 Route::post('/product/deletecoupon', [ProductController::class, 'deleteCoupon']);//done
 Route::post('/product/editcoupon', [ProductController::class, 'editCoupon']);//done
 Route::post('/product/onevendorproducts', [ProductController::class, 'onevendorproducts']);//done
+
+Route::post('/api/updateCartQuantity', [ProductController::class, 'updateCartQuantity']);
+
+Route::post('/processOrder', [ProductController::class, 'processOrder']);

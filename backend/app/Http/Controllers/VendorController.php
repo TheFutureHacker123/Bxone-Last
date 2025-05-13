@@ -139,11 +139,7 @@ class VendorController extends Controller
         ]);
     }
 
-    /**
-     * Get all featured vendors
-     *
-     * @return JsonResponse
-     */
+    // Get all featured vendors
     public function getFeaturedVendors(): JsonResponse
     {
         $featuredVendors = Vendor::with('personalInfo')
@@ -158,11 +154,7 @@ class VendorController extends Controller
         ]);
     }
 
-    /**
-     * Get all categories
-     *
-     * @return JsonResponse
-     */
+    // Get all categories
     public function getCategories(): JsonResponse
     {
         $categories = Category::all();
@@ -173,12 +165,7 @@ class VendorController extends Controller
         ]);
     }
 
-    /**
-     * Get categories associated with a vendor's products
-     *
-     * @param int $id Vendor ID
-     * @return JsonResponse
-     */
+    // Get categories associated with a vendor's products
     public function getVendorCategories(int $id): JsonResponse
     {
         $vendor = Vendor::findOrFail($id);
@@ -227,11 +214,6 @@ class VendorController extends Controller
 
         return response()->json(['message' => 'Password updated successfully'], 200);
     }
-
-
-
-
-
 
     public function vendorinfo(Request $request)
     {
@@ -323,13 +305,6 @@ class VendorController extends Controller
         ], 201);
     }
 
-
-
-
-
-
-
-
     public function addproduct(Request $request)
     {
         // ✅ Step 1: Validate request data
@@ -386,9 +361,6 @@ class VendorController extends Controller
             'data' => $product
         ], 201);
     }
-
-
-
 
     public function productlist(Request $request)
     {
@@ -453,7 +425,6 @@ class VendorController extends Controller
 
         return response()->json(['message' => 'Product not found'], 404);
     }
-
 
     public function orderlist(Request $request)
     {
@@ -545,13 +516,11 @@ class VendorController extends Controller
         return response()->json(['message' => 'Failed to update order statussss'], 500);
     }
 
-
     public function categoryandsubcategory($category_id)
     {
         $subcategories = SubCategory::where('category_id', $category_id)->get();
         return response()->json($subcategories);
     }
-
 
     public function editproduct(Request $request)
     {
@@ -610,8 +579,6 @@ class VendorController extends Controller
         ], 200);
     }
 
-
-
     public function addNotification(Request $request)
     {
         // Validate the incoming request data
@@ -650,7 +617,6 @@ class VendorController extends Controller
         ], 200);
     }
 
-
     public function deleteNotification(Request $request)
     {
         // Validate the incoming request data
@@ -678,8 +644,6 @@ class VendorController extends Controller
             'message' => 'Notification deleted successfully.',
         ], 200);
     }
-
-
     public function listproduct(Request $request)
     {
         $validatedData = $request->validate([
