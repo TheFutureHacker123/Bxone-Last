@@ -104,7 +104,7 @@ const ResetPassword = () => {
         </form>
 
         <div className="text-center mt-3">
-          <p className="text-muted">
+          <p>
             Remembered your password? <a href="/vendor/login" className="vendor-login-link">Login here</a>
           </p>
         </div>

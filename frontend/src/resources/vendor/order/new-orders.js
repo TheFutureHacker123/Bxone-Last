@@ -130,62 +130,129 @@ function ControlOrder() {
 
   return (
     <div className="dashboard-wrapper">
-      <button className="hamburger-btn" onClick={toggleSidebar}><FaBars /></button>
+      <button className="hamburger-btn" onClick={toggleSidebar}>
+        <FaBars style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} />
+      </button>
 
       <div className={`custom-sidebar ${sidebarVisible ? "show" : "hide"}`}>
-        <h2 className="text-center custom-css flex-grow-1 mt-2 ms-4">{content?.vendor_dashboard || "Vendor Dashboard"}</h2>
+        <text className="text-center custom-css flex-grow-1 mt-2 ms-4" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+          {content?.vendor_dashboard || "Vendor Dashboard"}
+        </text>
         <Link to="/vendor" className="custom-link">
-          <FaChartLine className="me-2" /> {content?.analytics || "Analytics"}
+          <FaChartLine className="me-2" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} />
+          <span style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+            {content?.analytics || "Analytics"}
+          </span>
         </Link>
 
         <div className="dropdown">
           <div className="custom-link" onClick={() => handleDropdown("products")}>
-            <FaBox className="me-2" /> {content?.manage_products || "Manage Products"}
+            <FaBox className="me-2" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} />
+            <span style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+              {content?.manage_products || "Manage Products"}
+            </span>
           </div>
           {openDropdown === "products" && (
             <ul className="dropdown-menu custom-dropdown-menu">
-              <li><Link to="/vendor/add-products" className="dropdown-item-vendor">{content?.add_products || "Add Products"}</Link></li>
-              <li><Link to="/vendor/add-coupons" className="dropdown-item-vendor">{content?.add_coupons || "Add Coupons"}</Link></li>
+              <li>
+                <Link to="/vendor/add-products" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                  {content?.add_products || "Add Products"}
+                </Link>
+              </li>
+              <li>
+                <Link to="/vendor/add-coupons" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                  {content?.add_coupons || "Add Coupons"}
+                </Link>
+              </li>
             </ul>
           )}
         </div>
 
         <div className="dropdown">
           <div className="custom-link" onClick={() => handleDropdown("orders")}>
-            <FaShoppingCart className="me-2" /> {content?.manage_orders || "Manage Orders"}
+            <FaShoppingCart className="me-2" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} />
+            <span style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+              {content?.manage_orders || "Manage Orders"}
+            </span>
           </div>
           {openDropdown === "orders" && (
             <ul className="dropdown-menu custom-dropdown-menu">
-              <li><Link to="/vendor/new-orders" className="dropdown-item-vendor">{content?.new_orders || "New Order"}</Link></li>
-              <li><Link to="/vendor/shipped" className="dropdown-item-vendor">{content?.shipped || "Shipped"}</Link></li>
-              <li><Link to="/vendor/refunds" className="dropdown-item-vendor">{content?.refunds || "Refund"}</Link></li>
-              <li><Link to="/vendor/completed" className="dropdown-item-vendor">{content?.completed || "Completed"}</Link></li>
+              <li>
+                <Link to="/vendor/new-orders" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                  {content?.new_orders || "New Order"}
+                </Link>
+              </li>
+              <li>
+                <Link to="/vendor/shipped" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                  {content?.shipped || "Shipped"}
+                </Link>
+              </li>
+              <li>
+                <Link to="/vendor/refunds" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                  {content?.refunds || "Refund"}
+                </Link>
+              </li>
+              <li>
+                <Link to="/vendor/completed" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                  {content?.completed || "Completed"}
+                </Link>
+              </li>
             </ul>
           )}
         </div>
 
         <div className="dropdown">
           <div className="custom-link" onClick={() => handleDropdown("messages")}>
-            <FaComments className="me-2" /> {content?.manage_messages || "Manage Messages"}
+            <FaComments className="me-2" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} />
+            <span style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+              {content?.manage_messages || "Manage Messages"}
+            </span>
           </div>
           {openDropdown === "messages" && (
             <ul className="dropdown-menu custom-dropdown-menu">
-              <li><Link to="/vendor/user-messages" className="dropdown-item-vendor">{content?.user_message || "User Message"}</Link></li>
-              <li><Link to="/vendor/admin-messages" className="dropdown-item-vendor">{content?.admin_message || "Admin Message"}</Link></li>
-              <li><Link to="/vendor/review-messages" className="dropdown-item-vendor">{content?.review_message || "Review Message"}</Link></li>
-              <li><Link to="/vendor/notifications" className="dropdown-item-vendor">{content?.notifications || "Notification"}</Link></li>
+              <li>
+                <Link to="/vendor/user-messages" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                  {content?.user_message || "User Message"}
+                </Link>
+              </li>
+              <li>
+                <Link to="/vendor/admin-messages" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                  {content?.admin_message || "Admin Message"}
+                </Link>
+              </li>
+              <li>
+                <Link to="/vendor/review-messages" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                  {content?.review_message || "Review Message"}
+                </Link>
+              </li>
+              <li>
+                <Link to="/vendor/notifications" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                  {content?.notifications || "Notification"}
+                </Link>
+              </li>
             </ul>
           )}
         </div>
 
         <div className="dropdown">
           <div className="custom-link" onClick={() => handleDropdown("profile")}>
-            <FaUser className="me-2" /> {content?.profile || "Profile"}
+            <FaUser className="me-2" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} />
+            <span style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+              {content?.profile || "Profile"}
+            </span>
           </div>
           {openDropdown === "profile" && (
             <ul className="dropdown-menu custom-dropdown-menu">
-              <li><Link to="/vendor/manage-profile" className="dropdown-item-vendor">{content?.update_password || "Updated Password"}</Link></li>
-              <li><a onClick={logout} className="dropdown-item-vendor">{content?.logout || "Logout"}</a></li>
+              <li>
+                <Link to="/vendor/manage-profile" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                  {content?.update_password || "Updated Password"}
+                </Link>
+              </li>
+              <li>
+                <a onClick={logout} className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                  {content?.logout || "Logout"}
+                </a>
+              </li>
             </ul>
           )}
         </div>

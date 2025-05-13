@@ -255,234 +255,299 @@ function AddCoupons() {
     return (
         <div className="dashboard-wrapper">
             <button className="hamburger-btn" onClick={() => setSidebarVisible(!sidebarVisible)}>
-                <FaBars />
+                <FaBars style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} />
             </button>
 
             <div className={`custom-sidebar ${sidebarVisible ? "show" : "hide"}`}>
-                <h2 className="text-center custom-css flex-grow-1 mt-2 ms-4">{content?.vendor_dashboard || "Vendor Dashboard"}</h2>
+                <text className="text-center custom-css flex-grow-1 mt-2 ms-4" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                    {content?.vendor_dashboard || "Vendor Dashboard"}
+                </text>
                 <Link to="/vendor" className="custom-link">
-                    <FaChartLine className="me-2" /> {content?.analytics || "Analytics"}
+                    <FaChartLine className="me-2" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} />
+                    <span style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                        {content?.analytics || "Analytics"}
+                    </span>
                 </Link>
 
                 <div className="dropdown">
                     <div className="custom-link" onClick={() => handleDropdown("products")}>
-                        <FaBox className="me-2" /> {content?.manage_products || "Manage Products"}
+                        <FaBox className="me-2" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} />
+                        <span style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                            {content?.manage_products || "Manage Products"}
+                        </span>
                     </div>
                     {openDropdown === "products" && (
                         <ul className="dropdown-menu custom-dropdown-menu">
-                            <li><Link to="/vendor/add-products" className="dropdown-item-vendor">{content?.add_products || "Add Products"}</Link></li>
-                            <li><Link to="/vendor/add-coupons" className="dropdown-item-vendor">{content?.add_coupons || "Add Coupons"}</Link></li>
+                            <li>
+                                <Link to="/vendor/add-products" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                                    {content?.add_products || "Add Products"}
+                                </Link>
+                            </li>
+                            <li>
+                                <Link to="/vendor/add-coupons" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                                    {content?.add_coupons || "Add Coupons"}
+                                </Link>
+                            </li>
                         </ul>
                     )}
                 </div>
 
                 <div className="dropdown">
                     <div className="custom-link" onClick={() => handleDropdown("orders")}>
-                        <FaShoppingCart className="me-2" /> {content?.manage_orders || "Manage Orders"}
+                        <FaShoppingCart className="me-2" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} />
+                        <span style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                            {content?.manage_orders || "Manage Orders"}
+                        </span>
                     </div>
                     {openDropdown === "orders" && (
                         <ul className="dropdown-menu custom-dropdown-menu">
-                            <li><Link to="/vendor/new-orders" className="dropdown-item-vendor">{content?.new_orders || "New Order"}</Link></li>
-                            <li><Link to="/vendor/shipped" className="dropdown-item-vendor">{content?.shipped || "Shipped"}</Link></li>
-                            <li><Link to="/vendor/refunds" className="dropdown-item-vendor">{content?.refunds || "Refund"}</Link></li>
-                            <li><Link to="/vendor/completed" className="dropdown-item-vendor">{content?.completed || "Completed"}</Link></li>
+                            <li>
+                                <Link to="/vendor/new-orders" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                                    {content?.new_orders || "New Order"}
+                                </Link>
+                            </li>
+                            <li>
+                                <Link to="/vendor/shipped" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                                    {content?.shipped || "Shipped"}
+                                </Link>
+                            </li>
+                            <li>
+                                <Link to="/vendor/refunds" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                                    {content?.refunds || "Refund"}
+                                </Link>
+                            </li>
+                            <li>
+                                <Link to="/vendor/completed" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                                    {content?.completed || "Completed"}
+                                </Link>
+                            </li>
                         </ul>
                     )}
                 </div>
 
                 <div className="dropdown">
                     <div className="custom-link" onClick={() => handleDropdown("messages")}>
-                        <FaComments className="me-2" /> {content?.manage_messages || "Manage Messages"}
+                        <FaComments className="me-2" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} />
+                        <span style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                            {content?.manage_messages || "Manage Messages"}
+                        </span>
                     </div>
                     {openDropdown === "messages" && (
                         <ul className="dropdown-menu custom-dropdown-menu">
-                            <li><Link to="/vendor/user-messages" className="dropdown-item-vendor">{content?.user_message || "User Message"}</Link></li>
-                            <li><Link to="/vendor/admin-messages" className="dropdown-item-vendor">{content?.admin_message || "Admin Message"}</Link></li>
-                            <li><Link to="/vendor/review-messages" className="dropdown-item-vendor">{content?.review_message || "Review Message"}</Link></li>
-                            <li><Link to="/vendor/notifications" className="dropdown-item-vendor">{content?.notifications || "Notification"}</Link></li>
+                            <li>
+                                <Link to="/vendor/user-messages" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                                    {content?.user_message || "User Message"}
+                                </Link>
+                            </li>
+                            <li>
+                                <Link to="/vendor/admin-messages" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                                    {content?.admin_message || "Admin Message"}
+                                </Link>
+                            </li>
+                            <li>
+                                <Link to="/vendor/review-messages" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                                    {content?.review_message || "Review Message"}
+                                </Link>
+                            </li>
+                            <li>
+                                <Link to="/vendor/notifications" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                                    {content?.notifications || "Notification"}
+                                </Link>
+                            </li>
                         </ul>
                     )}
                 </div>
 
                 <div className="dropdown">
                     <div className="custom-link" onClick={() => handleDropdown("profile")}>
-                        <FaUser className="me-2" /> {content?.profile || "Profile"}
+                        <FaUser className="me-2" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} />
+                        <span style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                            {content?.profile || "Profile"}
+                        </span>
                     </div>
                     {openDropdown === "profile" && (
                         <ul className="dropdown-menu custom-dropdown-menu">
-                            <li><Link to="/vendor/manage-profile" className="dropdown-item-vendor">{content?.update_password || "Updated Password"}</Link></li>
-                            <li><a onClick={logout} className="dropdown-item-vendor">{content?.logout || "Logout"}</a></li>
+                            <li>
+                                <Link to="/vendor/manage-profile" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                                    {content?.update_password || "Updated Password"}
+                                </Link>
+                            </li>
+                            <li>
+                                <a onClick={logout} className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                                    {content?.logout || "Logout"}
+                                </a>
+                            </li>
                         </ul>
                     )}
                 </div>
             </div>
 
             <div className={`main-content ${sidebarVisible ? "with-sidebar" : "full-width"}`}>
-    <div className="custom-header text-center">
-        <h1 className="h4 mb-0">{content?.coupon_lists || "Coupon Lists"}</h1>
-    </div>
-    <Container fluid>
-        <Row>
-            <Col lg={12} className="p-4">
-                <Row className="mt-3">
-                    <Col lg={12} className="d-flex justify-content-end">
-                        <Button
-                            variant="primary"
-                            className="add-product-btn"
-                            onClick={() => setShowAddCouponModal(true)}
-                        >
-                            {content?.add_coupon || "Add Coupon"}
-                        </Button>
-                    </Col>
-                </Row>
+                <div className="custom-header text-center">
+                    <h1 className="h4 mb-0">{content?.coupon_lists || "Coupon Lists"}</h1>
+                </div>
+                <Container fluid>
+                    <Row>
+                        <Col lg={12} className="p-4">
+                            <Row className="mt-3">
+                                <Col lg={12} className="d-flex justify-content-end">
+                                    <Button
+                                        variant="primary"
+                                        className="add-product-btn"
+                                        onClick={() => setShowAddCouponModal(true)}
+                                    >
+                                        {content?.add_coupon || "Add Coupon"}
+                                    </Button>
+                                </Col>
+                            </Row>
 
-                <Row className="mt-3">
-                    {coupons.map((coupon) => (
-                        <Col xs={12} md={6} lg={3} key={coupon.coupon_id}>
-                            <Card className="shadow-sm rounded-4 p-3 product-card-vendor">
-                                <Image
-                                    src={`http://localhost:8000/storage/${coupon.product?.product_img1}`}
-                                    alt={coupon.product?.product_name || content?.unknown_product || "Product Image"}
-                                    fluid
-                                    rounded
-                                    className="mb-3"
-                                    style={{ height: "150px", objectFit: "contain" }}
-                                />
-                                <h5 className="fw-bold">{coupon.product?.product_name || content?.unknown_product || "Unknown Product"}</h5>
-                                <p>{content?.coupon_code || "Coupon Code:"} {coupon.coupon_code}</p>
-                                <p>{content?.discount_price || "Discount Price:"} ${coupon.discount_price}</p>
-                                <p>{content?.expiry_date || "Expiry Date:"} {coupon.expiry_date}</p>
-                                <p>{content?.status || "Status:"} {coupon.status}</p>
-                                <div className="d-flex justify-content-between mt-3">
-                                    <Button variant="warning" size="sm" onClick={() => handleEditClick(coupon)}>
-                                        <FaPen />
-                                    </Button>
-                                    <Button variant="danger" size="sm" onClick={() => deleteCoupon(coupon.coupon_id)}>
-                                        <FaTimes />
-                                    </Button>
-                                </div>
-                            </Card>
+                            <Row className="mt-3">
+                                {coupons.map((coupon) => (
+                                    <Col xs={12} md={6} lg={3} key={coupon.coupon_id}>
+                                        <Card className="shadow-sm rounded-4 p-3 product-card-vendor">
+                                            <Image
+                                                src={`http://localhost:8000/storage/${coupon.product?.product_img1}`}
+                                                alt={coupon.product?.product_name || content?.unknown_product || "Product Image"}
+                                                fluid
+                                                rounded
+                                                className="mb-3"
+                                                style={{ height: "150px", objectFit: "contain" }}
+                                            />
+                                            <h5 className="fw-bold">{coupon.product?.product_name || content?.unknown_product || "Unknown Product"}</h5>
+                                            <p>{content?.coupon_code || "Coupon Code:"} {coupon.coupon_code}</p>
+                                            <p>{content?.discount_price || "Discount Price:"} ${coupon.discount_price}</p>
+                                            <p>{content?.expiry_date || "Expiry Date:"} {coupon.expiry_date}</p>
+                                            <p>{content?.status || "Status:"} {coupon.status}</p>
+                                            <div className="d-flex justify-content-between mt-3">
+                                                <Button variant="warning" size="sm" onClick={() => handleEditClick(coupon)}>
+                                                    <FaPen />
+                                                </Button>
+                                                <Button variant="danger" size="sm" onClick={() => deleteCoupon(coupon.coupon_id)}>
+                                                    <FaTimes />
+                                                </Button>
+                                            </div>
+                                        </Card>
+                                    </Col>
+                                ))}
+                            </Row>
                         </Col>
-                    ))}
-                </Row>
-            </Col>
-        </Row>
+                    </Row>
 
-        {/* Add Coupon Modal */}
-        <Modal show={showAddCouponModal} onHide={handleCloseAddCouponModal} centered>
-            <Modal.Header closeButton>
-                <Modal.Title>{content?.add_new_coupon || "Add New Coupon"}</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <Form onSubmit={addCoupon}>
-                    <Form.Group controlId="productName">
-                        <Form.Label>{content?.product_name || "Product Name"}</Form.Label>
-                        <Form.Control
-                            as="select"
-                            value={productName}
-                            onChange={handleProductChange}
-                        >
-                            <option value="">{content?.select_product || "Select a product"}</option>
-                            {products.map((product) => (
-                                <option key={product.product_id} value={product.product_name}>
-                                    {product.product_name}
-                                </option>
-                            ))}
-                        </Form.Control>
-                    </Form.Group>
-                    <Form.Group controlId="couponCode">
-                        <Form.Label>{content?.coupon_code || "Coupon Code"}</Form.Label>
-                        <Form.Control type="text" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} placeholder={content?.enter_coupon_code || "Enter coupon code"} />
-                    </Form.Group>
-                    <Form.Group controlId="discountPrice">
-                        <Form.Label>{content?.discount_price || "Discount Price"}</Form.Label>
-                        <Form.Control type="text" value={discountPrice} onChange={(e) => setDiscountPrice(e.target.value)} placeholder={content?.enter_discount_price || "Enter discount price"} />
-                    </Form.Group>
-                    <Form.Group controlId="expiryDate">
-                        <Form.Label>{content?.expiry_date || "Expiry Date"}</Form.Label>
-                        <Form.Control
-                            type="date"
-                            value={expiryDate}
-                            onChange={(e) => setExpiryDate(e.target.value)}
-                        />
-                    </Form.Group>
-                    <Form.Group controlId="status">
-                        <Form.Label>{content?.status || "Status"}</Form.Label>
-                        <Form.Control
-                            as="select"
-                            value={status}
-                            onChange={(e) => setStatus(e.target.value)}
-                        >
-                            <option value="active">{content?.active || "Active"}</option>
-                            <option value="inactive">{content?.inactive || "Inactive"}</option>
-                        </Form.Control>
-                    </Form.Group>
-                    <Modal.Footer>
-                        <Button variant="secondary" onClick={handleCloseAddCouponModal}>{content?.close || "Close"}</Button>
-                        <Button variant="primary" type="submit">{content?.save_coupon || "Save Coupon"}</Button>
-                    </Modal.Footer>
-                </Form>
-            </Modal.Body>
-        </Modal>
+                    {/* Add Coupon Modal */}
+                    <Modal show={showAddCouponModal} onHide={handleCloseAddCouponModal} centered>
+                        <Modal.Header closeButton>
+                            <Modal.Title>{content?.add_new_coupon || "Add New Coupon"}</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                            <Form onSubmit={addCoupon}>
+                                <Form.Group controlId="productName">
+                                    <Form.Label>{content?.product_name || "Product Name"}</Form.Label>
+                                    <Form.Control
+                                        as="select"
+                                        value={productName}
+                                        onChange={handleProductChange}
+                                    >
+                                        <option value="">{content?.select_product || "Select a product"}</option>
+                                        {products.map((product) => (
+                                            <option key={product.product_id} value={product.product_name}>
+                                                {product.product_name}
+                                            </option>
+                                        ))}
+                                    </Form.Control>
+                                </Form.Group>
+                                <Form.Group controlId="couponCode">
+                                    <Form.Label>{content?.coupon_code || "Coupon Code"}</Form.Label>
+                                    <Form.Control type="text" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} placeholder={content?.enter_coupon_code || "Enter coupon code"} />
+                                </Form.Group>
+                                <Form.Group controlId="discountPrice">
+                                    <Form.Label>{content?.discount_price || "Discount Price"}</Form.Label>
+                                    <Form.Control type="text" value={discountPrice} onChange={(e) => setDiscountPrice(e.target.value)} placeholder={content?.enter_discount_price || "Enter discount price"} />
+                                </Form.Group>
+                                <Form.Group controlId="expiryDate">
+                                    <Form.Label>{content?.expiry_date || "Expiry Date"}</Form.Label>
+                                    <Form.Control
+                                        type="date"
+                                        value={expiryDate}
+                                        onChange={(e) => setExpiryDate(e.target.value)}
+                                    />
+                                </Form.Group>
+                                <Form.Group controlId="status">
+                                    <Form.Label>{content?.status || "Status"}</Form.Label>
+                                    <Form.Control
+                                        as="select"
+                                        value={status}
+                                        onChange={(e) => setStatus(e.target.value)}
+                                    >
+                                        <option value="active">{content?.active || "Active"}</option>
+                                        <option value="inactive">{content?.inactive || "Inactive"}</option>
+                                    </Form.Control>
+                                </Form.Group>
+                                <Modal.Footer>
+                                    <Button variant="secondary" onClick={handleCloseAddCouponModal}>{content?.close || "Close"}</Button>
+                                    <Button variant="primary" type="submit">{content?.save_coupon || "Save Coupon"}</Button>
+                                </Modal.Footer>
+                            </Form>
+                        </Modal.Body>
+                    </Modal>
 
-        {/* Edit Coupon Modal */}
-        <Modal show={showEditCouponModal} onHide={handleCloseEditCouponModal} centered>
-            <Modal.Header closeButton>
-                <Modal.Title>{content?.edit_coupon || "Edit Coupon"}</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <Form>
-                    <Form.Group controlId="productName">
-                        <Form.Label>{content?.product_name || "Product Name"}</Form.Label>
-                        <Form.Control
-                            as="select"
-                            value={productName}
-                            onChange={handleProductChange}
-                        >
-                            <option value="">{content?.select_product || "Select a product"}</option>
-                            {products.map((product) => (
-                                <option key={product.product_id} value={product.product_name}>
-                                    {product.product_name}
-                                </option>
-                            ))}
-                        </Form.Control>
-                    </Form.Group>
-                    <Form.Group controlId="couponCode">
-                        <Form.Label>{content?.coupon_code || "Coupon Code"}</Form.Label>
-                        <Form.Control type="text" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} placeholder={content?.enter_coupon_code || "Enter coupon code"} />
-                    </Form.Group>
-                    <Form.Group controlId="discountPrice">
-                        <Form.Label>{content?.discount_price || "Discount Price"}</Form.Label>
-                        <Form.Control type="text" value={discountPrice} onChange={(e) => setDiscountPrice(e.target.value)} placeholder={content?.enter_discount_price || "Enter discount price"} />
-                    </Form.Group>
-                    <Form.Group controlId="expiryDate">
-                        <Form.Label>{content?.expiry_date || "Expiry Date"}</Form.Label>
-                        <Form.Control
-                            type="date"
-                            value={expiryDate}
-                            onChange={(e) => setExpiryDate(e.target.value)}
-                        />
-                    </Form.Group>
-                    <Form.Group controlId="status">
-                        <Form.Label>{content?.status || "Status"}</Form.Label>
-                        <Form.Control
-                            as="select"
-                            value={status}
-                            onChange={(e) => setStatus(e.target.value)}
-                        >
-                            <option value="active">{content?.active || "Active"}</option>
-                            <option value="inactive">{content?.inactive || "Inactive"}</option>
-                        </Form.Control>
-                    </Form.Group>
-                </Form>
-            </Modal.Body>
-            <Modal.Footer>
-                <Button variant="secondary" onClick={handleCloseEditCouponModal}>{content?.close || "Close"}</Button>
-                <Button variant="primary" onClick={editCoupon} type="submit">{content?.save_changes || "Save Changes"}</Button>
-            </Modal.Footer>
-        </Modal>
-    </Container>
-</div>
+                    {/* Edit Coupon Modal */}
+                    <Modal show={showEditCouponModal} onHide={handleCloseEditCouponModal} centered>
+                        <Modal.Header closeButton>
+                            <Modal.Title>{content?.edit_coupon || "Edit Coupon"}</Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                            <Form>
+                                <Form.Group controlId="productName">
+                                    <Form.Label>{content?.product_name || "Product Name"}</Form.Label>
+                                    <Form.Control
+                                        as="select"
+                                        value={productName}
+                                        onChange={handleProductChange}
+                                    >
+                                        <option value="">{content?.select_product || "Select a product"}</option>
+                                        {products.map((product) => (
+                                            <option key={product.product_id} value={product.product_name}>
+                                                {product.product_name}
+                                            </option>
+                                        ))}
+                                    </Form.Control>
+                                </Form.Group>
+                                <Form.Group controlId="couponCode">
+                                    <Form.Label>{content?.coupon_code || "Coupon Code"}</Form.Label>
+                                    <Form.Control type="text" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} placeholder={content?.enter_coupon_code || "Enter coupon code"} />
+                                </Form.Group>
+                                <Form.Group controlId="discountPrice">
+                                    <Form.Label>{content?.discount_price || "Discount Price"}</Form.Label>
+                                    <Form.Control type="text" value={discountPrice} onChange={(e) => setDiscountPrice(e.target.value)} placeholder={content?.enter_discount_price || "Enter discount price"} />
+                                </Form.Group>
+                                <Form.Group controlId="expiryDate">
+                                    <Form.Label>{content?.expiry_date || "Expiry Date"}</Form.Label>
+                                    <Form.Control
+                                        type="date"
+                                        value={expiryDate}
+                                        onChange={(e) => setExpiryDate(e.target.value)}
+                                    />
+                                </Form.Group>
+                                <Form.Group controlId="status">
+                                    <Form.Label>{content?.status || "Status"}</Form.Label>
+                                    <Form.Control
+                                        as="select"
+                                        value={status}
+                                        onChange={(e) => setStatus(e.target.value)}
+                                    >
+                                        <option value="active">{content?.active || "Active"}</option>
+                                        <option value="inactive">{content?.inactive || "Inactive"}</option>
+                                    </Form.Control>
+                                </Form.Group>
+                            </Form>
+                        </Modal.Body>
+                        <Modal.Footer>
+                            <Button variant="secondary" onClick={handleCloseEditCouponModal}>{content?.close || "Close"}</Button>
+                            <Button variant="primary" onClick={editCoupon} type="submit">{content?.save_changes || "Save Changes"}</Button>
+                        </Modal.Footer>
+                    </Modal>
+                </Container>
+            </div>
         </div>
     );
 }

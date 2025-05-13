@@ -349,7 +349,7 @@ function Home() {
             {/* Main Content */}
             <div className="toppush container-fluid mt-5">
                 <div className="bg-warning text-center p-4 rounded mb-4">
-                    <h1 className="text-dark">
+                    <h1>
                         {content?.welcome || "Welcome to Your E-Commerce Dashboard"}
                     </h1>
                 </div>

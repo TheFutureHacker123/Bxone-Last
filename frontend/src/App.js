@@ -1,3 +1,4 @@
+import "./App.css"
 
 import Home from "./resources/home"
 import Login from "./resources/user/login"
