@@ -214,12 +214,12 @@ const LoginVendor = () => {
                 </form>
 
                 <div className="text-center mt-3">
-                    <a href="/vendor/reset" className="vendor-forgot-link">
+                    <a href="/vendor/reset" className="vendor-forgot-link" style={{ color: fontColor}} >
                         {content?.forgot_password || "Forgot Password?"}
                     </a>
                     <p>
                         {content?.no_account || "Don't have an account? "} 
-                        <a href="/vendor/register" className="vendor-login-link">
+                        <a href="/vendor/register" className="vendor-login-link"  style={{ color: fontColor}}>
                             {content?.register_here || "Register here"}
                         </a>
                     </p>

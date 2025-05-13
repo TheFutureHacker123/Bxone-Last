@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FaUser, FaEnvelope, FaLock, FaCheckCircle } from "react-icons/fa";
 import { ToastContainer, toast } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
+import Translation from "../translations/vendor.json";
 import "./style/register.css";
 
 const RegisterVendor = () => {
@@ -12,6 +13,29 @@ const RegisterVendor = () => {
     const [passwordError, setPasswordError] = useState("");
     const [passConfirmError, setPassConfirmError] = useState("");
     const navigate = useNavigate();
+
+
+
+    const defaultFontSize = 'medium';
+    const defaultFontColor = '#000000';
+    const defaultLanguage = 'english';
+
+    const [fontSize, setFontSize] = useState(() => localStorage.getItem('fontSize') || defaultFontSize);
+    const [fontColor, setFontColor] = useState(() => localStorage.getItem('fontColor') || defaultFontColor);
+    const [language, setLanguage] = useState(() => localStorage.getItem('language') || defaultLanguage);
+    const [content, setContent] = useState(Translation[language]);
+
+    useEffect(() => {
+        document.documentElement.style.setProperty('--font-size', fontSize);
+        document.documentElement.style.setProperty('--font-color', fontColor);
+
+        localStorage.setItem('fontSize', fontSize);
+        localStorage.setItem('fontColor', fontColor);
+        localStorage.setItem('language', language);
+
+        setContent(Translation[language]);
+    }, [fontSize, fontColor, language]);
+
 
     const [passReqMet, setPassReqMet] = useState({
         length: false,
@@ -40,15 +64,15 @@ const RegisterVendor = () => {
     const validateEmail = (email) => {
         const allowedDomains = ["@gmail.com", "@hotmail.com", "@outlook.com", "@yahoo.com", "@icloud.com"];
         if (!email.trim()) {
-            return "Email is required";
+            return content?.email_required || "Email is required";
         }
         const isValidDomain = allowedDomains.some(domain => email.endsWith(domain));
         if (!isValidDomain) {
-            return "Please use a valid @gmail.com, @hotmail.com, @outlook.com, @yahoo.com, or @icloud.com email address.";
+            return content?.valid_email_domains || "Please use a valid @gmail.com, @hotmail.com, @outlook.com, @yahoo.com, or @icloud.com email address.";
         }
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
-            return "Invalid email format";
+            return content?.invalid_email_format || "Invalid email format";
         }
         return "";
     };
@@ -63,17 +87,17 @@ const RegisterVendor = () => {
         });
 
         if (!password.trim()) {
-            return "Password is required";
+            return content?.password_required || "Password is required";
         } else if (password.length < 8) {
-            return "Password must be at least 8 characters long";
+            return content?.password_min_length || "Password must be at least 8 characters long";
         } else if (!/[a-z]/.test(password)) {
-            return "Password must contain at least one lowercase letter";
+            return content?.password_lowercase || "Password must contain at least one lowercase letter";
         } else if (!/[A-Z]/.test(password)) {
-            return "Password must contain at least one uppercase letter";
+            return content?.password_uppercase || "Password must contain at least one uppercase letter";
         } else if (!/\d/.test(password)) {
-            return "Password must contain at least one number";
+            return content?.password_number || "Password must contain at least one number";
         } else if (!/[!@#$%^&*]/.test(password)) {
-            return "Password must contain at least one special character";
+            return content?.password_special || "Password must contain at least one special character";
         }
         return "";
     };
@@ -99,17 +123,17 @@ const RegisterVendor = () => {
         }
 
         if (!passConfirm.trim()) {
-            setPassConfirmError("Password confirmation is required");
+            setPassConfirmError(content?.pass_confirm_required || "Password confirmation is required");
             isValid = false;
         } else if (password !== passConfirm) {
-            setPassConfirmError("Passwords do not match");
+            setPassConfirmError(content?.passwords_do_not_match || "Passwords do not match");
             isValid = false;
         } else {
             setPassConfirmError("");
         }
 
         if (!isValid) {
-            toast.error("Please correct the highlighted fields.", {
+            toast.error(content?.correct_highlighted_fields || "Please correct the highlighted fields.", {
                 position: "top-right",
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -136,7 +160,7 @@ const RegisterVendor = () => {
             console.warn(result);
             // If success is true, show success alert
             if (result.success) {
-                toast.success("Registration Successful!", {
+                toast.success(content?.registration_success || "Registration Successful!", {
                     position: "top-right",
                     autoClose: 3000,
                     hideProgressBar: false,
@@ -150,7 +174,7 @@ const RegisterVendor = () => {
                 }, 1000); // Delay the navigation for 1 second
 
             } else {
-                toast.error(result.message || "Failed to create account. Please try again.", {
+                toast.error(result.message || content?.registration_failed || "Failed to create account. Please try again.", {
                     position: "top-right",
                     autoClose: 3000,
                     hideProgressBar: false,
@@ -160,7 +184,7 @@ const RegisterVendor = () => {
                 });
             }
         } catch (error) {
-            toast.error("An error occurred. Please try again later.", {
+            toast.error(content?.error_occurred || "An error occurred. Please try again later.", {
                 position: "top-right",
                 autoClose: 3000,
                 hideProgressBar: false,
@@ -169,18 +193,17 @@ const RegisterVendor = () => {
                 draggable: true,
             });
         }
-
-    };
+    }
 
     return (
         <div className="vendor-signup-wrapper">
             <div className="vendor-signup-container">
-                <h2 className="text-center mb-4 vendor-signup-header">Vendor Sign Up</h2>
+                <h2 className="text-center mb-4 vendor-signup-header">{content?.vendor_sign_up || "Vendor Sign Up"}</h2>
 
                 <form onSubmit={handleSubmit} className="vendor-signup-form">
                     <div className="form-group mb-3 vendor-form-group">
                         <label htmlFor="email" className="form-label vendor-form-label">
-                            <FaEnvelope className="me-2" /> Email
+                            <FaEnvelope className="me-2" /> {content?.email || "Email"}
                         </label>
                         <input
                             type="email"
@@ -188,14 +211,14 @@ const RegisterVendor = () => {
                             className={`form-control vendor-form-control ${emailError ? 'is-invalid' : ''}`}
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            placeholder="Enter your email"
+                            placeholder={content?.enter_your_email || "Enter your email"}
                         />
                         {emailError && <div className="invalid-feedback">{emailError}</div>}
                     </div>
 
                     <div className="form-group mb-3 vendor-form-group">
                         <label htmlFor="password" className="form-label vendor-form-label">
-                            <FaLock className="me-2" /> Password
+                            <FaLock className="me-2" /> {content?.password || "Password"}
                         </label>
                         <input
                             type="password"
@@ -206,32 +229,32 @@ const RegisterVendor = () => {
                                 setPassword(e.target.value);
                                 checkPasswordRequirements(e.target.value);
                             }}
-                            placeholder="Enter your password"
+                            placeholder={content?.enter_your_password || "Enter your password"}
                         />
                         {passwordError && <div className="invalid-feedback">{passwordError}</div>}
 
                         <ul className="password-requirements">
                             <li className={passReqMet.length ? 'met' : ''}>
-                                <FaCheckCircle className="me-2" /> At least 8 characters
+                                <FaCheckCircle className="me-2" /> {content?.at_least_8_characters || "At least 8 characters"}
                             </li>
                             <li className={passReqMet.lowercase ? 'met' : ''}>
-                                <FaCheckCircle className="me-2" /> One lowercase letter
+                                <FaCheckCircle className="me-2" /> {content?.one_lowercase_letter || "One lowercase letter"}
                             </li>
                             <li className={passReqMet.uppercase ? 'met' : ''}>
-                                <FaCheckCircle className="me-2" /> One uppercase letter
+                                <FaCheckCircle className="me-2" /> {content?.one_uppercase_letter || "One uppercase letter"}
                             </li>
                             <li className={passReqMet.number ? 'met' : ''}>
-                                <FaCheckCircle className="me-2" /> One number
+                                <FaCheckCircle className="me-2" /> {content?.one_number || "One number"}
                             </li>
                             <li className={passReqMet.special ? 'met' : ''}>
-                                <FaCheckCircle className="me-2" /> One special character (!@#$%^&*)
+                                <FaCheckCircle className="me-2" /> {content?.one_special_character || "One special character (!@#$%^&*)"}
                             </li>
                         </ul>
                     </div>
 
                     <div className="form-group mb-3 vendor-form-group">
                         <label htmlFor="passConfirm" className="form-label vendor-form-label">
-                            <FaCheckCircle className="me-2" /> Confirm Password
+                            <FaCheckCircle className="me-2" /> {content?.confirm_password || "Confirm Password"}
                         </label>
                         <input
                             type="password"
@@ -239,19 +262,19 @@ const RegisterVendor = () => {
                             className={`form-control vendor-form-control ${passConfirmError ? 'is-invalid' : ''}`}
                             value={passConfirm}
                             onChange={(e) => setPassConfirm(e.target.value)}
-                            placeholder="Confirm your password"
+                            placeholder={content?.confirm_your_password || "Confirm your password"}
                         />
                         {passConfirmError && <div className="invalid-feedback">{passConfirmError}</div>}
                     </div>
 
                     <button type="submit" className="btn btn-success vendor-btn-submit w-100">
-                        Sign Up
+                        {content?.sign_up || "Sign Up"}
                     </button>
                 </form>
 
                 <div className="text-center mt-3">
-                    <p className="text-muted">
-                        Already have an account? <a href="/vendor/login" className="vendor-login-link">Login here</a>
+                    <p style={{ color: fontColor }}>
+                        {content?.already_have_account || "Already have an account?"} <a href="/vendor/login" className="vendor-login-link" style={{ color: fontColor }}>{content?.login_here || "Login here"}</a>
                     </p>
                 </div>
             </div>
