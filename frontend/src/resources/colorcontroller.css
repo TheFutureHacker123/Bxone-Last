@@ -1,0 +1,8 @@
+
+h1,h2,h3,h4,h5,p,button,label,select,textarea,span,a,li,div,input,th {
+    color: var(--font-color) !important;
+}
+
+::placeholder {
+    color: var(--font-color) !important; /* For placeholder text */
+}
