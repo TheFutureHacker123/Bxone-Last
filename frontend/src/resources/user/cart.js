@@ -9,7 +9,9 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 function Cart() {
   const [isNavOpen, setNavOpen] = useState(true);
   const [cartitems, setCartItems] = useState([]);
-  const [updating, setUpdating] = useState(false); // Prevent rapid clicks
+  const [updating, setUpdating] = useState(false);
+  const [couponInputs, setCouponInputs] = useState({});
+  const [appliedCoupons, setAppliedCoupons] = useState({});
   const navigate = useNavigate();
 
   const defaultFontSize = 'medium';
@@ -24,34 +26,27 @@ function Cart() {
   useEffect(() => {
     document.documentElement.style.setProperty('--font-size', fontSize);
     document.documentElement.style.setProperty('--font-color', fontColor);
-
     localStorage.setItem('fontSize', fontSize);
     localStorage.setItem('fontColor', fontColor);
     localStorage.setItem('language', language);
-
     setContent(Translation[language]);
   }, [fontSize, fontColor, language]);
 
-  const toggleNav = () => {
-    setNavOpen(!isNavOpen);
-  };
+  const toggleNav = () => setNavOpen(!isNavOpen);
 
   const fetchCartItems = async () => {
     const storedUser = localStorage.getItem("user-info");
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
-      let items = { user_id: parsedUser.user_id };
-
       try {
         let response = await fetch("http://localhost:8000/api/listcartitems", {
           method: 'POST',
-          body: JSON.stringify(items),
+          body: JSON.stringify({ user_id: parsedUser.user_id }),
           headers: {
             "Content-Type": 'application/json',
             "Accept": 'application/json'
           }
         });
-
         let result = await response.json();
         setCartItems(result.cart_items || []);
       } catch (error) {
@@ -66,44 +61,31 @@ function Cart() {
     fetchCartItems();
   }, []);
 
-  async function removeItems(cart_id) {
+  const removeItems = async (cart_id) => {
     const storedUser = localStorage.getItem("user-info");
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
-      let items = { cart_id: cart_id, user_id: parsedUser.user_id };
-
       try {
         let response = await fetch("http://localhost:8000/api/removecartitems", {
           method: 'POST',
-          body: JSON.stringify(items),
+          body: JSON.stringify({ cart_id, user_id: parsedUser.user_id }),
           headers: {
             "Content-Type": 'application/json',
             "Accept": 'application/json'
           }
         });
-
         let result = await response.json();
-
         if (result.success) {
-          toast.success("Product Removed!", {
-            position: "top-right",
-            autoClose: 3000,
-          });
-
+          toast.success("Product Removed!");
           fetchCartItems();
         } else {
-          toast.error(result.message, {
-            position: "top-right",
-            autoClose: 3000,
-          });
+          toast.error(result.message);
         }
       } catch (error) {
         toast.error('An error occurred. Please try again later.');
       }
-    } else {
-      navigate("/login");
     }
-  }
+  };
 
   const updateCartQuantity = async (cart_id, newQuantity) => {
     const storedUser = localStorage.getItem("user-info");
@@ -111,16 +93,13 @@ function Cart() {
       navigate("/login");
       return;
     }
+
     const parsedUser = JSON.parse(storedUser);
     setUpdating(true);
     try {
       let response = await fetch("http://localhost:8000/api/updateCartQuantity", {
         method: 'POST',
-        body: JSON.stringify({
-          user_id: parsedUser.user_id,
-          cart_id: cart_id,
-          total_added: newQuantity
-        }),
+        body: JSON.stringify({ user_id: parsedUser.user_id, cart_id, total_added: newQuantity }),
         headers: {
           "Content-Type": 'application/json',
           "Accept": 'application/json'
@@ -129,14 +108,12 @@ function Cart() {
       let result = await response.json();
       if (result.success) {
         setCartItems(prev =>
-          prev.map(item =>
-            item.cart_id === cart_id ? { ...item, total_added: newQuantity } : item
-          )
+          prev.map(item => item.cart_id === cart_id ? { ...item, total_added: newQuantity } : item)
         );
       } else {
         toast.error(result.message || "Failed to update quantity");
       }
-    } catch (error) {
+    } catch {
       toast.error('An error occurred. Please try again later.');
     }
     setUpdating(false);
@@ -148,12 +125,60 @@ function Cart() {
     updateCartQuantity(cart_id, newQuantity);
   };
 
-  function checkoutProcess() {
-    navigate('/checkout');
-  }
+  const checkoutProcess = () => navigate('/checkout');
 
   const calculateTotal = () => {
-    return cartitems.reduce((total, item) => total + item.product_price * item.total_added, 0).toFixed(2);
+    return cartitems.reduce((total, item) => {
+      const price = item.product_price-item.discount_price || item.product_price;
+      return total + price * item.total_added;
+    }, 0).toFixed(2);
+  };
+
+  const couponCodeCheck = async (couponCode, productId) => {
+    const storedUser = localStorage.getItem("user-info");
+    if (!storedUser) {
+      navigate("/login");
+      return;
+    }
+
+    const parsedUser = JSON.parse(storedUser);
+
+    try {
+      let response = await fetch("http://localhost:8000/api/applyCoupon", {
+        method: 'POST',
+        body: JSON.stringify({ user_id: parsedUser.user_id, coupon_code: couponCode, product_id: productId }),
+        headers: {
+          "Content-Type": 'application/json',
+          "Accept": 'application/json'
+        }
+      });
+      let result = await response.json();
+      if (result.success) {
+        setCartItems(prev =>
+          prev.map(item =>
+            item.product_id === productId ? { ...item, discount_price: result.data.discount_price } : item
+          )
+        );
+        setAppliedCoupons(prev => ({ ...prev, [productId]: couponCode }));
+        toast.success(result.message);
+      } else {
+        toast.error(result.message || "Failed to apply coupon");
+      }
+    } catch {
+      toast.error('An error occurred. Please try again later.');
+    }
+  };
+
+  const removeCoupon = (productId) => {
+    setAppliedCoupons(prev => {
+      const updated = { ...prev };
+      delete updated[productId];
+      return updated;
+    });
+    setCouponInputs(prev => ({ ...prev, [productId]: '' }));
+    setCartItems(prev => prev.map(item =>
+      item.product_id === productId ? { ...item, discount_price: null } : item
+    ));
   };
 
   return (
@@ -202,7 +227,7 @@ function Cart() {
             </thead>
           )}
           <tbody>
-            {cartitems.map((item) => (
+            {cartitems.map(item => (
               <tr key={item.cart_id}>
                 <td>
                   <div className="product-info">
@@ -210,7 +235,7 @@ function Cart() {
                     <span className="product-name">{item.product_name}</span>
                   </div>
                 </td>
-                <td>${(item.product_price * item.total_added).toFixed(2)}</td>
+                <td>${((item.product_price-item.discount_price || item.product_price) * item.total_added).toFixed(2)}</td>
                 <td>
                   <div className="quantity-container">
                     <button
@@ -228,12 +253,34 @@ function Cart() {
                 </td>
                 <td>
                   <div className="coupon-container">
-                    <input type="text" placeholder={`${content?.discount || 'Enter coupon code'}`} />
-                    <button>{content?.apply || 'Apply'}</button>
+                    <input
+                      type="text"
+                      value={couponInputs[item.product_id] || ''}
+                      onChange={(e) => setCouponInputs(prev => ({ ...prev, [item.product_id]: e.target.value }))}
+                      placeholder="Enter coupon code"
+                      disabled={!!appliedCoupons[item.product_id]}
+                    />
+                    <button
+                      onClick={() => couponCodeCheck(couponInputs[item.product_id], item.product_id)}
+                      disabled={!!appliedCoupons[item.product_id]}
+                    >
+                      {content?.apply || 'Apply'}
+                    </button>
+                    {appliedCoupons[item.product_id] && (
+                      <span
+                        className="remove-coupon"
+                        onClick={() => removeCoupon(item.product_id)}
+                        style={{ cursor: 'pointer', color: 'red', marginLeft: '10px' }}
+                      >
+                        X
+                      </span>
+                    )}
                   </div>
                 </td>
                 <td>
-                  <button className="remove-btn" onClick={() => removeItems(item.cart_id)}>{content?.remove || 'Remove'}</button>
+                  <button className="remove-btn" onClick={() => removeItems(item.cart_id)}>
+                    {content?.remove || 'Remove'}
+                  </button>
                 </td>
               </tr>
             ))}
@@ -242,9 +289,11 @@ function Cart() {
 
         {cartitems.length > 0 ? (
           <div className="summary">
-            <h2 className="summary-title">{content?.order_summary || 'Order Summary'}</h2>
-            <p className="summary-total">{content?.total || 'Total'}: <strong>${calculateTotal()}</strong></p>
-            <button onClick={checkoutProcess} className="btn btn-warning proceed-btn">{content?.checkout || 'Proceed to Checkout'}</button>
+            <h2>{content?.order_summary || 'Order Summary'}</h2>
+            <p>{content?.total || 'Total'}: <strong>${calculateTotal()}</strong></p>
+            <button onClick={checkoutProcess} className="btn btn-warning proceed-btn">
+              {content?.checkout || 'Proceed to Checkout'}
+            </button>
           </div>
         ) : (
           <div className="empty-cart-message mt-5 text-center">

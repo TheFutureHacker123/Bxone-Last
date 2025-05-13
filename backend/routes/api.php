@@ -114,6 +114,8 @@ Route::post('/product/deletecoupon', [ProductController::class, 'deleteCoupon'])
 Route::post('/product/editcoupon', [ProductController::class, 'editCoupon']);//done
 Route::post('/product/onevendorproducts', [ProductController::class, 'onevendorproducts']);//done
 
-Route::post('/api/updateCartQuantity', [ProductController::class, 'updateCartQuantity']);
+Route::post('/updateCartQuantity', [ProductController::class, 'updateCartQuantity']);
 
 Route::post('/processOrder', [ProductController::class, 'processOrder']);
+
+Route::post('/applyCoupon', [ProductController::class, 'applyCoupon']);

@@ -554,4 +554,62 @@ class ProductController extends Controller
         // Return the products as a JSON response
         return response()->json($products);
     }
+
+
+   
+
+
+public function applyCoupon(Request $request)
+{
+    // Validate the request to ensure coupon_code and product_id are provided
+    $request->validate([
+        'coupon_code' => 'required|string',
+        'product_id' => 'required|integer|exists:product,product_id',
+    ]);
+
+    // Retrieve the coupon based on coupon_code and product_id
+    $coupon = Coupon::where('coupon_code', $request->coupon_code)
+                    ->where('product_id', $request->product_id)
+                    ->first();
+
+    // Check if the coupon exists and is active
+    if ($coupon) {
+        if ($coupon->status === 'inactive') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Coupon not found'
+            ], 404);
+        }
+
+        // Extract the desired fields
+        $couponDetails = [
+            'coupon_code' => $coupon->coupon_code,
+            'product_id' => $coupon->product_id,
+            'discount_price' => $coupon->discount_price,
+            'expiry_date' => $coupon->expiry_date,
+            'status' => $coupon->status,
+        ];
+
+        return response()->json([
+            'success' => true,
+            'data' => $couponDetails,
+            'message' => 'Coupon applied successfully!'
+        ]);
+    } else {
+        return response()->json([
+            'success' => false,
+            'message' => 'Coupon not found'
+        ], 404);
+    }
+}
+
+
+
+
+
+
+
+
+
+
 }

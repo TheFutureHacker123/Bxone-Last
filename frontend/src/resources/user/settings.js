@@ -145,6 +145,7 @@ function Settings() {
     };
 
     try {
+      
       console.warn("Form Data:", formData); // Log form data for debugging
       const response = await fetch("http://localhost:8000/api/addaddress", {
         // Changed to addaddress
