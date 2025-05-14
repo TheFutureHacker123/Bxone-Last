@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { FaUser, FaLock } from "react-icons/fa";
+import { useNavigate, Link } from "react-router-dom"; // Import Link
+import { FaUser, FaLock, FaArrowLeft } from "react-icons/fa"; // Import FaArrowLeft
 import { ToastContainer, toast } from "react-toastify";
 import Translation from "../translations/vendor.json";
 import "react-toastify/dist/ReactToastify.css";
@@ -26,7 +26,7 @@ const LoginVendor = () => {
     useEffect(() => {
         document.documentElement.style.setProperty('--font-size', fontSize);
         document.documentElement.style.setProperty('--font-color', fontColor);
-        
+
         localStorage.setItem('fontSize', fontSize);
         localStorage.setItem('fontColor', fontColor);
         localStorage.setItem('language', language);
@@ -38,7 +38,7 @@ const LoginVendor = () => {
         const vendorInfo = localStorage.getItem("vendor-info");
         const userInfo = localStorage.getItem("user-info");
         const adminInfo = localStorage.getItem("admin-info");
-        
+
         if (vendorInfo) {
             const vendor = JSON.parse(vendorInfo);
             if (vendor.status === "Pending") {
@@ -172,6 +172,9 @@ const LoginVendor = () => {
     return (
         <div className="vendor-login-wrapper">
             <div className="vendor-login-container">
+                <Link to="/" className="back-to-home">
+                    <FaArrowLeft />
+                </Link>
                 <h2 className="text-center mb-4 vendor-login-header">{content?.vendor_login || "Vendor Login"}</h2>
 
                 <form onSubmit={login} className="vendor-login-form">
@@ -218,7 +221,7 @@ const LoginVendor = () => {
                         {content?.forgot_password || "Forgot Password?"}
                     </a>
                     <p>
-                        {content?.no_account || "Don't have an account? "} 
+                        {content?.no_account || "Don't have an account? "}
                         <a href="/vendor/register" className="vendor-login-link"  style={{ color: fontColor}}>
                             {content?.register_here || "Register here"}
                         </a>

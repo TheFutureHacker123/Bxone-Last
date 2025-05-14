@@ -254,9 +254,9 @@ function VendorDashboard() {
                 </Link>
               </li>
               <li>
-                <a onClick={logout} className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                <button onClick={logout} className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor, background: "none", border: "none" }}>
                   {content?.logout || "Logout"}
-                </a>
+                </button>
               </li>
             </ul>
           )}

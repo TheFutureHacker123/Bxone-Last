@@ -68,7 +68,6 @@
     "pending": "Pending",
     "cancelled": "Cancelled",
     "save": "Save",
-    "Updated Password": "",
     "coupon_lists": "Coupon Lists",
     "coupon_code": "Coupon Code",
     "discount_price": "Discount Price",
@@ -115,8 +114,6 @@
     "reviews": "Reviews",
     "sales": "Sales ($)",
     "monthly_sales": "Monthly Sales Analytics",
-    "product_lists": "Product Lists",
-    "add_product": "Add Product",
     "add_new_product": "Add New Product",
     "select_category_prompt": "Select a Category",
     "select_subcategory_prompt": "Select a Subcategory",
@@ -184,7 +181,7 @@
     "error_account_name_invalid": "Account Holder Name cannot contain numbers or symbols",
     "error_account_number_required": "Account Number is required",
     "error_account_number_invalid": "Account Number must be valid length for selected bank"
-  },
+},
   "amharic": {
     "vendor_dashboard": "የሻጭ መስተዳድር ገጽ",
     "analytics": "ትንታኔ",
