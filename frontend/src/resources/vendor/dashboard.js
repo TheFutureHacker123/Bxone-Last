@@ -16,6 +16,17 @@ function VendorDashboard() {
   const [openDropdown, setOpenDropdown] = useState(null);
   const navigate = useNavigate();
 
+  const [analytics, setAnalytics] = useState({
+    total_orders: 0,
+    pending_orders: 0,
+    shipped_orders: 0,
+    completed_orders: 0,
+    daily_orders: {
+      dates: [],
+      counts: [],
+    },
+  });
+
   const defaultFontSize = 'medium';
   const defaultFontColor = '#000000';
   const defaultLanguage = 'english';
@@ -28,20 +39,49 @@ function VendorDashboard() {
   useEffect(() => {
     document.documentElement.style.setProperty('--font-size', fontSize);
     document.documentElement.style.setProperty('--font-color', fontColor);
-
     localStorage.setItem('fontSize', fontSize);
     localStorage.setItem('fontColor', fontColor);
     localStorage.setItem('language', language);
-
     setContent(Translation[language]);
   }, [fontSize, fontColor, language]);
 
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        const vendorInfo = JSON.parse(localStorage.getItem('vendor-info'));
+        const vendorId = vendorInfo?.vendor_id;
+
+        if (!vendorId) {
+          toast.error("Vendor ID not found");
+          return;
+        }
+
+        const response = await fetch("http://localhost:8000/api/vendor/analytics", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ vendor_id: vendorId }),
+        });
+
+        if (!response.ok) throw new Error('Network response was not ok');
+
+        const data = await response.json();
+        setAnalytics(data);
+      } catch (error) {
+        toast.error("Failed to fetch analytics data");
+      }
+    };
+
+    fetchAnalytics();
+  }, []);
+
   const data = {
-    labels: ['January', 'February', 'March', 'April', 'May', 'June'],
+    labels: analytics.daily_orders.dates,
     datasets: [
       {
         label: content?.sales || 'Sales ($)',
-        data: [1500, 2000, 1800, 2200, 3000, 2500],
+        data: analytics.daily_orders.counts,
         backgroundColor: 'rgba(75, 192, 192, 0.6)',
         borderColor: 'rgba(75, 192, 192, 1)',
         borderWidth: 1,
@@ -226,25 +266,25 @@ function VendorDashboard() {
             <Card className="analytics-card">
               <Card.Body>
                 <Card.Title>{content?.total_orders || "Total Orders"}</Card.Title>
-                <Card.Text>1,500</Card.Text>
+                <Card.Text>{analytics.total_orders}</Card.Text>
               </Card.Body>
             </Card>
             <Card className="analytics-card">
               <Card.Body>
                 <Card.Title>{content?.pending_orders || "Pending Orders"}</Card.Title>
-                <Card.Text>200</Card.Text>
+                <Card.Text>{analytics.pending_orders}</Card.Text>
+              </Card.Body>
+            </Card>
+            <Card className="analytics-card">
+              <Card.Body>
+                <Card.Title>{content?.shipped || "Shipped"}</Card.Title>
+                <Card.Text>{analytics.shipped_orders}</Card.Text>
               </Card.Body>
             </Card>
             <Card className="analytics-card">
               <Card.Body>
                 <Card.Title>{content?.complete_orders || "Complete Orders"}</Card.Title>
-                <Card.Text>1,200</Card.Text>
-              </Card.Body>
-            </Card>
-            <Card className="analytics-card">
-              <Card.Body>
-                <Card.Title>{content?.reviews || "Reviews"}</Card.Title>
-                <Card.Text>350</Card.Text>
+                <Card.Text>{analytics.completed_orders}</Card.Text>
               </Card.Body>
             </Card>
           </div>

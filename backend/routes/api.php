@@ -119,3 +119,6 @@ Route::post('/updateCartQuantity', [ProductController::class, 'updateCartQuantit
 Route::post('/processOrder', [ProductController::class, 'processOrder']);
 
 Route::post('/applyCoupon', [ProductController::class, 'applyCoupon']);
+
+Route::post('/vendor/analytics', [VendorController::class, 'analytics']);//done
+Route::post('/admin/analytics', [AdminController::class, 'analytics']);//done

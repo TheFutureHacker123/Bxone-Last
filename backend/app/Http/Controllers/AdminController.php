@@ -14,6 +14,7 @@ use App\Models\bankInfo;
 use App\Models\Category;
 use App\Models\SubCategory;
 use App\Models\Notification;
+use App\Models\Orders;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -479,6 +480,40 @@ public function addNotification(Request $request)
             'notification' => $notification,
         ], 201);
     }
+
+
+
+  public function analytics(Request $request)
+{
+    // General counts
+    $totalOrders = Orders::count();
+    $pendingOrders = Orders::where('order_status', 'Pending')->count();
+    $completedOrders = Orders::where('order_status', 'Completed')->count();
+    $shippedOrders = Orders::where('order_status', 'Shipped')->count();
+
+    // Time-based analytics (e.g., daily counts)
+    $dateRange = now()->subDays(30); // Adjust the range as needed
+    $dailyOrders = Orders::where('created_at', '>=', $dateRange)
+                         ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
+                         ->groupBy('date')
+                         ->orderBy('date')
+                         ->get();
+
+    // Prepare data for chart
+    $orderDates = $dailyOrders->pluck('date');
+    $orderCounts = $dailyOrders->pluck('count');
+
+    return response()->json([
+        'total_orders' => $totalOrders,
+        'pending_orders' => $pendingOrders,
+        'shipped_orders' => $shippedOrders,
+        'completed_orders' => $completedOrders,
+        'daily_orders' => [
+            'dates' => $orderDates,
+            'counts' => $orderCounts,
+        ],
+    ]);
+}
 
 
 

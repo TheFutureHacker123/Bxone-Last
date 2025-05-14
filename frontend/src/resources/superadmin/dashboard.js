@@ -1,14 +1,30 @@
 import React, { useState, useEffect } from "react";
 import { FaBars, FaChartLine, FaStore, FaThList, FaUsers, FaUser, FaUserShield, FaTools } from "react-icons/fa";
+import { Bar } from 'react-chartjs-2';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Link, useNavigate } from "react-router-dom";
 import Translation from "../translations/superadmin.json";
 import "./style/dashboard.css";
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
+
+// Register Chart.js components
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title);
 
 function SAdminDashboard() {
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [analytics, setAnalytics] = useState({
+    total_orders: 0,
+    pending_orders: 0,
+    shipped_orders: 0,
+    completed_orders: 0,
+    daily_orders: {
+      dates: [],
+      counts: [],
+    },
+  });
+  
   const navigate = useNavigate();
 
   const defaultFontSize = 'medium';
@@ -23,13 +39,35 @@ function SAdminDashboard() {
   useEffect(() => {
     document.documentElement.style.setProperty('--font-size', fontSize);
     document.documentElement.style.setProperty('--font-color', fontColor);
-
+    
     localStorage.setItem('fontSize', fontSize);
     localStorage.setItem('fontColor', fontColor);
     localStorage.setItem('language', language);
-
+    
     setContent(Translation[language]);
   }, [fontSize, fontColor, language]);
+
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        const response = await fetch("http://localhost:8000/api/admin/analytics", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) throw new Error('Network response was not ok');
+
+        const data = await response.json();
+        setAnalytics(data);
+      } catch (error) {
+        toast.error("Failed to fetch analytics data");
+      }
+    };
+
+    fetchAnalytics();
+  }, []);
 
   const toggleSidebar = () => setSidebarVisible(!sidebarVisible);
   const handleDropdown = (menu) => setOpenDropdown(openDropdown === menu ? null : menu);
@@ -44,6 +82,32 @@ function SAdminDashboard() {
       navigate("/admin/login");
     }, 1000);
   }
+
+  const chartData = {
+    labels: analytics.daily_orders.dates,
+    datasets: [
+      {
+        label: content?.daily_orders || 'Daily Orders',
+        data: analytics.daily_orders.counts,
+        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+      title: {
+        display: true,
+        text: content?.daily_orders_title || 'Daily Orders Analytics',
+      },
+    },
+  };
 
   return (
     <div className="admin-dashboard-wrapper">
@@ -161,10 +225,33 @@ function SAdminDashboard() {
 
       <div className={`admin-main-content ${sidebarVisible ? "with-sidebar" : "full-width"}`}>
         <div className="admin-custom-header text-center">
-          <text className="h4 mb-0" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} >{content?.welcome_message || "Welcome to Super Admin Dashboard"}</text>
+          <text className="h4 mb-0" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>{content?.welcome_message || "Welcome to Super Admin Dashboard"}</text>
         </div>
 
-        {/* Main content starts here */}
+        <div className="analytics-section">
+          <h2 className="h5">{content?.analytics_dashboard || "Analytics Dashboard"}</h2>
+          <div className="analytics-cards">
+            <div className="analytics-card">
+              <h3>{content?.total_orders || "Total Orders"}</h3>
+              <p>{analytics.total_orders}</p>
+            </div>
+            <div className="analytics-card">
+              <h3>{content?.pending_orders || "Pending Orders"}</h3>
+              <p>{analytics.pending_orders}</p>
+            </div>
+            <div className="analytics-card">
+              <h3>{content?.shipped || "Shipped"}</h3>
+              <p>{analytics.shipped_orders}</p>
+            </div>
+            <div className="analytics-card">
+              <h3>{content?.complete_orders || "Complete Orders"}</h3>
+              <p>{analytics.completed_orders}</p>
+            </div>
+          </div>
+          <div className="analytics-chart">
+            <Bar data={chartData} options={chartOptions} />
+          </div>
+        </div>
       </div>
 
       <ToastContainer />

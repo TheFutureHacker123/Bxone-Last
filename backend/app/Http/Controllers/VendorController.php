@@ -676,4 +676,47 @@ class VendorController extends Controller
             'data' => $reviews,
         ]);
     }
+
+ public function analytics(Request $request)
+{
+    $vendorId = $request->input('vendor_id');
+
+    // General counts
+    $totalOrders = Orders::where('vendor_id', $vendorId)->count();
+    $pendingOrders = Orders::where('vendor_id', $vendorId)
+                            ->where('order_status', 'Pending')
+                            ->count();
+    $completedOrders = Orders::where('vendor_id', $vendorId)
+                             ->where('order_status', 'Completed')
+                             ->count();
+    $shippedOrders = Orders::where('vendor_id', $vendorId)
+                           ->where('order_status', 'Shipped')
+                           ->count();
+
+    // Time-based analytics (e.g., daily counts)
+    $dateRange = now()->subDays(30); // Adjust the range as needed
+    $dailyOrders = Orders::where('vendor_id', $vendorId)
+                         ->where('created_at', '>=', $dateRange)
+                         ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
+                         ->groupBy('date')
+                         ->orderBy('date')
+                         ->get();
+
+    // Prepare data for chart
+    $orderDates = $dailyOrders->pluck('date');
+    $orderCounts = $dailyOrders->pluck('count');
+
+    return response()->json([
+        'total_orders' => $totalOrders,
+        'pending_orders' => $pendingOrders,
+        'shipped_orders' => $shippedOrders,
+        'completed_orders' => $completedOrders,
+        'daily_orders' => [
+            'dates' => $orderDates,
+            'counts' => $orderCounts,
+        ],
+    ]);
+}
+
+
 }
