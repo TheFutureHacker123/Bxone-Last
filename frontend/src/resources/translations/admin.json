@@ -68,7 +68,8 @@
     "new_password": "New Password",
     "confirm_new_password": "Confirm New Password",
     "fill_all_fields": "Please fill in all fields.",
-    "password_mismatch": "New passwords do not match."
+    "password_mismatch": "New passwords do not match.",
+    "settings":"Settings"
 
   },
   "amharic": {
@@ -139,7 +140,7 @@
     "new_password": "አዲስ የይለፍ ቃል",
     "confirm_new_password": "አዲስ የይለፍ ቃል ይረግሙ",
     "fill_all_fields": "እባክዎ የሁሉንም መስኮች ይሙሉ.",
-    "password_mismatch": "የአዲስ የይለፍ ቃል እና የማረጋገጥ ይለፍ ቃል አልተመሳሰሉም."
-
+    "password_mismatch": "የአዲስ የይለፍ ቃል እና የማረጋገጥ ይለፍ ቃል አልተመሳሰሉም.",
+    "settings":"ቅንጅቶች"
   }
 }

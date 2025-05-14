@@ -64,7 +64,7 @@ import ListUsers from "./resources/admin/user/list-users"
 import UserMessagesAdmin from "./resources/admin/user/user-messages"
 import AddBanner from "./resources/admin/banner/add-banner"
 import UpdatePassword from "./resources/admin/setting/update-password"
-
+import AdminSettings from "./resources/admin/setting/setting"
 
 import NewVendors from "./resources/admin/vendor/new-vendors"
 import ListVendor from "./resources/admin/vendor/list-vendors"
@@ -125,7 +125,8 @@ function App() {
 
           <Route path="/admin/banners" element={<ProtectPathAdmin Cmp={AddBanner} />} />
           <Route path="/admin/manage-password" element={<ProtectPathAdmin Cmp={UpdatePassword} />} />
-
+          <Route path="/admin/settings" element={<ProtectPathAdmin Cmp={AdminSettings} />} />
+ 
           <Route path="/superadmin/testone" element={<TestOne />} />
 
 
