@@ -111,20 +111,20 @@ function CompletedOrders() {
     setEditPopupVisible(true);
   };
 
-  function logout() {
-    localStorage.clear();
-    toast.success("Logout Successful!", {
-      position: "top-right",
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-    });
-    setTimeout(() => {
-      navigate("/vendor/login");
-    }, 1000); // Delay the navigation for 3 seconds
-  }
+ function logout() {
+     localStorage.clear();
+     toast.success(content?.logout_success || "Logout Successful!", {
+       position: "top-right",
+       autoClose: 3000,
+       hideProgressBar: false,
+       closeOnClick: true,
+       pauseOnHover: true,
+       draggable: true,
+     });
+     setTimeout(() => {
+       navigate("/vendor/login");
+     }, 1000);
+   }
 
   return (
     <div className="dashboard-wrapper">
