@@ -19,7 +19,7 @@ import Settings from "./resources/user/settings"
 import Test from "./resources/user/test"
 import ProtectPath from "./resources/user/protectpath"
 import Notification from "./resources/user/notification"
-
+import SAdminManageProfile from "./resources/superadmin/setting/manage-profile"
 import OrderConfirmation from "./resources/user/OrderConfirmation";
 
 
@@ -56,7 +56,7 @@ import VendorInfo from "./resources/vendor/vendor-info"
 
 
 
-import TestOne  from "./resources/superadmin/testone"
+import TestOne from "./resources/superadmin/testone"
 
 
 
@@ -78,7 +78,7 @@ import ProtectPathAdmin from "./resources/admin/protectpath"
 import AddProduct from "./resources/vendor/product/add-products"
 import AddCoupons from "./resources/vendor/product/add-coupons"
 import VendorUnderReview from "./resources/vendor/underreview"
-import VendorSuspended from "./resources/vendor/suspend"  
+import VendorSuspended from "./resources/vendor/suspend"
 import VendorSupport from "./resources/vendor/support"
 import VendorStore from "./resources/vendor/VendorStore"
 
@@ -102,42 +102,44 @@ function App() {
           <Route path="/superadmin/add-subcategory" element={<AddSubCategory />} />
           <Route path="/superadmin/login" element={<LoginAdmin />} />
           <Route path="/superadmin" element={<ProtectPathSAdmin Cmp={SAdminDashboard} />} />
-          
-          <Route path="/superadmin/list-users" element={<ProtectPathSAdmin Cmp={SAdminListUsers} />}/>
+
+          <Route path="/superadmin/list-users" element={<ProtectPathSAdmin Cmp={SAdminListUsers} />} />
           <Route path="/superadmin/new-Vendors" element={<ProtectPathSAdmin Cmp={SAdminNewVendors} />} />
           <Route path="/superadmin/list-vendors" element={<ProtectPathSAdmin Cmp={SAdminListVendor} />} />
           <Route path="/superadmin/list-admins" element={<ProtectPathSAdmin Cmp={SAdminListAdmins} />} />
+          <Route path="/superadmin/manage-profile" element={<ProtectPathSAdmin Cmp={SAdminManageProfile} />} />
 
-          <Route path="/admin/dashboard" element={<ProtectPathAdmin Cmp={AdminDashboard} />}  />
-          <Route path="/admin" element={<ProtectPathAdmin Cmp={AdminDashboard} />}  />
+
+          <Route path="/admin/dashboard" element={<ProtectPathAdmin Cmp={AdminDashboard} />} />
+          <Route path="/admin" element={<ProtectPathAdmin Cmp={AdminDashboard} />} />
           <Route path="/admin/login" element={<LoginAdmin />} />
 
-          <Route path="/admin/list-users" element={<ProtectPathAdmin Cmp={ListUsers} />}/>
+          <Route path="/admin/list-users" element={<ProtectPathAdmin Cmp={ListUsers} />} />
           <Route path="/admin/user-messages" element={<ProtectPathAdmin Cmp={UserMessagesAdmin} />} />
           <Route path="/admin/new-Vendors" element={<ProtectPathAdmin Cmp={NewVendors} />} />
           <Route path="/admin/list-vendors" element={<ProtectPathAdmin Cmp={ListVendor} />} />
-          <Route path="/admin/manage-products" element={<ProtectPathAdmin Cmp={ManageProducts} />}/>
+          <Route path="/admin/manage-products" element={<ProtectPathAdmin Cmp={ManageProducts} />} />
           <Route path="/admin/manage-orders" element={<ProtectPathAdmin Cmp={ManageOrders} />} />
           <Route path="/admin/approve-payout" element={<ProtectPathAdmin Cmp={ApprovePayouts} />} />
           <Route path="/admin/vendor-messages" element={<ProtectPathAdmin Cmp={VendorMessages} />} />
 
           <Route path="/admin/banners" element={<ProtectPathAdmin Cmp={AddBanner} />} />
-          <Route path="/admin/manage-password" element={<ProtectPathAdmin Cmp={UpdatePassword} />}  />
+          <Route path="/admin/manage-password" element={<ProtectPathAdmin Cmp={UpdatePassword} />} />
 
-          <Route path="/superadmin/testone" element={<TestOne  />} />
+          <Route path="/superadmin/testone" element={<TestOne />} />
 
 
           <Route path="/vendor/dashboard" element={<ProtectPathVendor Cmp={VendorDashboard} />} />
-          <Route path="/vendor" element={<ProtectPathVendor Cmp={VendorDashboard} />}  />
+          <Route path="/vendor" element={<ProtectPathVendor Cmp={VendorDashboard} />} />
           <Route path="/vendor/login" element={<LoginVendor />} />
           <Route path="/vendor/register" element={<RegisterVendor />} />
           <Route path="/vendor/reset" element={<RestePassword />} />
           <Route path="/vendor/:id" element={<VendorStore />} />
 
-          <Route path="/vendor/manage-profile" element={<ProtectPathVendor Cmp={ManageProfile} />}  />
+          <Route path="/vendor/manage-profile" element={<ProtectPathVendor Cmp={ManageProfile} />} />
 
-          <Route path="/vendor/user-messages" element={<ProtectPathVendor Cmp={UserMessages} />}  />
-          <Route path="/vendor/admin-messages" element={<ProtectPathVendor Cmp={AdminMessages} />}  />
+          <Route path="/vendor/user-messages" element={<ProtectPathVendor Cmp={UserMessages} />} />
+          <Route path="/vendor/admin-messages" element={<ProtectPathVendor Cmp={AdminMessages} />} />
           <Route path="/vendor/notifications" element={<ProtectPathVendor Cmp={Notifications} />} />
           <Route path="/vendor/review-messages" element={<ProtectPathVendor Cmp={ReviewMessages} />} />
           <Route path="/vendor/add-products" element={<ProtectPathVendor Cmp={AddProduct} />} />
@@ -151,7 +153,7 @@ function App() {
           <Route path="/vendor/new-orders" element={<ProtectPathVendor Cmp={ControlOrder} />} />
           <Route path="/vendor/shipped" element={<ProtectPathVendor Cmp={Shipped} />} />
           <Route path="/vendor/refunds" element={<ProtectPathVendor Cmp={Refunds} />} />
-          <Route path="/vendor/completed" element={<ProtectPathVendor Cmp={CompletedOrders} />}/>
+          <Route path="/vendor/completed" element={<ProtectPathVendor Cmp={CompletedOrders} />} />
 
 
           <Route path="/vendor/vendor-info" element={<ProtectPathVendor Cmp={VendorInfo} />} />

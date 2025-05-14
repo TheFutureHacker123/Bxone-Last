@@ -241,6 +241,11 @@ function VendorDashboard() {
           {openDropdown === "profile" && (
             <ul className="dropdown-menu custom-dropdown-menu">
               <li>
+                <Link to="/vendor/setting" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                  {"Settings"}
+                </Link>
+              </li>
+              <li>
                 <Link to="/vendor/manage-profile" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
                   {content?.update_password || "Updated Password"}
                 </Link>
