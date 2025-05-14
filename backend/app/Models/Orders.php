@@ -16,7 +16,7 @@ class Orders extends Model
     protected $fillable = [
         'user_id',
         'product_id',
-        'vendor_id', 
+        'vendor_id',
         'order_status',
         'payment_method',
         'total_paid',
@@ -27,6 +27,8 @@ class Orders extends Model
     protected $casts = [
         'total_paid' => 'float',
         'status' => 'string',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public function user()

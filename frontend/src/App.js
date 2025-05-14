@@ -50,14 +50,7 @@ import ProtectPathVendor from "./resources/vendor/protectpath"
 import VendorInfo from "./resources/vendor/vendor-info"
 
 
-
-
-
-
-
-
 import TestOne  from "./resources/superadmin/testone"
-
 
 
 import ListUsers from "./resources/admin/user/list-users"

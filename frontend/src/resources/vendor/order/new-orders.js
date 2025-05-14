@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { FaBars, FaChartLine, FaBox, FaShoppingCart, FaComments, FaUser, FaPen, } from "react-icons/fa";
+import {
+  FaBars,
+  FaChartLine,
+  FaBox,
+  FaShoppingCart,
+  FaComments,
+  FaUser,
+  FaPen,
+} from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer, toast } from "react-toastify";
 import Translation from "../../translations/vendor.json";
 import "../style/new-orders.css";
 
@@ -19,51 +27,62 @@ function ControlOrder() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
 
+  const defaultFontSize = "medium";
+  const defaultFontColor = "#000000";
+  const defaultLanguage = "english"; // Default language
 
-  const defaultFontSize = 'medium';
-  const defaultFontColor = '#000000';
-  const defaultLanguage = 'english'; // Default language
-
-  const [fontSize, setFontSize] = useState(() => localStorage.getItem('fontSize') || defaultFontSize);
-  const [fontColor, setFontColor] = useState(() => localStorage.getItem('fontColor') || defaultFontColor);
-  const [language, setLanguage] = useState(() => localStorage.getItem('language') || defaultLanguage);
+  const [fontSize, setFontSize] = useState(
+    () => localStorage.getItem("fontSize") || defaultFontSize
+  );
+  const [fontColor, setFontColor] = useState(
+    () => localStorage.getItem("fontColor") || defaultFontColor
+  );
+  const [language, setLanguage] = useState(
+    () => localStorage.getItem("language") || defaultLanguage
+  );
   const [content, setContent] = useState(Translation[language]);
 
   useEffect(() => {
-    document.documentElement.style.setProperty('--font-size', fontSize);
-    document.documentElement.style.setProperty('--font-color', fontColor);
+    document.documentElement.style.setProperty("--font-size", fontSize);
+    document.documentElement.style.setProperty("--font-color", fontColor);
 
-    localStorage.setItem('fontSize', fontSize);
-    localStorage.setItem('fontColor', fontColor);
-    localStorage.setItem('language', language);
+    localStorage.setItem("fontSize", fontSize);
+    localStorage.setItem("fontColor", fontColor);
+    localStorage.setItem("language", language);
 
     // Update content based on selected language
     setContent(Translation[language]);
   }, [fontSize, fontColor, language]);
 
-
   useEffect(() => {
+    console.log("Fetching order details...");
     async function listProductDetail() {
       try {
         const storedUser = JSON.parse(localStorage.getItem("vendor-info"));
         const vendorId = storedUser?.vendor_id;
 
-        let response = await fetch(`http://localhost:8000/api/vendor/orderlist`, {
-          method: 'POST',
-          body: JSON.stringify({
-            vendor_id: vendorId,
-            order_status: "Pending"
-          }),
-          headers: {
-            "Content-Type": 'application/json',
-            "Accept": 'application/json'
+        let response = await fetch(
+          `http://localhost:8000/api/vendor/orderlist`,
+          {
+            method: "POST",
+            body: JSON.stringify({
+              vendor_id: vendorId,
+              order_status: "Pending",
+            }),
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
           }
-        });
+        );
 
         let result = await response.json();
-        setOrderDetail(result);
+        console.log("API Result:", result);
+        // Adjust this line based on your actual API response
+        setOrderDetail(Array.isArray(result) ? result : result.orders || []);
       } catch (error) {
         console.error("Fetch error:", error);
+        setOrderDetail([]); // fallback to empty array on error
       }
     }
 
@@ -73,9 +92,10 @@ function ControlOrder() {
   const totalProducts = orderDetail.length;
   const totalPages = Math.ceil(totalProducts / entries);
 
-  const filteredProducts = orderDetail.filter(product =>
-    product.product_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.order_status.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredProducts = orderDetail.filter(
+    (product) =>
+      product.product_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.order_status.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const displayedProducts = filteredProducts.slice(
@@ -84,7 +104,8 @@ function ControlOrder() {
   );
 
   const toggleSidebar = () => setSidebarVisible(!sidebarVisible);
-  const handleDropdown = (menu) => setOpenDropdown(openDropdown === menu ? null : menu);
+  const handleDropdown = (menu) =>
+    setOpenDropdown(openDropdown === menu ? null : menu);
 
   const handleDetailClick = (product) => {
     setSelectedProduct(product);
@@ -126,41 +147,69 @@ function ControlOrder() {
     }, 1000); // Delay the navigation for 3 seconds
   }
 
-
-
   return (
     <div className="dashboard-wrapper">
       <button className="hamburger-btn" onClick={toggleSidebar}>
-        <FaBars style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} />
+        <FaBars
+          style={{ color: fontColor === "#000000" ? "#FFFFFF" : fontColor }}
+        />
       </button>
 
       <div className={`custom-sidebar ${sidebarVisible ? "show" : "hide"}`}>
-        <text className="text-center custom-css flex-grow-1 mt-2 ms-4" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+        <div
+          className="text-center custom-css flex-grow-1 mt-2 ms-4"
+          style={{ color: fontColor === "#000000" ? "#FFFFFF" : fontColor }}
+        >
           {content?.vendor_dashboard || "Vendor Dashboard"}
-        </text>
+        </div>
         <Link to="/vendor" className="custom-link">
-          <FaChartLine className="me-2" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} />
-          <span style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+          <FaChartLine
+            className="me-2"
+            style={{ color: fontColor === "#000000" ? "#FFFFFF" : fontColor }}
+          />
+          <span
+            style={{ color: fontColor === "#000000" ? "#FFFFFF" : fontColor }}
+          >
             {content?.analytics || "Analytics"}
           </span>
         </Link>
 
         <div className="dropdown">
-          <div className="custom-link" onClick={() => handleDropdown("products")}>
-            <FaBox className="me-2" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} />
-            <span style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+          <div
+            className="custom-link"
+            onClick={() => handleDropdown("products")}
+          >
+            <FaBox
+              className="me-2"
+              style={{ color: fontColor === "#000000" ? "#FFFFFF" : fontColor }}
+            />
+            <span
+              style={{ color: fontColor === "#000000" ? "#FFFFFF" : fontColor }}
+            >
               {content?.manage_products || "Manage Products"}
             </span>
           </div>
           {openDropdown === "products" && (
             <ul className="dropdown-menu custom-dropdown-menu">
               <li>
-                <Link to="/vendor/add-products" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                <Link
+                  to="/vendor/add-products"
+                  className="dropdown-item-vendor"
+                  style={{
+                    color: fontColor === "#000000" ? "#FFFFFF" : fontColor,
+                  }}
+                >
                   {content?.add_products || "Add Products"}
                 </Link>
               </li>
               <li>
-                <Link to="/vendor/add-coupons" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                <Link
+                  to="/vendor/add-coupons"
+                  className="dropdown-item-vendor"
+                  style={{
+                    color: fontColor === "#000000" ? "#FFFFFF" : fontColor,
+                  }}
+                >
                   {content?.add_coupons || "Add Coupons"}
                 </Link>
               </li>
@@ -170,30 +219,59 @@ function ControlOrder() {
 
         <div className="dropdown">
           <div className="custom-link" onClick={() => handleDropdown("orders")}>
-            <FaShoppingCart className="me-2" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} />
-            <span style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+            <FaShoppingCart
+              className="me-2"
+              style={{ color: fontColor === "#000000" ? "#FFFFFF" : fontColor }}
+            />
+            <span
+              style={{ color: fontColor === "#000000" ? "#FFFFFF" : fontColor }}
+            >
               {content?.manage_orders || "Manage Orders"}
             </span>
           </div>
           {openDropdown === "orders" && (
             <ul className="dropdown-menu custom-dropdown-menu">
               <li>
-                <Link to="/vendor/new-orders" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                <Link
+                  to="/vendor/new-orders"
+                  className="dropdown-item-vendor"
+                  style={{
+                    color: fontColor === "#000000" ? "#FFFFFF" : fontColor,
+                  }}
+                >
                   {content?.new_orders || "New Order"}
                 </Link>
               </li>
               <li>
-                <Link to="/vendor/shipped" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                <Link
+                  to="/vendor/shipped"
+                  className="dropdown-item-vendor"
+                  style={{
+                    color: fontColor === "#000000" ? "#FFFFFF" : fontColor,
+                  }}
+                >
                   {content?.shipped || "Shipped"}
                 </Link>
               </li>
               <li>
-                <Link to="/vendor/refunds" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                <Link
+                  to="/vendor/refunds"
+                  className="dropdown-item-vendor"
+                  style={{
+                    color: fontColor === "#000000" ? "#FFFFFF" : fontColor,
+                  }}
+                >
                   {content?.refunds || "Refund"}
                 </Link>
               </li>
               <li>
-                <Link to="/vendor/completed" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                <Link
+                  to="/vendor/completed"
+                  className="dropdown-item-vendor"
+                  style={{
+                    color: fontColor === "#000000" ? "#FFFFFF" : fontColor,
+                  }}
+                >
                   {content?.completed || "Completed"}
                 </Link>
               </li>
@@ -202,31 +280,63 @@ function ControlOrder() {
         </div>
 
         <div className="dropdown">
-          <div className="custom-link" onClick={() => handleDropdown("messages")}>
-            <FaComments className="me-2" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} />
-            <span style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+          <div
+            className="custom-link"
+            onClick={() => handleDropdown("messages")}
+          >
+            <FaComments
+              className="me-2"
+              style={{ color: fontColor === "#000000" ? "#FFFFFF" : fontColor }}
+            />
+            <span
+              style={{ color: fontColor === "#000000" ? "#FFFFFF" : fontColor }}
+            >
               {content?.manage_messages || "Manage Messages"}
             </span>
           </div>
           {openDropdown === "messages" && (
             <ul className="dropdown-menu custom-dropdown-menu">
               <li>
-                <Link to="/vendor/user-messages" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                <Link
+                  to="/vendor/user-messages"
+                  className="dropdown-item-vendor"
+                  style={{
+                    color: fontColor === "#000000" ? "#FFFFFF" : fontColor,
+                  }}
+                >
                   {content?.user_message || "User Message"}
                 </Link>
               </li>
               <li>
-                <Link to="/vendor/admin-messages" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                <Link
+                  to="/vendor/admin-messages"
+                  className="dropdown-item-vendor"
+                  style={{
+                    color: fontColor === "#000000" ? "#FFFFFF" : fontColor,
+                  }}
+                >
                   {content?.admin_message || "Admin Message"}
                 </Link>
               </li>
               <li>
-                <Link to="/vendor/review-messages" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                <Link
+                  to="/vendor/review-messages"
+                  className="dropdown-item-vendor"
+                  style={{
+                    color: fontColor === "#000000" ? "#FFFFFF" : fontColor,
+                  }}
+                >
                   {content?.review_message || "Review Message"}
                 </Link>
               </li>
               <li>
-                <Link to="/vendor/notifications" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                <Link
+                  to="/vendor/notifications"
+                  className="dropdown-item-vendor"
+                  style={{
+                    color: fontColor === "#000000" ? "#FFFFFF" : fontColor,
+                  }}
+                >
                   {content?.notifications || "Notification"}
                 </Link>
               </li>
@@ -235,30 +345,52 @@ function ControlOrder() {
         </div>
 
         <div className="dropdown">
-          <div className="custom-link" onClick={() => handleDropdown("profile")}>
-            <FaUser className="me-2" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} />
-            <span style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+          <div
+            className="custom-link"
+            onClick={() => handleDropdown("profile")}
+          >
+            <FaUser
+              className="me-2"
+              style={{ color: fontColor === "#000000" ? "#FFFFFF" : fontColor }}
+            />
+            <span
+              style={{ color: fontColor === "#000000" ? "#FFFFFF" : fontColor }}
+            >
               {content?.profile || "Profile"}
             </span>
           </div>
           {openDropdown === "profile" && (
             <ul className="dropdown-menu custom-dropdown-menu">
               <li>
-                <Link to="/vendor/manage-profile" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                <Link
+                  to="/vendor/manage-profile"
+                  className="dropdown-item-vendor"
+                  style={{
+                    color: fontColor === "#000000" ? "#FFFFFF" : fontColor,
+                  }}
+                >
                   {content?.update_password || "Updated Password"}
                 </Link>
               </li>
-              <li>
-                <a onClick={logout} className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
-                  {content?.logout || "Logout"}
-                </a>
-              </li>
+              <a
+                onClick={logout}
+                className="dropdown-item-vendor"
+                style={{
+                  color: fontColor === "#000000" ? "#FFFFFF" : fontColor,
+                }}
+              >
+                {content?.logout || "Logout"}
+              </a>
             </ul>
           )}
         </div>
       </div>
 
-      <div className={`main-content ${sidebarVisible ? "with-sidebar" : "full-width"}`}>
+      <div
+        className={`main-content ${
+          sidebarVisible ? "with-sidebar" : "full-width"
+        }`}
+      >
         <div className="custom-header text-center">
           <h1 className="h4 mb-0">Completed Items</h1>
         </div>
@@ -303,15 +435,20 @@ function ControlOrder() {
                   <td>{product.order_time}</td>
                   <td>{product.order_status}</td>
                   <td>
-                    <button className="see-detail" onClick={() => handleDetailClick(product)}>
+                    <button
+                      className="see-detail"
+                      onClick={() => handleDetailClick(product)}
+                    >
                       See Detail
                     </button>
                   </td>
                   <td>
-                    <button className="edit-button" onClick={() => handleEditClick(product)}>
+                    <button
+                      className="edit-button"
+                      onClick={() => handleEditClick(product)}
+                    >
                       <FaPen />
                     </button>
-
                   </td>
                 </tr>
               ))}
@@ -322,14 +459,21 @@ function ControlOrder() {
         {popupVisible && selectedProduct && (
           <div className="popup-overlay">
             <div className="popup-content">
-
               <h2>Order Details</h2>
-              <p><strong>Address:</strong> {selectedProduct.address}</p>
-              <p><strong>Phone:</strong> {selectedProduct.phone}</p>
-              <p><strong>Total Paid:</strong> {selectedProduct.total_paid}</p>
-              <p><strong>Ordered Quantity:</strong> {selectedProduct.ordered_quantity}</p>
+              <p>
+                <strong>Address:</strong> {selectedProduct.address}
+              </p>
+              <p>
+                <strong>Phone:</strong> {selectedProduct.phone}
+              </p>
+              <p>
+                <strong>Total Paid:</strong> {selectedProduct.total_paid}
+              </p>
+              <p>
+                <strong>Ordered Quantity:</strong>{" "}
+                {selectedProduct.ordered_quantity}
+              </p>
               <div className="popup-buttons">
-
                 <button onClick={() => setPopupVisible(false)}>Close</button>
                 <button onClick={handlePrint}>🖨️ Print</button>
               </div>
@@ -337,20 +481,32 @@ function ControlOrder() {
           </div>
         )}
 
-
         {totalPages > 1 && (
           <div className="pagination">
-            <button disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}>Previous</button>
-            <span>Page {currentPage} of {totalPages}</span>
-            <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(currentPage + 1)}>Next</button>
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(currentPage - 1)}
+            >
+              Previous
+            </button>
+            <span>
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(currentPage + 1)}
+            >
+              Next
+            </button>
           </div>
         )}
         {editPopupVisible && editingProduct && (
           <div className="popup-overlay">
             <div className="popup-content">
-
               <h2>Edit Order Status</h2>
-              <p><strong>Product:</strong> {editingProduct.product_name}</p>
+              <p>
+                <strong>Product:</strong> {editingProduct.product_name}
+              </p>
 
               <label>Status:</label>
               <select
@@ -365,21 +521,26 @@ function ControlOrder() {
               </select>
 
               <div className="popup-buttons mt-3">
-                <button onClick={() => setEditPopupVisible(false)}>Cancel</button>
+                <button onClick={() => setEditPopupVisible(false)}>
+                  Cancel
+                </button>
                 <button
                   onClick={async () => {
                     try {
-                      const response = await fetch("http://localhost:8000/api/vendor/update-order-status", {
-                        method: "POST",
-                        headers: {
-                          "Content-Type": "application/json",
-                          Accept: "application/json"
-                        },
-                        body: JSON.stringify({
-                          order_id: editingProduct.order_id,
-                          new_status: newStatus
-                        }),
-                      });
+                      const response = await fetch(
+                        "http://localhost:8000/api/vendor/update-order-status",
+                        {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                            Accept: "application/json",
+                          },
+                          body: JSON.stringify({
+                            order_id: editingProduct.order_id,
+                            new_status: newStatus,
+                          }),
+                        }
+                      );
 
                       if (response.ok) {
                         toast.success("Status updated successfully!", {
@@ -397,12 +558,10 @@ function ControlOrder() {
                 >
                   Save
                 </button>
-
               </div>
             </div>
           </div>
         )}
-
 
         <ToastContainer />
       </div>

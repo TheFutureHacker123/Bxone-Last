@@ -1,5 +1,5 @@
+@import "bootstrap-icons/font/bootstrap-icons.css";
 
-  
 :root {
   --font-size: medium; /* Default font size */
   --font-color: #000000; /* Default font color */
@@ -15,371 +15,456 @@ body {
   background-color: #f4f4f4;
 }
 
-  .card-title {
-    color: black; /* Set the color of the product title to black */
+.card-title {
+  color: black; /* Set the color of the product title to black */
 }
 /* Main Content */
 .toppush {
   padding-top: 56px; /* Push down the main content */
 }
-  /* Navigation Bar */
-  .navbar {
-    background-color: #000000;
-    color: #ffffff;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 20px;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-  }
-
-.product-card img{
-    width: 250px;
-   height: 300px;
-  }
-
-  .product-card {
-    background-color: #ffffff;
-    border: 1px solid #dddddd;
-    border-radius: 8px;
-    padding: 15px;
-    text-align: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    display: flex; /* Use flexbox */
-    flex-direction: column; /* Arrange children in a column */
-    align-items: center; /* Center items horizontally */
-    justify-content: flex-start; /* Align items to the top */
+/* Navigation Bar */
+.navbar {
+  background-color: #000000;
+  color: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
-  
-  .navbar h1 {
-    color: #fbbe28;
-    font-size: 24px;
-    margin: 0;
+
+.product-card img {
+  width: 250px;
+  height: 300px;
+}
+
+.product-card {
+  background-color: #ffffff;
+  border: 1px solid #dddddd;
+  border-radius: 8px;
+  padding: 15px;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex; /* Use flexbox */
+  flex-direction: column; /* Arrange children in a column */
+  align-items: center; /* Center items horizontally */
+  justify-content: flex-start; /* Align items to the top */
+}
+
+.navbar h1 {
+  color: #fbbe28;
+  font-size: 24px;
+  margin: 0;
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  justify-content: center; /* Center the items */
+}
+
+.navbar a {
+  color: #ffffff;
+  text-decoration: none;
+  margin: 0 15px;
+  font-size: 16px;
+}
+
+.navbar a:hover {
+  color: #fbbe28;
+}
+.dropdown-toggle::after {
+  display: none; /* Hide the dropdown icon */
+}
+/* Dropdown */
+.dropdown {
+  position: relative;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #ffffff;
+  min-width: 160px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+
+.dropdown-content a {
+  color: #000000;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown-content a:hover {
+  background-color: #f1f1f1;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block; /* Show dropdown on hover */
+}
+
+/* Search Bar */
+.search-bar {
+  display: flex;
+  align-items: center;
+  background-color: #ffffff;
+  padding: 5px 10px;
+  border-radius: 5px;
+  margin: 0 15px; /* Adjust margin */
+  width: 300px; /* Set a specific width */
+}
+
+.search-bar input {
+  border: none;
+  outline: none;
+  padding: 5px;
+  font-size: 14px;
+  flex: 1;
+}
+
+.search-bar button {
+  background-color: #fbbe28;
+  color: #000000;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.search-bar button:hover {
+  background-color: #e0a822;
+}
+
+.dropdown-menu {
+  display: none; /* Initially hide the dropdown */
+  padding: 8px 16px; /* Remove padding from dropdown menu */
+}
+
+.dropdown:hover .dropdown-menu {
+  display: block; /* Show dropdown on hover */
+  position: absolute; /* Position it correctly */
+  z-index: 1000; /* Ensure it appears above other elements */
+}
+
+.dropdown-menu .dropdown-item {
+  color: black; /* Set text color to black */
+  /* Add padding for better spacing */
+  white-space: nowrap; /* Prevent text wrapping */
+}
+
+.dropdown-menu .dropdown-item:hover {
+  background-color: #fbbe28; /* Change background on hover */
+  color: black; /* Ensure text remains black on hover */
+}
+
+/* Category and Sort Dropdowns */
+.category-container,
+.sort-container {
+  margin: 20px 0;
+  display: flex; /* Use flexbox for alignment */
+  align-items: center; /* Center items vertically */
+}
+
+.category-container label,
+.sort-container label {
+  font-size: 16px;
+  font-weight: bold;
+  margin-right: 10px;
+  color: #333; /* Change the label color */
+}
+
+.category-container select,
+.sort-container select {
+  padding: 10px; /* Increase padding for a better look */
+  font-size: 14px;
+  border-radius: 5px;
+  border: 1px solid #dddddd;
+  background-color: #ffffff;
+  transition: border-color 0.3s; /* Smooth border color transition */
+}
+
+.category-container select:hover,
+.sort-container select:hover {
+  border-color: #fbbe28; /* Change border color on hover */
+}
+
+.category-container select:focus,
+.sort-container select:focus {
+  border-color: #fbbe28; /* Change border color when focused */
+  outline: none; /* Remove default outline */
+}
+
+/* Main Content */
+.main-content {
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.header {
+  background-color: #fbbe28;
+  color: #000000;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.product-overview {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.product-card {
+  background-color: #ffffff;
+  border: 1px solid #dddddd;
+  border-radius: 8px;
+  padding: 15px;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+}
+
+.product-card img {
+  max-width: 100%;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.product-card h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+  color: #000000;
+}
+
+.product-card p {
+  color: #666666;
+  font-size: 14px;
+}
+
+.product-card button {
+  background-color: #fbbe28;
+  color: #000000;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.product-card button:hover {
+  background-color: #e0a822;
+}
+
+@media screen and (max-width: 1024px) {
+  .product-overview {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .product-overview {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .product-overview {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media screen and (max-width: 990px) {
+  .navbar {
+    flex-direction: column; /* Stack items vertically */
+    align-items: flex-start; /* Align items to the start */
   }
 
-  .navbar-links {
-    display: flex;
-    align-items: center;
-    flex-grow: 1;
+  .navbar-nav {
+    width: 100%; /* Make the nav items full width */
     justify-content: center; /* Center the items */
   }
 
-  .navbar a {
-    color: #ffffff;
-    text-decoration: none;
-    margin: 0 15px;
-    font-size: 16px;
-  }
-
-  .navbar a:hover {
-    color: #fbbe28;
-  }
-  .dropdown-toggle::after {
-    display: none; /* Hide the dropdown icon */
-  }
-  /* Dropdown */
-  .dropdown {
-    position: relative;
-  }
-
-  .dropdown-content {
-    display: none;
-    position: absolute;
-    background-color: #ffffff;
-    min-width: 160px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-    z-index: 1;
-  }
-
-  .dropdown-content a {
-    color: #000000;
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
-  }
-
-  .dropdown-content a:hover {
-    background-color: #f1f1f1;
-  }
-
-  .dropdown:hover .dropdown-content {
-    display: block; /* Show dropdown on hover */
-  }
-
-  /* Search Bar */
-  .search-bar {
-    display: flex;
-    align-items: center;
-    background-color: #ffffff;
-    padding: 5px 10px;
-    border-radius: 5px;
-    margin: 0 15px; /* Adjust margin */
-    width: 300px; /* Set a specific width */
-  }
-
-  .search-bar input {
-    border: none;
-    outline: none;
-    padding: 5px;
-    font-size: 14px;
-    flex: 1;
-  }
-
-  .search-bar button {
-    background-color: #fbbe28;
-    color: #000000;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-
-  .search-bar button:hover {
-    background-color: #e0a822;
-  }
-
   .dropdown-menu {
-    display: none; /* Initially hide the dropdown */
-    padding: 8px 16px; /* Remove padding from dropdown menu */
+    display: flex; /* Use flexbox */
+    flex-direction: column; /* Stack items vertically */
+    align-items: center; /* Center items horizontally */
+    padding: 0; /* Remove default padding */
+    margin: 0; /* Remove default margin */
+    border-radius: 4px; /* Optional: Add rounded corners */
+    overflow: hidden; /* Prevent overflow */
+    position: absolute; /* Position absolute to control placement */
+    left: 50%; /* Centering the dropdown */
+    transform: translateX(-50%); /* Adjust for centering */
   }
-  
-  .dropdown:hover .dropdown-menu {
-    display: block; /* Show dropdown on hover */
-    position: absolute; /* Position it correctly */
-    z-index: 1000; /* Ensure it appears above other elements */
-  }
-  
+
   .dropdown-menu .dropdown-item {
-    color: black; /* Set text color to black */
-     /* Add padding for better spacing */
-    white-space: nowrap; /* Prevent text wrapping */
+    text-align: center; /* Center the text of dropdown items */
+    width: 80%; /* Make each item full width */
+    padding: 10px; /* Add padding for better spacing */
+    box-sizing: border-box; /* Include padding in width calculation */
   }
-  
+
   .dropdown-menu .dropdown-item:hover {
-    background-color: #fbbe28; /* Change background on hover */
+    background-color: #fbbe28; /* Change background color on hover */
     color: black; /* Ensure text remains black on hover */
   }
 
-  /* Category and Sort Dropdowns */
-  .category-container, .sort-container {
-    margin: 20px 0;
-    display: flex; /* Use flexbox for alignment */
-    align-items: center; /* Center items vertically */
-  }
-
-  .category-container label, .sort-container label {
-    font-size: 16px;
-    font-weight: bold;
-    margin-right: 10px;
-    color: #333; /* Change the label color */
-  }
-
-  .category-container select, .sort-container select {
-    padding: 10px; /* Increase padding for a better look */
-    font-size: 14px;
-    border-radius: 5px;
-    border: 1px solid #dddddd;
-    background-color: #ffffff;
-    transition: border-color 0.3s; /* Smooth border color transition */
-  }
-
-  .category-container select:hover, .sort-container select:hover {
-    border-color: #fbbe28; /* Change border color on hover */
-  }
-
-  .category-container select:focus, .sort-container select:focus {
-    border-color: #fbbe28; /* Change border color when focused */
-    outline: none; /* Remove default outline */
-  }
-
-  /* Main Content */
-  .main-content {
-    padding: 20px;
-    margin-top: 20px;
-  }
-
-  .header {
-    background-color: #fbbe28;
-    color: #000000;
-    padding: 20px;
-    border-radius: 8px;
-    text-align: center;
-    margin-bottom: 20px;
-  }
-
-  .product-overview {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-  }
-
-  .product-card {
-    background-color: #ffffff;
-    border: 1px solid #dddddd;
-    border-radius: 8px;
-    padding: 15px;
-    text-align: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-
-  .product-card:hover {
-    transform: scale(1.05);
-    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
-  }
-
-  .product-card img {
-    max-width: 100%;
-    border-radius: 8px;
-    margin-bottom: 10px;
-  }
-
-  .product-card h3 {
-    font-size: 18px;
-    margin-bottom: 10px;
-    color: #000000;
-  }
-
-  .product-card p {
-    color: #666666;
-    font-size: 14px;
-  }
-
-  .product-card button {
-    background-color: #fbbe28;
-    color: #000000;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-
-  .product-card button:hover {
-    background-color: #e0a822;
-  }
-
-  @media screen and (max-width: 1024px) {
-    .product-overview {
-      grid-template-columns: repeat(3, 1fr);
-    }
-  }
-
-  @media screen and (max-width: 768px) {
-    .product-overview {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  @media screen and (max-width: 576px) {
-    .product-overview {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  @media screen and (max-width: 990px) {
-    .navbar {
-      flex-direction: column; /* Stack items vertically */
-      align-items: flex-start; /* Align items to the start */
-    }
-  
-    .navbar-nav {
-      width: 100%; /* Make the nav items full width */
-      justify-content: center; /* Center the items */
-    }
-  
-    .dropdown-menu {
-      display: flex; /* Use flexbox */
-      flex-direction: column; /* Stack items vertically */
-      align-items: center; /* Center items horizontally */
-      padding: 0; /* Remove default padding */
-      margin: 0; /* Remove default margin */
-      border-radius: 4px; /* Optional: Add rounded corners */
-      overflow: hidden; /* Prevent overflow */
-      position: absolute; /* Position absolute to control placement */
-      left: 50%; /* Centering the dropdown */
-      transform: translateX(-50%); /* Adjust for centering */
-    }
-    
-    .dropdown-menu .dropdown-item {
-      text-align: center; /* Center the text of dropdown items */
-      width: 80%; /* Make each item full width */
-      padding: 10px; /* Add padding for better spacing */
-      box-sizing: border-box; /* Include padding in width calculation */
-    }
-    
-    .dropdown-menu .dropdown-item:hover {
-      background-color: #fbbe28; /* Change background color on hover */
-      color: black; /* Ensure text remains black on hover */
-    }
-   
-  
-    .search-bar {
-      width: 100%; /* Make the search bar full width */
-      margin: 0; /* Remove any margins */
-    }
-  
-    .search-bar input {
-      width: 100%; /* Make the input field full width */
-    }
-  
-    .navbar-collapse {
-      display: none; /* Hide the navbar collapse by default */
-    }
-  
-    .navbar-toggler {
-      margin-left: auto; /* Align the toggle button to the right */
-    }
-  
-    .navbar.open .navbar-collapse {
-      display: flex; /* Show the navbar collapse when open */
-      flex-direction: column; /* Stack items vertically */
-      width: 100%; /* Make it full width */
-    }
-  }
-
-  .category-container, .sort-container {
-    margin: 20px 0;
-    display: flex;
-    align-items: center;
-  }
-  
-  .category-container label, .sort-container label {
-    font-size: 16px;
-    font-weight: bold;
-    margin-right: 10px;
-    color: #333;
-  }
-  
-  .category-container select, .sort-container select {
-    padding: 10px;
-    font-size: 14px;
-    border-radius: 5px;
-    border: 1px solid #dddddd;
-    background-color: #ffffff;
-  }
-  
-  .category-container select:hover, .sort-container select:hover {
-    border-color: #fbbe28;
-  }
-  
-  .category-container select:focus, .sort-container select:focus {
-    border-color: #fbbe28;
-    outline: none;
+  .search-bar {
+    width: 100%; /* Make the search bar full width */
+    margin: 0; /* Remove any margins */
   }
 
   .search-bar input {
-    background-color: #fff !important; /* White background */
-    color: #000 !important; /* Text color */
-    font-size: 16px !important; /* Font size */
-    border: 1px solid #ddd !important; /* Light border */
-    border-radius: 5px !important; /* Rounded corners */
+    width: 100%; /* Make the input field full width */
   }
-  
-  .search-bar input::placeholder {
-    color: #999 !important; /* Placeholder color */
-    opacity: 1 !important; /* Ensure visibility */
+
+  .navbar-collapse {
+    display: none; /* Hide the navbar collapse by default */
   }
-  
+
+  .navbar-toggler {
+    margin-left: auto; /* Align the toggle button to the right */
+  }
+
+  .navbar.open .navbar-collapse {
+    display: flex; /* Show the navbar collapse when open */
+    flex-direction: column; /* Stack items vertically */
+    width: 100%; /* Make it full width */
+  }
+}
+
+.category-container,
+.sort-container {
+  margin: 20px 0;
+  display: flex;
+  align-items: center;
+}
+
+.category-container label,
+.sort-container label {
+  font-size: 16px;
+  font-weight: bold;
+  margin-right: 10px;
+  color: #333;
+}
+
+.category-container select,
+.sort-container select {
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 5px;
+  border: 1px solid #dddddd;
+  background-color: #ffffff;
+}
+
+.category-container select:hover,
+.sort-container select:hover {
+  border-color: #fbbe28;
+}
+
+.category-container select:focus,
+.sort-container select:focus {
+  border-color: #fbbe28;
+  outline: none;
+}
+
+.search-bar input {
+  background-color: #fff !important; /* White background */
+  color: #000 !important; /* Text color */
+  font-size: 16px !important; /* Font size */
+  border: 1px solid #ddd !important; /* Light border */
+  border-radius: 5px !important; /* Rounded corners */
+}
+
+.search-bar input::placeholder {
+  color: #999 !important; /* Placeholder color */
+  opacity: 1 !important; /* Ensure visibility */
+}
+
+/* Footer Styles */
+footer {
+  background-color: #222; /* Dark background */
+  color: #eee; /* General text color in the footer */
+  padding: 20px 0;
+  margin-top: 20px;
+}
+
+footer h5 {
+  color: #fff; /* White heading text */
+  margin-bottom: 10px;
+}
+
+footer ul {
+  list-style: none;
+  padding: 0;
+}
+
+footer li {
+  margin-bottom: 5px;
+}
+
+footer a {
+  color: #ccc; /* Light gray links */
+  text-decoration: none;
+}
+
+footer a:hover {
+  color: #fff; /* White links on hover */
+}
+
+footer p {
+  color: #ccc;
+  margin-bottom: 10px;
+}
+
+.input-group input.form-control-sm {
+  background-color: #333; /* Darker input background */
+  color: #eee; /* Lighter input text */
+  border: 1px solid #555;
+}
+
+.input-group input.form-control-sm::placeholder {
+  color: #999; /* Light gray placeholder text */
+}
+
+.btn-warning.btn-sm {
+  color: #222; /* Dark text on yellow button */
+}
+
+.footer-bottom {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.footer-bottom p {
+  color: #888;
+}
+
+.subscription-component {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.subscription-button {
+  padding: 4px 4px;
+  background-color: #fbbe28;
+  border: none;
+}
+
+.form-container {
+  background-color: #ffffff;
+  padding: 4px;
+}
+ 
