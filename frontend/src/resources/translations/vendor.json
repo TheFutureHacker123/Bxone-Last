@@ -23,9 +23,7 @@
     "add_products": "Add Products",
     "add_coupons": "Add Coupons",
     "manage_orders": "Manage Orders",
-    "new_orders": "New Order",
     "shipped": "Shipped",
-    "refunds": "Refund",
     "completed": "Completed",
     "manage_messages": "Manage Messages",
     "user_message": "User Message",
@@ -90,8 +88,6 @@
     "phone": "Phone",
     "page_of": "Page {currentPage} of {totalPages}",
     "product": "Product:",
-    "add_product": "Add Product",
-    "product_lists": "Product Lists",
     "edit_product": "Edit Product",
     "product_description": "Product Description",
     "product_price": "Product Price",
@@ -122,20 +118,13 @@
     "product_lists": "Product Lists",
     "add_product": "Add Product",
     "add_new_product": "Add New Product",
-    "select_category": "Select Category",
     "select_category_prompt": "Select a Category",
-    "select_subcategory": "Select Subcategory",
     "select_subcategory_prompt": "Select a Subcategory",
-    "product_name": "Product Name",
     "enter_product_name": "Enter product name",
-    "total_product": "Total Product",
     "enter_total_product": "Enter total product",
-    "product_price": "Product Price",
     "enter_product_price": "Enter product price",
-    "product_description": "Product Description",
     "enter_product_description": "Enter product description",
-    "product_images": "Product Images (Max 5)",
-    "close": "Close",
+    "settings": "settings",
     "save_product": "Save Product",
     "vendor_personal_info": "Vendor Personal Information",
     "first_name": "First Name",
@@ -355,7 +344,8 @@
     "error_account_name_required": "የመለያ ባለቤት ስም ያስፈልጋል",
     "error_account_name_invalid": "የመለያ ባለቤት ስም ቁጥሮች ወይም ምልክቶችን ማካተት አይችልም",
     "error_account_number_required": "የመለያ ቁጥር ያስፈልጋል",
-    "error_account_number_invalid": "የመለያ ቁጥር ለተመረጠው ባንክ ተስማሚ መጠን መሆን አለበት"
+    "error_account_number_invalid": "የመለያ ቁጥር ለተመረጠው ባንክ ተስማሚ መጠን መሆን አለበት",
+    "settings": "ቅንብሮች"
   },
   "afan_oromo": {
     "vendor_dashboard": "Bara Karaa Gurguraa",
@@ -516,7 +506,8 @@
     "error_account_name_required": "Maqaan Abbaa Herregaa barbaachisaadha",
     "error_account_name_invalid": "Maqaan Abbaa Herregaa lakkoofsa ykn mallattoo hin qabaatu",
     "error_account_number_required": "Lakkoofsi Herregaa barbaachisaadha",
-    "error_account_number_invalid": "Lakkoofsi Herregaa dheerina sirrii qabaachuu qaba"
+    "error_account_number_invalid": "Lakkoofsi Herregaa dheerina sirrii qabaachuu qaba",
+    "settings": "qindaa’inoota"
   },
   "ethiopian_somali": {
     "vendor_dashboard": "Dashboard-ka Iibiyaha",
@@ -605,7 +596,7 @@
     "delete_confirmation": "Ma hubtaa inaad tirtirto alaabtan?",
     "yes_delete": "Haa, Tirtir",
     "no": "Maya",
-
+    "settings": "goobaha",
     "update_password": "Cusbooneysii Furaha Sirta ah",
     "current_password": "Furaha Sirta ah ee Hadda",
     "new_password": "Furaha Sirta ah ee Cusub",
@@ -832,6 +823,7 @@
     "error_account_name_required": "የመለያ ባለቤት ስም ያስፈልጋል",
     "error_account_name_invalid": "የመለያ ባለቤት ስም ቁጥሮች ወይም ምልክቶችን ማካተት አይችልም",
     "error_account_number_required": "የመለያ ቁጥር ያስፈልጋል",
-    "error_account_number_invalid": "የመለያ ቁጥር ለተመረጠው ባንክ ተስማሚ መጠን መሆን አለበት"
+    "error_account_number_invalid": "የመለያ ቁጥር ለተመረጠው ባንክ ተስማሚ መጠን መሆን አለበት",
+    "settings":"ቅጥዕታት"
   }
 }

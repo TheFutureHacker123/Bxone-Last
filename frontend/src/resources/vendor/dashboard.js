@@ -132,9 +132,12 @@ function VendorDashboard() {
       </button>
 
       <div className={`custom-sidebar ${sidebarVisible ? "show" : "hide"}`}>
-        <text className="text-center custom-css flex-grow-1 mt-2 ms-4" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
-          {content?.vendor_dashboard || "Vendor Dashboard"}
-        </text>
+        <div className="d-flex align-items-center ">
+          <span className="text-center custom-css flex-grow-1 mt-1 ms-3" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+            {content?.vendor_dashboard || "Vendor Dashboard"}
+          </span>
+        </div>
+
         <Link to="/vendor" className="custom-link">
           <FaChartLine className="me-2" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} />
           <span style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
@@ -176,7 +179,7 @@ function VendorDashboard() {
             <ul className="dropdown-menu custom-dropdown-menu">
               <li>
                 <Link to="/vendor/new-orders" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
-                  {content?.new_orders || "New Order"}
+                  {content?.new_order || "New Order"}
                 </Link>
               </li>
               <li>
@@ -186,7 +189,7 @@ function VendorDashboard() {
               </li>
               <li>
                 <Link to="/vendor/refunds" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
-                  {content?.refunds || "Refund"}
+                  {content?.refund || "Refund"}
                 </Link>
               </li>
               <li>
@@ -242,7 +245,7 @@ function VendorDashboard() {
             <ul className="dropdown-menu custom-dropdown-menu">
               <li>
                 <Link to="/vendor/setting" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
-                  {"Settings"}
+                  {content?.settings || "Settings"}
                 </Link>
               </li>
               <li>

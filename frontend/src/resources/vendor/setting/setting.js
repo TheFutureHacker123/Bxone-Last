@@ -1,74 +1,58 @@
 import React, { useState, useEffect } from "react";
-import { FaBars, FaChartLine, FaBox, FaShoppingCart, FaComments, FaUser } from "react-icons/fa";
+import { FaBars, FaUser } from "react-icons/fa";
 import { ToastContainer, toast } from 'react-toastify';
-import { Container, Button, Form, Modal } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
-import Translation from "../../translations/vendor.json";
-import "../style/dashboard.css";
-
+import Translation from "../translations/vendor.json";
+import "../style/setting.css"
 
 function VendorSetting() {
-    const [sidebarVisible, setSidebarVisible] = useState(true);
-    const [openDropdown, setOpenDropdown] = useState(null);
-    const navigate = useNavigate();
+  const [sidebarVisible, setSidebarVisible] = useState(true);
+  const [openDropdown, setOpenDropdown] = useState(null);
+  const navigate = useNavigate();
 
-    const defaultFontSize = 'medium';
-    const defaultFontColor = '#000000';
-    const defaultLanguage = 'english';
+  const defaultFontSize = 'medium';
+  const defaultFontColor = '#000000';
+  const defaultLanguage = 'english';
 
-    const [fontSize, setFontSize] = useState(() => localStorage.getItem('fontSize') || defaultFontSize);
-    const [fontColor, setFontColor] = useState(() => localStorage.getItem('fontColor') || defaultFontColor);
-    const [language, setLanguage] = useState(() => localStorage.getItem('language') || defaultLanguage);
-    const [content, setContent] = useState(Translation[language]);
+  const [fontSize, setFontSize] = useState(() => localStorage.getItem('fontSize') || defaultFontSize);
+  const [fontColor, setFontColor] = useState(() => localStorage.getItem('fontColor') || defaultFontColor);
+  const [language, setLanguage] = useState(() => localStorage.getItem('language') || defaultLanguage);
+  const [content, setContent] = useState(Translation[language]);
 
-    useEffect(() => {
-        document.documentElement.style.setProperty('--font-size', fontSize);
-        document.documentElement.style.setProperty('--font-color', fontColor);
-        localStorage.setItem('fontSize', fontSize);
-        localStorage.setItem('fontColor', fontColor);
-        localStorage.setItem('language', language);
-        setContent(Translation[language]);
-    }, [fontSize, fontColor, language]);
+  useEffect(() => {
+    document.documentElement.style.setProperty('--font-size', fontSize);
+    document.documentElement.style.setProperty('--font-color', fontColor);
+    localStorage.setItem('fontSize', fontSize);
+    localStorage.setItem('fontColor', fontColor);
+    localStorage.setItem('language', language);
+    setContent(Translation[language]);
+  }, [fontSize, fontColor, language]);
 
-    const toggleSidebar = () => {
-        setSidebarVisible(!sidebarVisible);
-    };
+  const toggleSidebar = () => {
+    setSidebarVisible(!sidebarVisible);
+  };
 
-    function logout() {
-        localStorage.clear();
-        toast.success(content?.logout_success || "Logout Successful!", {
-            position: "top-right",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-        });
-        setTimeout(() => {
-            navigate("/vendor/login");
-        }, 1000);
-    }
+  function logout() {
+    localStorage.clear();
+    toast.success(content?.logout_success || "Logout Successful!", {
+      position: "top-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+    });
+    setTimeout(() => {
+      navigate("/vendor/login");
+    }, 1000);
+  }
 
-    const resetToDefault = () => {
-        setFontSize(defaultFontSize);
-        setFontColor(defaultFontColor);
-        setLanguage(defaultLanguage);
-        localStorage.removeItem("fontSize");
-        localStorage.removeItem("fontColor");
-        localStorage.removeItem("language");
-        toast.success(content?.settings_reset_success || "Settings reset to default.");
-    };
-
-    const handleDropdown = (menu) => {
-        setOpenDropdown(openDropdown === menu ? null : menu);
-    };
-
-    return (
-        <div className="dashboard-wrapper">
-            <button className="hamburger-btn" onClick={toggleSidebar}>
-                <FaBars style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} />
+  return (
+    <div className="dashboard-wrapper">
+      <button className="hamburger-btn" onClick={toggleSidebar}>
+              <FaBars style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} />
             </button>
-
+      
             <div className={`custom-sidebar ${sidebarVisible ? "show" : "hide"}`}>
                     <div className="d-flex align-items-center ">
                       <span className="text-center custom-css flex-grow-1 mt-1 ms-3" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
@@ -201,65 +185,20 @@ function VendorSetting() {
                     </div>
                   </div>
 
-            <div className={`admin-main-content ${sidebarVisible ? "with-sidebar" : "full-width"}`}>
-                <div className="admin-custom-header text-center">
-                    <h2 className="h4 mb-0" style={{ color: "var(--font-color)" }}>{content?.settings || "Settings"}</h2>
-                </div>
-
-                <Container className="settings-container mt-3">
-                    <Form>
-                        <Form.Group controlId="language">
-                            <Form.Label>{content?.language || "Language"}:</Form.Label>
-                            <Form.Control
-                                as="select"
-                                value={language}
-                                onChange={(e) => {
-                                    const selectedLanguage = e.target.value;
-                                    setLanguage(selectedLanguage);
-                                    localStorage.setItem("language", selectedLanguage);
-                                    setContent(Translation[selectedLanguage]);
-                                }}
-                            >
-                                <option value="english">English</option>
-                                <option value="amharic">አማርኛ</option>
-                                <option value="afan_oromo">Afaan Oromoo</option>
-                                <option value="ethiopian_somali">Somali</option>
-                                <option value="tigrinya">ትግሪኛ</option>
-                            </Form.Control>
-                        </Form.Group>
-
-                        <Form.Group controlId="font-size">
-                            <Form.Label>{content?.font_size || "Font Size"}:</Form.Label>
-                            <Form.Control
-                                as="select"
-                                value={fontSize}
-                                onChange={(e) => setFontSize(e.target.value)}
-                            >
-                                <option value="small">{content?.small || "Small"}</option>
-                                <option value="medium">{content?.medium || "Medium"}</option>
-                                <option value="large">{content?.large || "Large"}</option>
-                            </Form.Control>
-                        </Form.Group>
-
-                        <Form.Group controlId="font-color">
-                            <Form.Label>{content?.font_color || "Font Color"}:</Form.Label>
-                            <Form.Control
-                                type="color"
-                                value={fontColor}
-                                onChange={(e) => setFontColor(e.target.value)}
-                            />
-                        </Form.Group>
-
-                        <Button variant="secondary" onClick={resetToDefault}>
-                            {content?.set_to_default || "Set to Default"}
-                        </Button>
-                    </Form>
-
-                    <ToastContainer />
-                </Container>
-            </div>
+      <div className={`main-content ${sidebarVisible ? "with-sidebar" : "full-width"}`}>
+        <div className="custom-header text-center">
+          <h1 className="h4 mb-0">{content?.welcome || "Welcome to the Vendor Dashboard"}</h1>
         </div>
-    );
+
+        <div className="settings-section">
+          <h2 className="h5">{content?.setting || "Settings"}</h2>
+          {/* Add your settings form or components here */}
+          <Link to="/vendor/setting" className="btn btn-primary">{content?.edit_settings || "Edit Settings"}</Link>
+        </div>
+      </div>
+      <ToastContainer />
+    </div>
+  );
 }
 
 export default VendorSetting;

@@ -38,7 +38,7 @@ import VendorDashboard from "./resources/vendor/dashboard"
 import LoginVendor from "./resources/vendor/login"
 import RegisterVendor from "./resources/vendor/register"
 import RestePassword from "./resources/vendor/reset-password"
-
+import VendorSetting from "./resources/vendor/setting/vendor-setting"
 import ManageProfile from "./resources/vendor/setting/manage-profile"
 
 import UserMessages from "./resources/vendor/message/user-messages"
@@ -158,6 +158,8 @@ function App() {
 
           <Route path="/vendor/vendor-info" element={<ProtectPathVendor Cmp={VendorInfo} />} />
 
+          <Route path="/vendor/setting" element={<ProtectPathVendor Cmp={VendorSetting} />} />
+          
 
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
