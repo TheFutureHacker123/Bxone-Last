@@ -120,9 +120,9 @@ function AdminDashboard() {
 
       <div className={`admin-custom-sidebar ${sidebarVisible ? "show" : "hide"}`}>
         <div className="d-flex align-items-center mb-3">
-          <text className="text-center admin-custom-css flex-grow-1 mt-2 ms-4" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+          <span className="text-center admin-custom-css flex-grow-1 mt-2 ms-4" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
             {content?.admin_dashboard_title || "Admin Dashboard"}
-          </text>
+          </span>
         </div>
 
         <Link to="/admin/" className="admin-custom-link">
@@ -211,6 +211,7 @@ function AdminDashboard() {
           {openDropdown === "profile" && (
             <ul className="dropdown-menu admin-custom-dropdown-menu">
               <li>
+                <li><Link to="/admin/settings" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>{content?.settings || "Settings"}</Link></li>
                 <Link to="/admin/manage-password" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
                   {content?.update_password || "Update Password"}
                 </Link>
