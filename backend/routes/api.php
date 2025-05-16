@@ -124,6 +124,7 @@ Route::post('/applyCoupon', [ProductController::class, 'applyCoupon']);
 Route::post('/vendor/analytics', [VendorController::class, 'analytics']);//done
 Route::post('/admin/analytics', [AdminController::class, 'analytics']);//done
 Route::post('/admin/changeproductstatus', [AdminController::class, 'changeproductstatus']);//done
+Route::post('/vendor/orderlistforadmin/', [VendorController::class, 'orderlistforadmin']);//done
 
 
 

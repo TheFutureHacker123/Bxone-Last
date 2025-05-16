@@ -304,18 +304,6 @@ const changeProductStatus = async (product_id, status) => {
                       <p style={{ margin: 0, color: '#666' }}>{user.email}</p>
                     </div>
                     <div>
-                      <span
-                        style={{
-                          padding: '0.5rem 1rem',
-                          borderRadius: '20px',
-                          backgroundColor: user.status === 'Verified' ? '#d4edda' : '#f8d7da',
-                          color: user.status === 'Verified' ? '#155724' : '#721c24',
-                          marginRight: '1rem'
-                        }}
-                      >
-                        {user.status}
-                      </span>
-                      
                       <Button
                         variant="primary"
                         size="sm"
