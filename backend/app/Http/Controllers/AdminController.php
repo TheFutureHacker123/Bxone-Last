@@ -272,7 +272,7 @@ public function addCategories(Request $request)
     // Validate the request
     $validated = $request->validate([
         'admin_id' => 'required|exists:admins,admin_id',
-        'category_name' => 'required|string|max:10',
+        'category_name' => 'required|string|max:50',
     ]);
 
     // Fetch the admin
@@ -334,7 +334,7 @@ public function addSubCategories(Request $request)
     $validated = $request->validate([
         'admin_id' => 'required|exists:admins,admin_id',
         'category_id' => 'required|exists:category,category_id',
-        'sub_category_name' => 'required|string|max:10',
+        'sub_category_name' => 'required|string|max:50',
     ]);
 
     // Step 2: Check if the admin is a SuperAdmin

@@ -6,6 +6,8 @@ import LoginAdmin from "./resources/admin/login"
 import Reset from "./resources/user/reset"
 import Register from "./resources/user/register"
 
+import Wishlist from "./resources/user/Wishlist";
+
 import Cart from "./resources/user/cart"
 import ChatVendor from "./resources/user/chat-to-vendor"
 import ChatAdmin from "./resources/user/chat-to-admin"
@@ -112,6 +114,9 @@ function App() {
           <Route path="/admin/dashboard" element={<ProtectPathAdmin Cmp={AdminDashboard} />} />
           <Route path="/admin" element={<ProtectPathAdmin Cmp={AdminDashboard} />} />
           <Route path="/admin/login" element={<LoginAdmin />} />
+
+
+          <Route path="/wishlist" element={<Wishlist />} />
 
           <Route path="/admin/list-users" element={<ProtectPathAdmin Cmp={ListUsers} />} />
           <Route path="/admin/user-messages" element={<ProtectPathAdmin Cmp={UserMessagesAdmin} />} />

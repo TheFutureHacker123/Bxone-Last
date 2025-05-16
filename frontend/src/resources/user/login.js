@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import Translation from "../translations/lang.json";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom"; // Import Link
 import 'react-toastify/dist/ReactToastify.css';
 import './styles/login.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -158,20 +158,15 @@ function Login() {
         }
     };
 
-    const goBack = () => {
-        navigate('/'); // Navigate directly to the homepage
-    };
-
     return (
         <div className="login-container">
             <div className="login-form">
-                <div className="back-button">
+                <Link to="/" className="back-to-home">
                     <FontAwesomeIcon
                         icon={faArrowLeft}
-                        onClick={goBack}
-                        style={{ cursor: 'pointer', fontSize: '1em', marginBottom: '10px' }}
+                        style={{ fontSize: '1em', marginBottom: '10px', color: 'blue' }}
                     />
-                </div>
+                </Link>
                 <h2 className="text-center">{content?.login || "Login"}</h2>
                 <form onSubmit={login}>
                     <div className="mb-3">

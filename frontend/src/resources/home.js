@@ -18,6 +18,7 @@ function Home() {
   const [bestSellingVendors, setBestSellingVendors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [loggedInUser, setLoggedInUser] = useState(null);
 
   const defaultFontSize = "medium";
   const defaultFontColor = "#000000";
@@ -42,6 +43,15 @@ function Home() {
     localStorage.setItem("language", language);
     setContent(Translation[language]);
   }, [fontSize, fontColor, language]);
+
+  useEffect(() => {
+    const user = localStorage.getItem("user-info");
+    if (user) {
+      setLoggedInUser(JSON.parse(user));
+    } else {
+      setLoggedInUser(null);
+    }
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -186,6 +196,36 @@ function Home() {
     setSelectedCategory(e.target.value);
   };
 
+  const addToWishlist = async (productid) => {
+    const storedUser = localStorage.getItem("user-info");
+    if (!storedUser) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:8000/api/wishlist/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: "Bearer " + JSON.parse(storedUser).token,
+        },
+        body: JSON.stringify({ product_id: productid }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast.success("Product added to wishlist!");
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      toast.error("An error occurred. Please try again later.");
+    }
+  };
+
   const handleSortChange = (e) => {
     setSortOption(e.target.value);
   };
@@ -245,13 +285,15 @@ function Home() {
         <div className="container-fluid">
           <div className="row align-items-center">
             <div className="col-md-6 text-start d-flex align-items-center">
+            {!loggedInUser && (
               <Link
                 to="/vendor/login"
                 className="text-dark text-decoration-none me-3"
               >
                 <i className="bi bi-shop me-1"></i> Vendor Log In
               </Link>
-            </div>
+            )}
+          </div>
             <div className="col-md-6 text-end d-flex align-items-center justify-content-end">
               {/* Search Bar, Category Dropdown, and Search Button */}
 
@@ -297,31 +339,14 @@ function Home() {
                 <select
                   className="form-select form-select-sm border-0 bg-light"
                   style={{ width: "auto" }}
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
                 >
-                  <option value="en">
-                    {" "}
-                    <i className="bi bi-flag-us me-1"></i> lang
-                  </option>
-                  <option value="en">
-                    {" "}
-                    <i className="bi bi-flag-us me-1"></i> En
-                  </option>
-                  <option value="am">
-                    {" "}
-                    <i className="bi bi-flag-et me-1"></i> Am
-                  </option>
-                  <option value="om">
-                    {" "}
-                    <i className="bi bi-flag-us me-1"></i> Om
-                  </option>
-                  <option value="so">
-                    {" "}
-                    <i className="bi bi-flag-et me-1"></i> So
-                  </option>
-                  <option value="ti">
-                    {" "}
-                    <i className="bi bi-flag-us me-1"></i> Ti
-                  </option>
+                  <option value="en">English</option>
+                  <option value="am">Amharic</option>
+                  <option value="om">Oromo</option>
+                  <option value="so">Somali</option>
+                  <option value="ti">Tigrinya</option>
                 </select>
               </div>
             </div>
@@ -506,7 +531,8 @@ function Home() {
                       <img
                         src={`http://localhost:8000/storage/${vendor.logo}`}
                         alt={vendor.store_name}
-                        className="card-img-top rounded-circle mx-auto"
+                        className="
+                        card-img-top rounded-circle mx-auto"
                         style={{
                           width: "80px",
                           height: "80px",
@@ -584,70 +610,63 @@ function Home() {
         </div>
 
         {/* Product Overview */}
-        <h2>{content?.product_overview || "Product Overview"}</h2>
-        <div className="row g-4">
-          {Array.isArray(productsToDisplay) &&
-            productsToDisplay.map((product) => (
-              <div className="col-md-3 col-sm-6" key={product.product_id}>
-                <div className="card product-card h-100">
-                  <Link
-                    to={"/productdetails/" + product.product_id}
-                    className="text-decoration-none"
-                  >
-                    <img
-                      src={
-                        "http://localhost:8000/storage/" + product.product_img1
-                      }
-                      className="card-img-top"
-                      alt={product.product_name}
-                    />
-                    <div className="card-body text-center">
-                      <h5 className="card-title" style={{ color: "black" }}>
-                        {product.product_name}
-                      </h5>
-                      <p className="card-text">${product.product_price}</p>
-                    </div>
-                  </Link>
-                  <button
-                    className="btn btn-warning"
+<h2>{content?.product_overview || "Product Overview"}</h2>
+<div className="row g-4">
+  {Array.isArray(productsToDisplay) &&
+    productsToDisplay.map((product) => (
+      <div className="col-md-3 col-sm-6" key={product.product_id}>
+        <div className="card product-card h-100">
+          <div className="img-container">
+            <Link
+              to={"/productdetails/" + product.product_id}
+              className="text-decoration-none"
+            >
+              <img
+                src={
+                  "http://localhost:8000/storage/" + product.product_img1
+                }
+                className="card-img-top product-image"
+                alt={product.product_name}
+              />
+            </Link>
+            <div className="overlay">
+              <div className="icon-container">
+                <div
+                  className="action-icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    addToCart(product.product_id);
+                  }}
+                  title={content?.add_to_cart || "Add to Cart"}
+                >
+                  <i className="bi bi-cart-plus"></i>
+                </div>
+                {loggedInUser && (
+                  <div
+                    className="action-icon"
                     onClick={(e) => {
                       e.stopPropagation();
-                      addToCart(product.product_id);
+                      addToWishlist(product.product_id);
                     }}
+                    title={content?.add_to_wishlist || "Add to Wishlist"}
                   >
-                    {content?.add_to_cart || "Add to Cart"}
-                  </button>
-                </div>
+                    <i className="bi bi-heart"></i>
+                  </div>
+                )}
+                {/* Quick View will go here later */}
               </div>
-            ))}
-          {!Array.isArray(productsToDisplay) && (
-            <p>{content?.no_products_found || "No products found."}</p>
-          )}
-          {Array.isArray(productsToDisplay) &&
-            productsToDisplay.length === 0 &&
-            selectedCategory !== "" && (
-              <p>
-                {content?.no_products_in_category ||
-                  `No products in the selected category.`}
-              </p>
-            )}
-          {Array.isArray(productsToDisplay) &&
-            productsToDisplay.length === 0 &&
-            searchproduct !== "" && (
-              <p>
-                {content?.no_search_results ||
-                  `No search results for "${searchproduct}".`}
-              </p>
-            )}
-          {Array.isArray(productsToDisplay) &&
-            productsToDisplay.length === 0 &&
-            selectedCategory === "" &&
-            searchproduct === "" && (
-              <p>
-                {content?.no_products_available || "No products available."}
-              </p>
-            )}
+            </div>
+          </div>
+          <div className="card-body text-center">
+            <h5 className="card-title" style={{ color: "black" }}>
+              {product.product_name}
+            </h5>
+            <p className="card-text">${product.product_price}</p>
+          </div>
         </div>
+      </div>
+    ))}
+</div>
       </div>
 
       {/* Footer */}

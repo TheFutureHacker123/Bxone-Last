@@ -46,4 +46,10 @@ class Product extends Model
     {
         return $this->belongsTo(SubCategory::class, 'sub_category_id', 'sub_category_id');
     }
+
+    // app/Models/Product.php
+    public function wishlist()
+    {
+        return $this->hasMany(Wishlist::class, 'product_id');
+    }
 }

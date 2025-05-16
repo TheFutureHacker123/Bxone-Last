@@ -7,6 +7,7 @@ use App\Http\Controllers\VendorController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\WishlistController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -122,3 +123,14 @@ Route::post('/applyCoupon', [ProductController::class, 'applyCoupon']);
 
 Route::post('/vendor/analytics', [VendorController::class, 'analytics']);//done
 Route::post('/admin/analytics', [AdminController::class, 'analytics']);//done
+
+
+
+
+Route::middleware('auth:api')->group(function () {
+    // Wishlist routes
+    Route::post('/wishlist/add', [WishlistController::class, 'addToWishlist']);
+    Route::post('/wishlist/remove', [WishlistController::class, 'removeFromWishlist']);
+    Route::get('/wishlist', [WishlistController::class, 'getWishlist']);
+    Route::get('/wishlist/check/{product_id}', [WishlistController::class, 'checkInWishlist']);
+});
