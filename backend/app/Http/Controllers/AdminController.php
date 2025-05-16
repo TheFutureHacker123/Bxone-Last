@@ -15,6 +15,7 @@ use App\Models\Category;
 use App\Models\SubCategory;
 use App\Models\Notification;
 use App\Models\Orders;
+use App\Models\Product;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -514,6 +515,34 @@ public function addNotification(Request $request)
         ],
     ]);
 }
+
+
+
+
+public function changeProductStatus(Request $request)
+    {
+        // Validate the request
+        $validated = $request->validate([
+            'product_id' => 'required|integer|exists:product,product_id',
+            'status' => 'required|in:Active,Inactive,Ban',
+        ]);
+
+        // Find the product
+        $product = Product::find($validated['product_id']);
+
+        // Update the status
+        $product->product_status = $validated['status'];
+        $product->save();
+
+        // Return a response
+        return response()->json([
+            'success' => true,
+            'message' => 'Product status updated successfully.',
+            'product' => $product,
+        ]);
+    }
+
+
 
 
 
