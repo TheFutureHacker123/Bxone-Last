@@ -69,15 +69,29 @@ body {
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
+
 .back-button {
     position: absolute; /* Position it within the login-form */
-    top: 5px;          /* Adjust as needed */
-    left: 5px;         /* Adjust as needed */
+    top: 15px;          /* Adjust as needed for better spacing */
+    left: 15px;         /* Adjust as needed for better spacing */
     z-index: 10;        /* Ensure it's above other content */
+    background-color: #fbbe28 !important; /* Set background color */
+    border-radius: 50% !important; /* Make it circular */
+    width: 40px;        /* Set width for the circle */
+    height: 40px;       /* Set height for the circle */
+    display: flex;      /* Center the icon */
+    align-items: center; /* Center vertically */
+    justify-content: center; /* Center horizontally */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Add subtle shadow */
+    transition: background-color 0.3s ease; /* Smooth color transition on hover */
 }
 
 .back-button svg { /* Style the SVG icon */
+    padding-top: 8px;
     font-size: 1.2em; /* Adjust size of the arrow */
-    cursor: pointer;
-    color: #121d80;      /* Optional: arrow color */
+    color: #000000 ;    /* Arrow color */
+}
+
+.back-button:hover { /* Hover effect for better interactivity */
+    background-color: #f9a800; /* Darker shade on hover */
 }
