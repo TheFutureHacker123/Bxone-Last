@@ -468,3 +468,95 @@ footer p {
   padding: 4px;
 }
  
+/* In your App.css or home.css */
+
+.product-card {
+  background-color: #ffffff;
+  border: 1px solid #dddddd;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  position: relative; /* For positioning overlay elements */
+  overflow: hidden; /* Clip overlay within card bounds */
+}
+
+.product-card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+}
+
+.img-container {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.product-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius-top-left: 8px;
+  border-radius-top-right: 8px;
+  transition: opacity 0.3s ease;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.1); /* Subtle overlay */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.product-card:hover .overlay {
+  opacity: 1;
+}
+
+.icon-container {
+  display: flex;
+  gap: 15px;
+}
+
+.action-icon {
+  background-color: rgba(255, 255, 255, 0.8);
+  color: #333;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.action-icon:hover {
+  background-color: #fbbe28;
+  color: black;
+  transform: scale(1.1);
+}
+
+.card-body {
+  padding: 15px;
+}
+
+.card-title {
+  margin-bottom: 5px;
+}
+
+.card-text {
+  font-size: 1rem;
+  color: #555;
+}
