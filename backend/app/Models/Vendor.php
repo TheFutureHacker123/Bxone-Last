@@ -25,13 +25,15 @@ class Vendor extends Authenticatable
         'time_stamp',
         'vendor_role_id',
         'logo', // Added logo to fillable
-        'is_featured', // Added is_featured to fillable
+        'is_featured',
+     // Added is_featured to fillable
     ];
 
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'is_featured' => 'boolean', // Cast is_featured to boolean
+        'is_approved' => 'boolean', // Cast is_approved to boolean
     ];
 
     public function personalInfo(): HasOne

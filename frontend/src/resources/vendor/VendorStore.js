@@ -104,45 +104,54 @@ function VendorStore() {
 
     return (
         <div className="vendor-store-page container mt-5">
-            <div className="vendor-header bg-light p-4 rounded mb-4 text-center">
-                {vendor.logo && (
-                    <img
-                        src={`http://localhost:8000/storage/${vendor.logo}`}
-                        alt={vendor.store_name}
-                        className="vendor-logo rounded-circle mb-3"
-                        style={{ width: '100px', height: '100px', objectFit: 'cover' }}
-                    />
-                )}
-                <h1>{vendor.store_name}</h1>
-                {vendor.personalInfo && vendor.personalInfo.personal_name && (
-                    <p className="text-muted">Owner: {vendor.personalInfo.personal_name}</p>
-                )}
-                {/* You can add more vendor details here if needed */}
+            <div className="vendor-header">
+                <div>
+                    {vendor.logo ? (
+                        <img
+                            src={`http://localhost:8000/storage/${vendor.logo}`}
+                            alt={vendor.store_name}
+                            className="vendor-logo"
+                        />
+                    ) : (
+                        <div className="vendor-logo vendor-logo-placeholder">
+                            {vendor.store_name?.charAt(0) || "?"}
+                        </div>
+                    )}
+                </div>
+                <div className="vendor-info">
+                    <h1 className="vendor-title">{vendor.store_name || "Store"}</h1>
+                    {vendor.personalInfo && vendor.personalInfo.personal_name && (
+                        <div className="vendor-meta">
+                            <span>Owner: {vendor.personalInfo.personal_name}</span>
+                        </div>
+                    )}
+                    {vendor.store_desc && (
+                        <div className="vendor-desc">{vendor.store_desc}</div>
+                    )}
+                </div>
             </div>
 
-            <h2>Products from {vendor.store_name}</h2>
-            <div className="row g-4">
+            <h2 className="product-listing-title">Products from {vendor.store_name}</h2>
+            <div className="product-grid">
                 {products.map((product) => (
-                    <div className="col-md-3 col-sm-6" key={product.product_id}>
-                        <div className="card product-card h-100">
-                            <Link to={`/productdetails/${product.product_id}`} className="text-decoration-none">
-                                <img
-                                    src={`http://localhost:8000/storage/${product.product_img1}`}
-                                    className="card-img-top"
-                                    alt={product.product_name}
-                                />
-                                <div className="card-body text-center">
-                                    <h5 className="card-title" style={{ color: 'black' }}>{product.product_name}</h5>
-                                    <p className="card-text">${product.product_price}</p>
-                                </div>
-                            </Link>
-                            <button
-                                className="btn btn-warning"
-                                onClick={() => addToCart(product.product_id)}
-                            >
-                                Add to Cart
-                            </button>
-                        </div>
+                    <div className="product-card" key={product.product_id}>
+                        <Link to={`/productdetails/${product.product_id}`} className="text-decoration-none">
+                            <img
+                                src={`http://localhost:8000/storage/${product.product_img1}`}
+                                className="card-img-top"
+                                alt={product.product_name}
+                            />
+                            <div className="card-body text-center">
+                                <h5 className="card-title">{product.product_name}</h5>
+                                <p className="card-text price">${product.product_price}</p>
+                            </div>
+                        </Link>
+                        <button
+                            className="btn btn-warning"
+                            onClick={() => addToCart(product.product_id)}
+                        >
+                            Add to Cart
+                        </button>
                     </div>
                 ))}
                 {products.length === 0 && <p>No products available from this vendor.</p>}

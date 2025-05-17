@@ -37,6 +37,7 @@ const VendorInfo = () => {
     blicense_number: "",
     addressProofImage: null,
     otherProofImages: [],
+    logo: null,
   });
   const [businessErrors, setBusinessErrors] = useState({});
 
@@ -54,6 +55,7 @@ const VendorInfo = () => {
 
   const [bankData, setBankData] = useState({
     bank_name: "",
+    account_type: "",
     account_name: "",
     account_number: "",
   });
@@ -68,13 +70,28 @@ const VendorInfo = () => {
     "Cooperative Bank of Oromia",
   ];
 
-  const accountNumberLengths = {
-    "Awash Bank": [13, 16],
-    "Bank of Abyssinia": [13, 16],
-    "Commercial Bank of Ethiopia": [12, 16],
-    "Dashen Bank": [13, 16],
-    "Nib International Bank": [13, 16],
-    "Cooperative Bank of Oromia": [13, 16],
+  const ethiopianRegions = [
+    "Addis Ababa",
+    "Afar",
+    "Amhara",
+    "Benishangul-Gumuz",
+    "Dire Dawa",
+    "Gambela",
+    "Harari",
+    "Oromia",
+    "Sidama",
+    "Somali",
+    "Southern Nations, Nationalities, and Peoples' Region (SNNPR)",
+    "Tigray",
+  ];
+
+  const walletNames = {
+    "Commercial Bank of Ethiopia": "CBE Birr",
+    "Awash Bank": "Awash Birr",
+    "Dashen Bank": "Amole",
+    "Bank of Abyssinia": "HelloCash",
+    "Nib International Bank": "Nib Digital Wallet",
+    "Cooperative Bank of Oromia": "Coopay",
   };
 
   useEffect(() => {
@@ -126,8 +143,6 @@ const VendorInfo = () => {
 
     if (!personalData.personal_state.trim())
       errors.personal_state = "State is required";
-    else if (containsInvalidChars(personalData.personal_state))
-      errors.personal_state = "State cannot contain numbers or symbols";
 
     if (!personalData.personal_phone.trim()) {
       errors.personal_phone = "Mobile number is required";
@@ -144,8 +159,16 @@ const VendorInfo = () => {
     } else {
       errors.personal_phone = "Mobile number must start with +251 or 09";
     }
-    if (!personalData.personal_unique_id.trim())
+    if (!personalData.personal_unique_id.trim()) {
       errors.personal_unique_id = "Unique ID is required";
+    } else if (
+      !/^(\d{4}\s){3}\d{4}$/.test(
+        personalData.personal_unique_id.trim().replace(/\s+/g, " ")
+      )
+    ) {
+      errors.personal_unique_id =
+        "Invalid FAN Number. Must be 16 digits, grouped as 1234 5678 9012 3456";
+    }
     if (!personalData.idPhotoFront)
       errors.idPhotoFront = "ID Photo (Front) is required";
     if (!personalData.idPhotoBack)
@@ -153,6 +176,7 @@ const VendorInfo = () => {
     setPersonalErrors(errors);
     return Object.keys(errors).length === 0;
   };
+
   const validateBusiness = () => {
     let errors = {};
     if (!businessData.business_name.trim()) {
@@ -170,9 +194,6 @@ const VendorInfo = () => {
     }
     if (!businessData.business_state.trim()) {
       errors.business_state = "Business State is required";
-    } else if (containsInvalidChars(businessData.business_state)) {
-      errors.business_state =
-        "Business State cannot contain numbers or symbols";
     }
     if (!businessData.business_phone.trim()) {
       errors.business_phone = "Business Mobile is required";
@@ -191,12 +212,17 @@ const VendorInfo = () => {
     }
     if (!businessData.blicense_number.trim()) {
       errors.blicense_number = "Business License Number is required";
+    } else if (!/^[a-zA-Z0-9\-\/]{5,20}$/.test(businessData.blicense_number.trim())) {
+      errors.blicense_number = "Invalid license number format.";
     }
     if (!businessData.addressProofImage) {
       errors.addressProofImage = "Address Proof Image is required";
     }
     if (businessData.otherProofImages.length > 5) {
       errors.otherProofImages = "Maximum 5 other proof images are allowed";
+    }
+    if (!businessData.logo) {
+      errors.logo = "Business Logo is required";
     }
     setBusinessErrors(errors);
     return Object.keys(errors).length === 0;
@@ -208,6 +234,9 @@ const VendorInfo = () => {
     else if (containsInvalidChars(bankData.bank_name))
       errors.bank_name = "Bank name cannot contain numbers or symbols";
 
+    if (!bankData.account_type)
+      errors.account_type = "Account Type is required";
+
     if (!bankData.account_name.trim())
       errors.account_name = "Account Holder Name is required";
     else if (containsInvalidChars(bankData.account_name))
@@ -216,15 +245,20 @@ const VendorInfo = () => {
 
     if (!bankData.account_number.trim())
       errors.account_number = "Account Number is required";
-    else if (bankData.bank_name && accountNumberLengths[bankData.bank_name]) {
-      const validLengths = accountNumberLengths[bankData.bank_name];
-      const numberLength = bankData.account_number.length;
-      if (!validLengths.includes(numberLength)) {
-        errors.account_number = `Account Number must be ${validLengths.join(
-          " or "
-        )} digits for ${bankData.bank_name}`;
+    else if (bankData.account_type === "branch" && bankData.account_number.length !== 13)
+      errors.account_number = "Branch account number must be 13 digits";
+    else if (bankData.account_type === "wallet" && bankData.account_number.length !== 16)
+      errors.account_number = "Wallet account number must be 16 digits";
+
+    if (bankData.account_type === "wallet") {
+      const expectedWallet = walletNames[bankData.bank_name];
+      if (!bankData.wallet_name || bankData.wallet_name.trim() === "") {
+        errors.wallet_name = `Wallet name is required for ${bankData.bank_name}`;
+      } else if (expectedWallet && bankData.wallet_name.trim() !== expectedWallet) {
+        errors.wallet_name = `Wallet name for ${bankData.bank_name} must be "${expectedWallet}"`;
       }
     }
+
     setBankErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -240,7 +274,6 @@ const VendorInfo = () => {
     personalData.personal_city.trim() !== "" &&
     !containsInvalidChars(personalData.personal_city) &&
     personalData.personal_state.trim() !== "" &&
-    !containsInvalidChars(personalData.personal_state) &&
     personalData.personal_phone.trim() !== "" &&
     personalData.personal_unique_id.trim() !== "" &&
     personalData.idPhotoFront !== null &&
@@ -254,7 +287,6 @@ const VendorInfo = () => {
     businessData.business_city.trim() !== "" &&
     !containsInvalidChars(businessData.business_city) &&
     businessData.business_state.trim() !== "" &&
-    !containsInvalidChars(businessData.business_state) &&
     businessData.business_phone.trim() !== "" &&
     businessData.blicense_number.trim() !== "" &&
     businessData.addressProofImage !== null;
@@ -275,8 +307,10 @@ const VendorInfo = () => {
       setBankData({
         ...bankData,
         [name]: value,
+        account_type: "",
         account_name: "",
         account_number: "",
+        wallet_name: "",
       });
     } else {
       setBankData({ ...bankData, [name]: value });
@@ -444,13 +478,19 @@ const VendorInfo = () => {
           <p className="error-message">{personalErrors.personal_city}</p>
         )}
 
-        <label>State</label>
-        <input
-          type="text"
+        <label>State/Region</label>
+        <select
           name="personal_state"
           value={personalData.personal_state}
           onChange={handlePersonalChange}
-        />
+        >
+          <option value="">Select Region</option>
+          {ethiopianRegions.map((region) => (
+            <option key={region} value={region}>
+              {region}
+            </option>
+          ))}
+        </select>
         {personalErrors.personal_state && (
           <p className="error-message">{personalErrors.personal_state}</p>
         )}
@@ -466,12 +506,19 @@ const VendorInfo = () => {
           <p className="error-message">{personalErrors.personal_phone}</p>
         )}
 
-        <label>Unique ID Number</label>
+        <label>Unique ID Number (FAN)</label>
         <input
           type="text"
           name="personal_unique_id"
           value={personalData.personal_unique_id}
-          onChange={handlePersonalChange}
+          onChange={(e) => {
+            // Auto-format as 4-4-4-4
+            let value = e.target.value.replace(/\D/g, "").slice(0, 16);
+            value = value.replace(/(.{4})/g, "$1 ").trim();
+            setPersonalData({ ...personalData, personal_unique_id: value });
+            setPersonalErrors({ ...personalErrors, personal_unique_id: "" });
+          }}
+          placeholder="1234 5678 9012 3456"
         />
         {personalErrors.personal_unique_id && (
           <p className="error-message">{personalErrors.personal_unique_id}</p>
@@ -550,13 +597,19 @@ const VendorInfo = () => {
           <p className="error-message">{businessErrors.business_city}</p>
         )}
 
-        <label>Business State</label>
-        <input
-          type="text"
+        <label>Business State/Region</label>
+        <select
           name="business_state"
           value={businessData.business_state}
           onChange={handleBusinessChange}
-        />
+        >
+          <option value="">Select Region</option>
+          {ethiopianRegions.map((region) => (
+            <option key={region} value={region}>
+              {region}
+            </option>
+          ))}
+        </select>
         {businessErrors.business_state && (
           <p className="error-message">{businessErrors.business_state}</p>
         )}
@@ -606,6 +659,17 @@ const VendorInfo = () => {
           <p className="error-message">{businessErrors.otherProofImages}</p>
         )}
 
+        <label>Business Logo</label>
+        <input
+          type="file"
+          name="logo"
+          accept="image/*"
+          onChange={handleBusinessFileChange}
+        />
+        {businessErrors.logo && (
+          <p className="error-message">{businessErrors.logo}</p>
+        )}
+
         <div className="form-navigation">
           <div className="nav-left">
             <span className="nav-link prev-link" onClick={handlePrevious}>
@@ -643,6 +707,25 @@ const VendorInfo = () => {
           <p className="error-message">{bankErrors.bank_name}</p>
         )}
 
+        {/* Account Type appears after bank is selected */}
+        {bankData.bank_name && (
+          <>
+            <label>Account Type</label>
+            <select
+              name="account_type"
+              value={bankData.account_type || ""}
+              onChange={handleBankChange}
+            >
+              <option value="">Select Type</option>
+              <option value="branch">Branch Account (13 digits)</option>
+              <option value="wallet">Wallet/Digital Account (16 digits)</option>
+            </select>
+            {bankErrors.account_type && (
+              <p className="error-message">{bankErrors.account_type}</p>
+            )}
+          </>
+        )}
+
         <label>Account Holder Name</label>
         <input
           type="text"
@@ -663,6 +746,27 @@ const VendorInfo = () => {
         />
         {bankErrors.account_number && (
           <p className="error-message">{bankErrors.account_number}</p>
+        )}
+
+        {/* Wallet Name for wallet accounts */}
+        {bankData.account_type === "wallet" && (
+          <>
+            <label>Wallet Name</label>
+            <input
+              type="text"
+              name="wallet_name"
+              value={bankData.wallet_name || ""}
+              onChange={handleBankChange}
+              placeholder={
+                bankData.bank_name && walletNames[bankData.bank_name]
+                  ? walletNames[bankData.bank_name]
+                  : "Wallet Name"
+              }
+            />
+            {bankErrors.wallet_name && (
+              <p className="error-message">{bankErrors.wallet_name}</p>
+            )}
+          </>
         )}
 
         <div className="form-navigation">
