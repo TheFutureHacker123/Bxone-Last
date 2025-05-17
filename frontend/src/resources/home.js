@@ -30,6 +30,10 @@ function Home() {
   const [subscriptionMessage, setSubscriptionMessage] = useState("");
   const [subscriptionStatus, setSubscriptionStatus] = useState(""); // 'success' or 'error'
 
+  // NEW: State for newly arrived products carousel
+  const [newArrivals, setNewArrivals] = useState([]);
+  const [currentNewArrival, setCurrentNewArrival] = useState(0);
+
   const defaultFontSize = "medium";
   const defaultFontColor = "#000000";
   const defaultLanguage = "english";
@@ -75,6 +79,7 @@ function Home() {
           featuredVendorsResponse,
           bestSellingVendorsResponse,
           categoriesResponse,
+          newArrivalsResponse, // NEW: fetch new arrivals
         ] = await Promise.all([
           fetch("http://localhost:8000/api/topproduct", {
             method: "POST",
@@ -86,6 +91,7 @@ function Home() {
           fetch("http://localhost:8000/api/featured-vendors"),
           fetch("http://localhost:8000/api/best-selling-vendors"),
           fetch("http://localhost:8000/api/vendor/get-categories"),
+          fetch("http://localhost:8000/api/new-arrivals"), // NEW: endpoint for new arrivals
         ]);
 
         if (!topProductsResponse.ok)
@@ -100,6 +106,8 @@ function Home() {
           );
         if (!categoriesResponse.ok)
           throw new Error(`HTTP error! status: ${categoriesResponse.status}`);
+        if (!newArrivalsResponse.ok)
+          throw new Error(`HTTP error! status: ${newArrivalsResponse.status}`);
 
         // Parse all JSON in parallel
         const [
@@ -107,11 +115,13 @@ function Home() {
           featuredVendorsData,
           bestSellingVendorsData,
           categoriesData,
+          newArrivalsData, // NEW
         ] = await Promise.all([
           topProductsResponse.json(),
           featuredVendorsResponse.json(),
           bestSellingVendorsResponse.json(),
           categoriesResponse.json(),
+          newArrivalsResponse.json(), // NEW
         ]);
 
         const products = Array.isArray(topProductsData) ? topProductsData : [];
@@ -120,6 +130,7 @@ function Home() {
         setFeaturedVendors(featuredVendorsData.featured_vendors);
         setBestSellingVendors(bestSellingVendorsData.best_selling_vendors);
         setCategories(categoriesData);
+        setNewArrivals(Array.isArray(newArrivalsData) ? newArrivalsData : []); // NEW
       } catch (err) {
         setError(err.message);
         console.error("Error fetching data:", err);
@@ -129,6 +140,7 @@ function Home() {
         setFeaturedVendors([]);
         setBestSellingVendors([]);
         setCategories([]);
+        setNewArrivals([]); // NEW
       } finally {
         setLoading(false);
       }
@@ -136,6 +148,17 @@ function Home() {
 
     fetchData();
   }, []);
+
+  // NEW: Carousel auto-scroll logic for new arrivals
+  useEffect(() => {
+    if (newArrivals.length === 0) return;
+    const interval = setInterval(() => {
+      setCurrentNewArrival((prev) =>
+        prev === newArrivals.length - 1 ? 0 : prev + 1
+      );
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [newArrivals]);
 
   useEffect(() => {
     const safeSearchResult = Array.isArray(searchresult) ? searchresult : [];
@@ -215,7 +238,10 @@ function Home() {
           Accept: "application/json",
           Authorization: "Bearer " + JSON.parse(storedUser).token,
         },
-        body: JSON.stringify({ product_id: productid, user_id: JSON.parse(storedUser).user_id }),
+        body: JSON.stringify({
+          product_id: productid,
+          user_id: JSON.parse(storedUser).user_id,
+        }),
       });
 
       const result = await response.json();
@@ -509,23 +535,109 @@ function Home() {
         </div>
       </nav>
 
+      {/* NEWLY ARRIVED PRODUCTS CAROUSEL */}
+      {newArrivals.length > 0 && (
+        <div className="new-arrivals-carousel mb-4 fade-in-section">
+          <h2 className="section-heading">
+            {content?.newly_arrived_products || "Newly Arrived Products"}
+          </h2>
+          <div className="carousel-container">
+            {newArrivals.map((product, idx) => (
+              <div
+                key={product.product_id}
+                className={`carousel-slide${
+                  idx === currentNewArrival ? " active" : ""
+                }`}
+              >
+                <div className="card mx-auto carousel-card">
+                  <img
+                    src={`http://localhost:8000/storage/${product.product_img1}`}
+                    alt={product.product_name}
+                    className="card-img-top"
+                    style={{ height: 200, objectFit: "cover" }}
+                  />
+                  <div className="card-body text-center">
+                    <h5 className="card-title">{product.product_name}</h5>
+                    <p className="card-text text-success fw-bold">
+                      ${product.product_price}
+                    </p>
+                    <Link
+                      to={`/productdetails/${product.product_id}`}
+                      className="btn btn-primary btn-sm"
+                    >
+                      {content?.view_product || "View Product"}
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {/* Carousel Controls */}
+            <button
+              className="carousel-arrow left"
+              onClick={() =>
+                setCurrentNewArrival(
+                  currentNewArrival === 0
+                    ? newArrivals.length - 1
+                    : currentNewArrival - 1
+                )
+              }
+              aria-label="Previous"
+            >
+              &#8592;
+            </button>
+            <button
+              className="carousel-arrow right"
+              onClick={() =>
+                setCurrentNewArrival(
+                  currentNewArrival === newArrivals.length - 1
+                    ? 0
+                    : currentNewArrival + 1
+                )
+              }
+              aria-label="Next"
+            >
+              &#8594;
+            </button>
+            {/* Indicators */}
+            <div className="carousel-indicators">
+              {newArrivals.map((_, idx) => (
+                <span
+                  key={idx}
+                  className={`indicator-dot${
+                    idx === currentNewArrival ? " active" : ""
+                  }`}
+                  onClick={() => setCurrentNewArrival(idx)}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Content */}
       <div
-        className="toppush container-fluid mt-5"
+        className="toppush container-fluid mt-5 main-content-body"
         style={{ paddingTop: "60px" }}
       >
-        <div className="bg-warning text-center p-4 rounded mb-4">
-          <h1>{content?.welcome || "Welcome to Your E-Commerce Dashboard"}</h1>
+        <div className="bg-warning text-center p-4 rounded mb-4 fade-in-section">
+          <h1 className="section-heading">
+            {content?.welcome || "Welcome to Your E-Commerce Dashboard"}
+          </h1>
         </div>
 
         {/* Featured Vendors Section */}
         {featuredVendors.length > 0 && (
-          <div className="mb-4">
-            <h2>{content?.featured_vendors || "Featured Vendors"}</h2>
-            <div className="row g-3">
+          <div className="mb-4 fade-in-section">
+            <h2 className="section-heading">
+              {content?.featured_vendors || "Featured Vendors"}
+            </h2>
+            <div className="row g-4 justify-content-center">
               {featuredVendors.map((vendor) => (
-                <div className="col-md-2 col-sm-4" key={vendor.vendor_id}>
-                  <div className="card vendor-card h-100 text-center p-3">
+                <div
+                  className="col-lg-2 col-md-3 col-sm-4 col-6 d-flex align-items-stretch"
+                  key={vendor.vendor_id}
+                >
+                  <div className="card vendor-card h-100 text-center p-3 w-100">
                     {vendor.logo && (
                       <img
                         src={`http://localhost:8000/storage/${vendor.logo}`}
@@ -564,18 +676,22 @@ function Home() {
 
         {/* Best Selling Vendors Section */}
         {bestSellingVendors.length > 0 && (
-          <div className="mb-4">
-            <h2>{content?.best_selling_vendors || "Best Selling Vendors"}</h2>
-            <div className="row g-3">
+          <div className="mb-4 fade-in-section">
+            <h2 className="section-heading">
+              {content?.best_selling_vendors || "Best Selling Vendors"}
+            </h2>
+            <div className="row g-4 justify-content-center">
               {bestSellingVendors.map((vendor) => (
-                <div className="col-md-2 col-sm-4" key={vendor.vendor_id}>
-                  <div className="card vendor-card h-100 text-center p-3">
+                <div
+                  className="col-lg-2 col-md-3 col-sm-4 col-6 d-flex align-items-stretch"
+                  key={vendor.vendor_id}
+                >
+                  <div className="card vendor-card h-100 text-center p-3 w-100">
                     {vendor.logo && (
                       <img
                         src={`http://localhost:8000/storage/${vendor.logo}`}
                         alt={vendor.store_name}
-                        className="
-                        card-img-top rounded-circle mx-auto"
+                        className="card-img-top rounded-circle mx-auto"
                         style={{
                           width: "80px",
                           height: "80px",
@@ -612,8 +728,8 @@ function Home() {
         )}
 
         {/* Category and Sort Dropdowns */}
-        <div className="d-flex justify-content-start align-items-center mb-3">
-          <div className="me-3">
+        <div className="d-flex flex-wrap justify-content-center align-items-center mb-3 fade-in-section">
+          <div className="me-3 mb-2">
             <label htmlFor="categorySelect" className="me-2">
               {content?.category || "Category"}:
             </label>
@@ -631,7 +747,7 @@ function Home() {
               ))}
             </select>
           </div>
-          <div>
+          <div className="mb-2">
             <label htmlFor="sortSelect" className="me-2">
               {content?.sort_sort_by || "Sort By"}:
             </label>
@@ -653,12 +769,17 @@ function Home() {
         </div>
 
         {/* Product Overview */}
-        <h2>{content?.product_overview || "Product Overview"}</h2>
-        <div className="row g-4">
+        <h2 className="section-heading fade-in-section">
+          {content?.product_overview || "Product Overview"}
+        </h2>
+        <div className="row g-4 justify-content-center fade-in-section">
           {Array.isArray(productsToDisplay) &&
             productsToDisplay.map((product) => (
-              <div className="col-md-3 col-sm-6" key={product.product_id}>
-                <div className="card product-card h-100">
+              <div
+                className="col-lg-3 col-md-4 col-sm-6 col-12 d-flex align-items-stretch"
+                key={product.product_id}
+              >
+                <div className="card product-card h-100 w-100">
                   <div className="img-container position-relative">
                     <Link
                       to={"/productdetails/" + product.product_id}
@@ -749,7 +870,9 @@ function Home() {
                     <h5 className="card-title" style={{ color: "black" }}>
                       {product.product_name}
                     </h5>
-                    <p className="card-text">${product.product_price}</p>
+                    <p className="card-text text-success fw-bold">
+                      ${product.product_price}
+                    </p>
                   </div>
                 </div>
               </div>
