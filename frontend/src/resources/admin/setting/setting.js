@@ -126,65 +126,112 @@ function AdminSettings() {
             </button>
 
             <div className={`admin-custom-sidebar ${sidebarVisible ? "show" : "hide"}`}>
-                <div className="d-flex align-items-center mb-3">
-                    <span className="text-center admin-custom-css flex-grow-1 mt-2 ms-4" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                    <div className="d-flex align-items-center mb-3">
+                      <span className="text-center admin-custom-css flex-grow-1 mt-2 ms-4" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
                         {content?.admin_dashboard_title || "Admin Dashboard"}
-                    </span>
-                </div>
-
-                <Link to="/admin/" className="admin-custom-link">
-                    <FaChartLine className="me-2" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} />
-                    <span style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                      </span>
+                    </div>
+            
+                    <Link to="/admin/" className="admin-custom-link">
+                      <FaChartLine className="me-2" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} />
+                      <span style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
                         {content?.dashboard || "Dashboard"}
-                    </span>
-                </Link>
-
-                <div className="dropdown">
-                    <div className="admin-custom-link" onClick={() => handleDropdown("user_management")}>
+                      </span>
+                    </Link>
+            
+                    {/* User Management Dropdown */}
+                    <div className="dropdown">
+                      <div className="admin-custom-link" onClick={() => handleDropdown("products")}>
                         <FaUsers className="me-2" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} />
                         <span style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
-                            {content?.user_management || "User Management"}
+                          {content?.user_management || "User Management"}
                         </span>
-                    </div>
-                    {openDropdown === "user_management" && (
+                      </div>
+                      {openDropdown === "products" && (
                         <ul className="dropdown-menu admin-custom-dropdown-menu">
-                            <li><Link to="/admin/list-users" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>{content?.list_users || "List Users"}</Link></li>
-                            <li><Link to="/admin/user-messages" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>{content?.user_messages || "User Messages"}</Link></li>
+                          <li>
+                            <Link to="/admin/list-users" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                              {content?.list_users || "List Users"}
+                            </Link>
+                          </li>
+                          <li>
+                            <Link to="/admin/user-messages" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                              {content?.user_messages || "User Messages"}
+                            </Link>
+                          </li>
                         </ul>
-                    )}
-                </div>
-
-                <div className="dropdown">
-                    <div className="admin-custom-link" onClick={() => handleDropdown("vendor_management")}>
+                      )}
+                    </div>
+            
+                    {/* Vendor Management Dropdown */}
+                    <div className="dropdown">
+                      <div className="admin-custom-link" onClick={() => handleDropdown("orders")}>
                         <FaStore className="me-2" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} />
                         <span style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
-                            {content?.vendor_management || "Vendor Management"}
+                          {content?.vendor_management || "Vendor Management"}
                         </span>
-                    </div>
-                    {openDropdown === "vendor_management" && (
+                      </div>
+                      {openDropdown === "orders" && (
                         <ul className="dropdown-menu admin-custom-dropdown-menu">
-                            <li><Link to="/admin/new-vendors" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>{content?.new_vendors || "New Vendors"}</Link></li>
-                            <li><Link to="/admin/list-vendors" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>{content?.list_of_vendors || "List of Vendors"}</Link></li>
+                          <li>
+                            <Link to="/admin/new-vendors" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                              {content?.new_vendors || "New Vendors"}
+                            </Link>
+                          </li>
+                          <li>
+                            <Link to="/admin/list-vendors" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                              {content?.list_of_vendors || "List of Vendors"}
+                            </Link>
+                          </li>
+                          <li>
+                            <Link to="/admin/manage-products" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                              {content?.manage_products || "Manage Products"}
+                            </Link>
+                          </li>
+                          <li>
+                            <Link to="/admin/manage-orders" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                              {content?.manage_orders || "Manage Orders"}
+                            </Link>
+                          </li>
+                          <li>
+                            <Link to="/admin/approve-payout" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                              {content?.approve_payout || "Approve Payout"}
+                            </Link>
+                          </li>
+                          <li>
+                            <Link to="/admin/vendor-messages" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                              {content?.vendor_messages || "Vendor Messages"}
+                            </Link>
+                          </li>
                         </ul>
-                    )}
-                </div>
-
-                <div className="dropdown">
-                    <div className="admin-custom-link" onClick={() => handleDropdown("profile")}>
+                      )}
+                    </div>
+            
+                    {/* Profile Dropdown */}
+                    <div className="dropdown">
+                      <div className="admin-custom-link" onClick={() => handleDropdown("profile")}>
                         <FaUser className="me-2" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} />
                         <span style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
-                            {content?.profile || "Profile"}
+                          {content?.profile || "Profile"}
                         </span>
-                    </div>
-                    {openDropdown === "profile" && (
+                      </div>
+                      {openDropdown === "profile" && (
                         <ul className="dropdown-menu admin-custom-dropdown-menu">
+                          <li>
                             <li><Link to="/admin/settings" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>{content?.settings || "Settings"}</Link></li>
-                            <li><Link to="/admin/manage-password" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>{content?.update_password || "Update Password"}</Link></li>
-                            <li><a onClick={logout} className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>{content?.logout || "Logout"}</a></li>
+                            <Link to="/admin/manage-password" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                              {content?.update_password || "Update Password"}
+                            </Link>
+                          </li>
+                          <li>
+                            <a onClick={logout} className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                              {content?.logout || "Logout"}
+                            </a>
+                          </li>
                         </ul>
-                    )}
-                </div>
-            </div>
+                      )}
+                    </div>
+                  </div>
 
             <div className={`admin-main-content ${sidebarVisible ? "with-sidebar" : "full-width"}`}>
                 <div className="admin-custom-header text-center">
