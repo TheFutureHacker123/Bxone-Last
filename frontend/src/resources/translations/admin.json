@@ -69,7 +69,24 @@
     "confirm_new_password": "Confirm New Password",
     "fill_all_fields": "Please fill in all fields.",
     "password_mismatch": "New passwords do not match.",
-    "settings":"Settings"
+    "settings":"Settings",
+
+    "language":"Language",
+    "small":"Small",
+    "medium":"Medium",
+    "large":"Large",
+    
+    "font_size":"Font Size",
+    "font_color":"Font Color",
+    "set_to_default":"Set to Default",
+    
+    "analytics_dashboard":"Analytics Dashboard",
+    "total_orders":"Total Orders",
+    "pending_orders":"Pending Orders",
+    "shipped":"Shipped",
+    "complete_orders":"Complete Orders"
+
+    
 
   },
   "amharic": {
@@ -141,6 +158,19 @@
     "confirm_new_password": "አዲስ የይለፍ ቃል ይረግሙ",
     "fill_all_fields": "እባክዎ የሁሉንም መስኮች ይሙሉ.",
     "password_mismatch": "የአዲስ የይለፍ ቃል እና የማረጋገጥ ይለፍ ቃል አልተመሳሰሉም.",
-    "settings":"ቅንጅቶች"
+    "settings":"ቅንጅቶች",
+    "language": "ቋንቋ",
+    "small": "ትንሽ",
+    "medium": "መካከለኛ",
+    "large": "ትልቅ",
+    "font_size": "መጠን ፊደል",
+    "font_color": "የፊደል ቀለም",
+    "set_to_default": "ወደ ነባር አንቀሳቅስ",
+
+    "analytics_dashboard": "አንሊቲክስ ዳሽቦርድ",
+    "total_orders": "ጠቅላላ ትእዛዞች",
+    "pending_orders": "በገንዘብ የቆሞ ትእዛዞች",
+    "shipped": "እንደተላከ",
+    "complete_orders": "ጨርሷል ትእዛዞች"
   }
 }

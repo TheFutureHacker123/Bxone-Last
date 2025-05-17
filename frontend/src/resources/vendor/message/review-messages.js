@@ -249,66 +249,66 @@ function ReviewMessages() {
 
       <div className={`main-content ${sidebarVisible ? "with-sidebar" : "full-width"}`}>
         <div className="custom-header text-center">
-          <h1 className="h4 mb-0">Product Review Messages</h1>
+          <h1 className="h4 mb-0">{content?.product_reviews || "Product Reviews"}</h1>
         </div>
 
         <Container fluid>
-          <Row>
-            <Col lg={10} className="p-4 d-flex justify-content-center align-items-center" style={{ width: '100%' }}>
-              <Card style={{ width: '80%', maxWidth: '1200px' }}>
-                <Card.Header>
-                  <h4 className="text-center">Product Reviews</h4>
-                </Card.Header>
-                <Card.Body>
-                  <ListGroup>
-                    {products.map(product => (
-                      <ListGroup.Item key={product.product_id} className="d-flex justify-content-between align-items-center">
-                        <div>
-                          <strong>{product.product_name}</strong>
-                        </div>
-                        <Button variant="outline-primary" size="sm" onClick={() => handleShow(product)}>
-                          View Reviews
-                        </Button>
-                      </ListGroup.Item>
-                    ))}
-                  </ListGroup>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
+  <Row>
+    <Col lg={10} className="p-4 d-flex justify-content-center align-items-center" style={{ width: '100%' }}>
+      <Card style={{ width: '80%', maxWidth: '1200px' }}>
+        <Card.Header>
+          <h4 className="text-center">{content?.product_reviews || "Product Reviews"}</h4>
+        </Card.Header>
+        <Card.Body>
+          <ListGroup>
+            {products.map(product => (
+              <ListGroup.Item key={product.product_id} className="d-flex justify-content-between align-items-center">
+                <div>
+                  <strong>{product.product_name}</strong>
+                </div>
+                <Button variant="outline-primary" size="sm" onClick={() => handleShow(product)}>
+                  {content?.view_reviews || "View Reviews"}
+                </Button>
+              </ListGroup.Item>
+            ))}
+          </ListGroup>
+        </Card.Body>
+      </Card>
+    </Col>
+  </Row>
 
-          {/* Modal for Viewing Reviews */}
-          <Modal show={showModal} onHide={handleClose} size="lg">
-            <Modal.Header closeButton>
-              <Modal.Title>{selectedProduct ? selectedProduct.product_name : ''} Reviews</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <ListGroup>
-                {selectedProduct && selectedProduct.reviews && selectedProduct.reviews.length > 0 ? (
-                  selectedProduct.reviews.map((review, index) => (
-                    <ListGroup.Item key={index} className="d-flex align-items-center">
-                      <FaUserCircle className="me-2" size={30} />
-                      <div>
-                        <strong>{review.user.name}</strong>: {review.review_txt}
-                        <br />
-                        <small className="text-muted">{new Date(review.created_at).toLocaleString()} | Rating: {Array(review.rate).fill('⭐')}</small>
-                      </div>
-                    </ListGroup.Item>
-                  ))
-                ) : (
-                  <ListGroup.Item className="text-center">
-                    No reviews available for this product.
-                  </ListGroup.Item>
-                )}
-              </ListGroup>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="secondary" onClick={handleClose}>
-                Close
-              </Button>
-            </Modal.Footer>
-          </Modal>
-        </Container>
+  {/* Modal for Viewing Reviews */}
+  <Modal show={showModal} onHide={handleClose} size="lg">
+    <Modal.Header closeButton>
+      <Modal.Title>{selectedProduct ? selectedProduct.product_name : ''} {content?.product_reviews || "Reviews"}</Modal.Title>
+    </Modal.Header>
+    <Modal.Body>
+      <ListGroup>
+        {selectedProduct && selectedProduct.reviews && selectedProduct.reviews.length > 0 ? (
+          selectedProduct.reviews.map((review, index) => (
+            <ListGroup.Item key={index} className="d-flex align-items-center">
+              <FaUserCircle className="me-2" size={30} />
+              <div>
+                <strong>{review.user.name}</strong>: {review.review_txt}
+                <br />
+                <small className="text-muted">{new Date(review.created_at).toLocaleString()} | Rating: {Array(review.rate).fill('⭐')}</small>
+              </div>
+            </ListGroup.Item>
+          ))
+        ) : (
+          <ListGroup.Item className="text-center">
+            {content?.no_reviews_available || "No reviews available for this product."}
+          </ListGroup.Item>
+        )}
+      </ListGroup>
+    </Modal.Body>
+    <Modal.Footer>
+      <Button variant="secondary" onClick={handleClose}>
+        {content?.close || "Close"}
+      </Button>
+    </Modal.Footer>
+  </Modal>
+</Container>
       </div>
     </div>
   );

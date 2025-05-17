@@ -161,7 +161,7 @@ function SAdminManageProfile() {
                     </div>
                     {openDropdown === "profile" && (
                         <ul className="dropdown-menu admin-custom-dropdown-menu">
-                            <li><Link to="/superadmin/manage-profile" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>{content?.manage_profile || "Manage Profile"}</Link></li>
+                            <li><Link to="/superadmin/manage-profile" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>{content?.setting || "Settings"}</Link></li>
                             <li><a onClick={logout} className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>{content?.logout || "Logout"}</a></li>
                         </ul>
                     )}
@@ -170,7 +170,7 @@ function SAdminManageProfile() {
 
             <div className={`admin-main-content ${sidebarVisible ? "with-sidebar" : "full-width"}`}>
                 <div className="admin-custom-header text-center">
-                    <h2 className="h4 mb-0" style={{ color: "var(--font-color)" }}>{content?.settings || "Settings"}</h2>
+                    <h2 className="h4 mb-0" style={{ color: "var(--font-color)" }}>{content?.setting || "Settings"}</h2>
                 </div>
 
                 <Container className="settings-container mt-3">

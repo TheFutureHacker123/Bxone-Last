@@ -5,7 +5,7 @@ import {
 import { Row, Col, Button, Form, Modal } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
-import Translation from "../../translations/lang.json";
+import Translation from "../../translations/superadmin.json";
 import "../style/list-admin.css";
 
 function SAdminListAdmins() {
@@ -252,7 +252,7 @@ function SAdminListAdmins() {
           </div>
           {openDropdown === "profile" && (
             <ul className="dropdown-menu admin-custom-dropdown-menu">
-              <li><Link to="/superadmin/manage-profile" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>{content?.manage_profile || "Manage Profile"}</Link></li>
+              <li><Link to="/superadmin/manage-profile" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>{content?.setting || "Settings"}</Link></li>
               <li><a onClick={logout} className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>{content?.logout || "Logout"}</a></li>
             </ul>
           )}
@@ -261,7 +261,7 @@ function SAdminListAdmins() {
 
       <div className={`main-content ${sidebarVisible ? "with-sidebar" : "full-width"}`}>
         <div className="custom-header text-center">
-          <h1 className="h4 mb-0">Admin List</h1>
+          <h1 className="h4 mb-0">{content?.admin_list || "Admin List"}</h1>
         </div>
 
         <div style={{ width: '100%', maxWidth: '800px', margin: '0 auto' }}>

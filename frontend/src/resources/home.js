@@ -370,7 +370,7 @@ function Home() {
               {localStorage.getItem("user-info") && (
                 <div className="d-inline-block me-3">
                   <Link
-                    to="/notifications"
+                    to="/notification"
                     className="text-dark text-decoration-none"
                   >
                     <i className="bi bi-bell fs-5"></i>
@@ -411,11 +411,11 @@ function Home() {
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
                 >
-                  <option value="en">English</option>
-                  <option value="am">Amharic</option>
-                  <option value="om">Oromo</option>
-                  <option value="so">Somali</option>
-                  <option value="ti">Tigrinya</option>
+                  <option value="english">English</option>
+                  <option value="amharic">Amharic</option>
+                  <option value="afan_oromo">Oromo</option>
+                  <option value="ethiopian_somali">Somali</option>
+                  <option value="tigrinya">Tigrinya</option>
                 </select>
               </div>
             </div>

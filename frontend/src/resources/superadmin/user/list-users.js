@@ -212,7 +212,7 @@ function SAdminListUsers() {
           </div>
           {openDropdown === "profile" && (
             <ul className="dropdown-menu admin-custom-dropdown-menu">
-              <li><Link to="/superadmin/manage-profile" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>{content?.manage_profile || "Manage Profile"}</Link></li>
+              <li><Link to="/superadmin/manage-profile" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>{content?.setting || "Settings"}</Link></li>
               <li><a onClick={logout} className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>{content?.logout || "Logout"}</a></li>
             </ul>
           )}
