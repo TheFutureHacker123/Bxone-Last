@@ -8,6 +8,11 @@ import Register from "./resources/user/register"
 
 import Wishlist from "./resources/user/Wishlist";
 
+import AboutPage from "./resources/user/about/AboutPage";
+import PrivacyPage from "./resources/user/about/PrivacyPage";
+import TermsPage from "./resources/user/about/TermsPage";
+import CareersPage from "./resources/user/about/CareersPage";
+
 import Cart from "./resources/user/cart"
 import ChatVendor from "./resources/user/chat-to-vendor"
 import ChatAdmin from "./resources/user/chat-to-admin"
@@ -52,7 +57,10 @@ import ProtectPathVendor from "./resources/vendor/protectpath"
 import VendorInfo from "./resources/vendor/vendor-info"
 
 
-
+import ShippingPolicyPage from "./resources/user/customer-service/ShippingPolicyPage"
+import ReturnsPolicy from "./resources/user/customer-service/ReturnsPolicy"
+import FAQ from "./resources/user/customer-service/FAQ"
+import Contact from "./resources/user/customer-service/Contact"
 
 
 
@@ -118,6 +126,11 @@ function App() {
 
           <Route path="/wishlist" element={<Wishlist />} />
 
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/careers" element={<CareersPage />} />
+
           <Route path="/admin/list-users" element={<ProtectPathAdmin Cmp={ListUsers} />} />
           <Route path="/admin/user-messages" element={<ProtectPathAdmin Cmp={UserMessagesAdmin} />} />
           <Route path="/admin/new-Vendors" element={<ProtectPathAdmin Cmp={NewVendors} />} />
@@ -133,6 +146,11 @@ function App() {
  
           <Route path="/superadmin/testone" element={<TestOne />} />
 
+
+          <Route path="/shipping-policy" element={<ShippingPolicyPage />} />
+          <Route path="/returns-policy" element={<ReturnsPolicy />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/contact" element={<Contact />} />
 
           <Route path="/vendor/dashboard" element={<ProtectPathVendor Cmp={VendorDashboard} />} />
           <Route path="/vendor" element={<ProtectPathVendor Cmp={VendorDashboard} />} />
