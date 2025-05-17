@@ -27,6 +27,8 @@ function VendorDashboard() {
     },
   });
 
+  const [vendorInfo, setVendorInfo] = useState(null);
+
   const defaultFontSize = 'medium';
   const defaultFontColor = '#000000';
   const defaultLanguage = 'english';
@@ -44,6 +46,20 @@ function VendorDashboard() {
     localStorage.setItem('language', language);
     setContent(Translation[language]);
   }, [fontSize, fontColor, language]);
+
+  useEffect(() => {
+    // Fetch vendor info from backend or localStorage
+    const info = JSON.parse(localStorage.getItem('vendor-info'));
+    setVendorInfo(info);
+  }, []);
+
+  useEffect(() => {
+    if (vendorInfo && !vendorInfo.is_approved) {
+      // Redirect or show message
+      navigate('/vendor/dashboard');
+      toast.error("Your account must be approved by admin to add coupons.");
+    }
+  }, [vendorInfo]);
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -155,14 +171,26 @@ function VendorDashboard() {
           {openDropdown === "products" && (
             <ul className="dropdown-menu custom-dropdown-menu">
               <li>
-                <Link to="/vendor/add-products" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
-                  {content?.add_products || "Add Products"}
-                </Link>
+                {vendorInfo?.is_approved ? (
+                  <Link to="/vendor/add-products" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                    {content?.add_products || "Add Products"}
+                  </Link>
+                ) : (
+                  <span className="dropdown-item-vendor text-muted" title="Your account must be approved by admin to add products.">
+                    {content?.add_products || "Add Products"} (Awaiting Approval)
+                  </span>
+                )}
               </li>
               <li>
-                <Link to="/vendor/add-coupons" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
-                  {content?.add_coupons || "Add Coupons"}
-                </Link>
+                {vendorInfo?.is_approved ? (
+                  <Link to="/vendor/add-coupons" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                    {content?.add_coupons || "Add Coupons"}
+                  </Link>
+                ) : (
+                  <span className="dropdown-item-vendor text-muted" title="Your account must be approved by admin to add coupons.">
+                    {content?.add_coupons || "Add Coupons"} (Awaiting Approval)
+                  </span>
+                )}
               </li>
             </ul>
           )}

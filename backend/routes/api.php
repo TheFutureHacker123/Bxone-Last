@@ -145,3 +145,13 @@ Route::get('/wishlist/check/{product_id}', [WishlistController::class, 'checkInW
 
 
 Route::post('/subscribe', [SubscriptionController::class, 'subscribe']);
+
+
+Route::post('pay', 'App\Http\Controllers\ChapaController@initialize')->name('pay');
+ 
+// The callback url after a payment
+Route::get('callback/{reference}', 'App\Http\Controllers\ChapaController@callback')->name('callback');
+
+
+
+Route::get('/new-arrivals', [ProductController::class, 'newArrivals']);

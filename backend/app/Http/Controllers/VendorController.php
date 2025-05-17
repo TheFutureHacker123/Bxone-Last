@@ -224,11 +224,10 @@ class VendorController extends Controller
             'personal_city' => 'required|string|max:100',
             'personal_state' => 'required|string|max:100',
             'personal_phone' => 'required|string|max:100',
-            'personal_unique_id' => 'required|integer',
+            'personal_unique_id' => ['required', 'regex:/^100\d{9}$/'],
             'idPhotoFront' => 'required|image|max:2048',
             'idPhotoBack' => 'required|image|max:2048',
             'business_name' => 'required|string|max:100',
-
             'business_address' => 'required|string|max:100',
             'business_city' => 'required|string|max:100',
             'business_phone' => 'required|string|max:100',
@@ -240,6 +239,7 @@ class VendorController extends Controller
             'account_number' => 'required|string|max:100',
             'vendor_id' => 'required|integer', // Accept vendor_id from user
             'verified_by' => 'nullable|integer', // Accept verified_by from user
+            'logo' => 'nullable|image|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -253,6 +253,7 @@ class VendorController extends Controller
         $idPhotoFrontPath = $request->file('idPhotoFront')->store('id_photos', 'public');
         $idPhotoBackPath = $request->file('idPhotoBack')->store('id_photos', 'public');
         $addressProofPath = $request->file('addressProofImage')->store('address_proofs', 'public');
+        $logoPath = $request->hasFile('logo') ? $request->file('logo')->store('logos', 'public') : null;
 
         // Create personal info record
         $personalInfo = PersonalInfo::create([
@@ -294,6 +295,12 @@ class VendorController extends Controller
             'verified_by' => $request->verified_by, // Use user-provided verified_by
         ]);
 
+        $vendor = Vendor::find($request->vendor_id);
+        if ($logoPath) {
+            $vendor->logo = $logoPath;
+            $vendor->save();
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Vendor information submitted successfully.',
@@ -324,6 +331,11 @@ class VendorController extends Controller
             'product_img4'      => 'nullable|image|mimes:jpeg,png,jpg,gif',
             'product_img5'      => 'nullable|image|mimes:jpeg,png,jpg,gif',
         ]);
+
+        $vendor = Vendor::find($request->vendor_id);
+        if (!$vendor || !$vendor->is_approved) {
+            return response()->json(['message' => 'Vendor not approved'], 403);
+        }
 
         // ✅ Step 2: Handle image uploads
         $imageFields = ['product_img1', 'product_img2', 'product_img3', 'product_img4', 'product_img5'];
@@ -426,72 +438,72 @@ class VendorController extends Controller
         return response()->json(['message' => 'Product not found'], 404);
     }
 
- 
- 
- 
+
+
+
     public function orderlist(Request $request)
-{
-    // Get vendor_id and order_status from the request
-    $vendor_id = $request->input('vendor_id');
-    $order_status = $request->input('order_status');
+    {
+        // Get vendor_id and order_status from the request
+        $vendor_id = $request->input('vendor_id');
+        $order_status = $request->input('order_status');
 
-    // Retrieve orders with product and address details
-    $orders = Orders::where('vendor_id', $vendor_id)
-        ->where('order_status', $order_status)
-        ->with([
-            'product' => function ($query) {
-                $query->select('product_id', 'product_name', 'product_img1');
-            },
-            'address' => function ($query) {
-                $query->select(
-                    'address_id',
-                    'full_name',
-                    'phone',
-                    'country',
-                    'state',
-                    'city',
-                    'post'
-                );
-            }
-        ])
-        ->select(
-            'order_id',
-            'user_id',
-            'product_id',
-            'address_id',
-            // 'payment_method',
-            'created_at as order_time',
-            'order_status',
-            'total_paid',
-            'orderd_quantity'
-        )
-        ->get();
+        // Retrieve orders with product and address details
+        $orders = Orders::where('vendor_id', $vendor_id)
+            ->where('order_status', $order_status)
+            ->with([
+                'product' => function ($query) {
+                    $query->select('product_id', 'product_name', 'product_img1');
+                },
+                'address' => function ($query) {
+                    $query->select(
+                        'address_id',
+                        'full_name',
+                        'phone',
+                        'country',
+                        'state',
+                        'city',
+                        'post'
+                    );
+                }
+            ])
+            ->select(
+                'order_id',
+                'user_id',
+                'product_id',
+                'address_id',
+                // 'payment_method',
+                'created_at as order_time',
+                'order_status',
+                'total_paid',
+                'orderd_quantity'
+            )
+            ->get();
 
-    // Format the response
-    $formattedOrders = $orders->map(function ($order) {
-    $address = $order->address;
-    $fullAddress = $address
-        ? trim("{$address->country}, {$address->state}, {$address->city}, " . ($address->post ? $address->post : ''), ', ')
-        : 'Address not available';
+        // Format the response
+        $formattedOrders = $orders->map(function ($order) {
+            $address = $order->address;
+            $fullAddress = $address
+                ? trim("{$address->country}, {$address->state}, {$address->city}, " . ($address->post ? $address->post : ''), ', ')
+                : 'Address not available';
 
-    return [
-        'order_id' => $order->order_id,
-        'product_id' => $order->product_id,
-        'product_name' => $order->product->product_name ?? 'N/A',
-        'product_image' => $order->product->product_img1 ?? null,
-        'payment_method' => $order->payment_method,
-        'order_time' => $order->created_at ? \Carbon\Carbon::parse($order->created_at)->toDateTimeString() : 'N/A', // Convert to Carbon instance
-        'order_status' => $order->order_status,
-        'address' => $fullAddress,
-        'phone' => $address->phone ?? 'N/A',
-        'full_name' => $address->full_name ?? 'N/A',
-        'total_paid' => $order->total_paid,
-        'ordered_quantity' => $order->orderd_quantity,
-    ];
-});
+            return [
+                'order_id' => $order->order_id,
+                'product_id' => $order->product_id,
+                'product_name' => $order->product->product_name ?? 'N/A',
+                'product_image' => $order->product->product_img1 ?? null,
+                'payment_method' => $order->payment_method,
+                'order_time' => $order->created_at ? \Carbon\Carbon::parse($order->created_at)->toDateTimeString() : 'N/A', // Convert to Carbon instance
+                'order_status' => $order->order_status,
+                'address' => $fullAddress,
+                'phone' => $address->phone ?? 'N/A',
+                'full_name' => $address->full_name ?? 'N/A',
+                'total_paid' => $order->total_paid,
+                'ordered_quantity' => $order->orderd_quantity,
+            ];
+        });
 
-    return response()->json($formattedOrders);
-}
+        return response()->json($formattedOrders);
+    }
 
 
 
@@ -683,117 +695,111 @@ class VendorController extends Controller
         ]);
     }
 
- public function analytics(Request $request)
-{
-    $vendorId = $request->input('vendor_id');
+    public function analytics(Request $request)
+    {
+        $vendorId = $request->input('vendor_id');
 
-    // General counts
-    $totalOrders = Orders::where('vendor_id', $vendorId)->count();
-    $pendingOrders = Orders::where('vendor_id', $vendorId)
-                            ->where('order_status', 'Pending')
-                            ->count();
-    $completedOrders = Orders::where('vendor_id', $vendorId)
-                             ->where('order_status', 'Completed')
-                             ->count();
-    $shippedOrders = Orders::where('vendor_id', $vendorId)
-                           ->where('order_status', 'Shipped')
-                           ->count();
+        // General counts
+        $totalOrders = Orders::where('vendor_id', $vendorId)->count();
+        $pendingOrders = Orders::where('vendor_id', $vendorId)
+            ->where('order_status', 'Pending')
+            ->count();
+        $completedOrders = Orders::where('vendor_id', $vendorId)
+            ->where('order_status', 'Completed')
+            ->count();
+        $shippedOrders = Orders::where('vendor_id', $vendorId)
+            ->where('order_status', 'Shipped')
+            ->count();
 
-    // Time-based analytics (e.g., daily counts)
-    $dateRange = now()->subDays(30); // Adjust the range as needed
-    $dailyOrders = Orders::where('vendor_id', $vendorId)
-                         ->where('created_at', '>=', $dateRange)
-                         ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
-                         ->groupBy('date')
-                         ->orderBy('date')
-                         ->get();
+        // Time-based analytics (e.g., daily counts)
+        $dateRange = now()->subDays(30); // Adjust the range as needed
+        $dailyOrders = Orders::where('vendor_id', $vendorId)
+            ->where('created_at', '>=', $dateRange)
+            ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
 
-    // Prepare data for chart
-    $orderDates = $dailyOrders->pluck('date');
-    $orderCounts = $dailyOrders->pluck('count');
+        // Prepare data for chart
+        $orderDates = $dailyOrders->pluck('date');
+        $orderCounts = $dailyOrders->pluck('count');
 
-    return response()->json([
-        'total_orders' => $totalOrders,
-        'pending_orders' => $pendingOrders,
-        'shipped_orders' => $shippedOrders,
-        'completed_orders' => $completedOrders,
-        'daily_orders' => [
-            'dates' => $orderDates,
-            'counts' => $orderCounts,
-        ],
-    ]);
-}
-
-
-public function orderlistforadmin(Request $request)
-{
-    // Get vendor_id from the request
-    $vendor_id = $request->input('vendor_id');
-
-    // Retrieve orders with product, address, and user details
-    $orders = Orders::where('vendor_id', $vendor_id)
-        ->with([
-            'product' => function ($query) {
-                $query->select('product_id', 'product_name', 'product_img1');
-            },
-            'address' => function ($query) {
-                $query->select(
-                    'address_id',
-                    'full_name',
-                    'phone',
-                    'country',
-                    'state',
-                    'city',
-                    'post'
-                );
-            },
-            'user' => function ($query) {
-                $query->select('user_id', 'email'); // Retrieve the email
-            }
-        ])
-        ->select(
-            'order_id',
-            'user_id',
-            'product_id',
-            'address_id',
-            'payment_method',
-            'created_at as order_time',
-            'order_status',
-            'total_paid',
-            'orderd_quantity'
-        )
-        ->get();
-
-    // Format the response
-    $formattedOrders = $orders->map(function ($order) {
-        $address = $order->address;
-        $fullAddress = $address
-            ? trim("{$address->country}, {$address->state}, {$address->city}, " . ($address->post ? $address->post : ''), ', ')
-            : 'Address not available';
-
-        return [
-            'order_id' => $order->order_id,
-            'product_id' => $order->product_id,
-            'product_name' => $order->product->product_name ?? 'N/A',
-            'product_img1' => $order->product->product_img1 ?? null,
-            'payment_method' => $order->payment_method,
-            'created_at' => $order->created_at ? \Carbon\Carbon::parse($order->created_at)->toDateTimeString() : 'N/A',
-            'order_status' => $order->order_status,
-            'address' => $fullAddress,
-            'phone' => $address->phone ?? 'N/A',
-            'full_name' => $address->full_name ?? 'N/A',
-            'email' => $order->user->email ?? 'N/A', // Include user email
-            'total_paid' => $order->total_paid,
-            'ordered_quantity' => $order->orderd_quantity,
-        ];
-    });
-
-    return response()->json($formattedOrders);
-}
+        return response()->json([
+            'total_orders' => $totalOrders,
+            'pending_orders' => $pendingOrders,
+            'shipped_orders' => $shippedOrders,
+            'completed_orders' => $completedOrders,
+            'daily_orders' => [
+                'dates' => $orderDates,
+                'counts' => $orderCounts,
+            ],
+        ]);
+    }
 
 
+    public function orderlistforadmin(Request $request)
+    {
+        // Get vendor_id from the request
+        $vendor_id = $request->input('vendor_id');
 
+        // Retrieve orders with product, address, and user details
+        $orders = Orders::where('vendor_id', $vendor_id)
+            ->with([
+                'product' => function ($query) {
+                    $query->select('product_id', 'product_name', 'product_img1');
+                },
+                'address' => function ($query) {
+                    $query->select(
+                        'address_id',
+                        'full_name',
+                        'phone',
+                        'country',
+                        'state',
+                        'city',
+                        'post'
+                    );
+                },
+                'user' => function ($query) {
+                    $query->select('user_id', 'email'); // Retrieve the email
+                }
+            ])
+            ->select(
+                'order_id',
+                'user_id',
+                'product_id',
+                'address_id',
+                'payment_method',
+                'created_at as order_time',
+                'order_status',
+                'total_paid',
+                'orderd_quantity'
+            )
+            ->get();
 
+        // Format the response
+        $formattedOrders = $orders->map(function ($order) {
+            $address = $order->address;
+            $fullAddress = $address
+                ? trim("{$address->country}, {$address->state}, {$address->city}, " . ($address->post ? $address->post : ''), ', ')
+                : 'Address not available';
 
+            return [
+                'order_id' => $order->order_id,
+                'product_id' => $order->product_id,
+                'product_name' => $order->product->product_name ?? 'N/A',
+                'product_img1' => $order->product->product_img1 ?? null,
+                'payment_method' => $order->payment_method,
+                'created_at' => $order->created_at ? \Carbon\Carbon::parse($order->created_at)->toDateTimeString() : 'N/A',
+                'order_status' => $order->order_status,
+                'address' => $fullAddress,
+                'phone' => $address->phone ?? 'N/A',
+                'full_name' => $address->full_name ?? 'N/A',
+                'email' => $order->user->email ?? 'N/A', // Include user email
+                'total_paid' => $order->total_paid,
+                'ordered_quantity' => $order->orderd_quantity,
+            ];
+        });
 
+        return response()->json($formattedOrders);
+    }
 }

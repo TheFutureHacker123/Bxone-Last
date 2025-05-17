@@ -52,4 +52,8 @@ class Product extends Model
     {
         return $this->hasMany(Wishlist::class, 'product_id');
     }
+    public function scopeNewArrivals($query, $limit = 10)
+    {
+        return $query->orderBy('created_at', 'desc')->take($limit);
+    }
 }

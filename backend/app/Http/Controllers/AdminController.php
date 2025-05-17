@@ -121,24 +121,18 @@ class AdminController extends Controller
         return response()->json(['users' => $users]);
     }
 
-    // Change user status
-    public function changevendorstatus(Request $request)
+    // Change vendor status
+    public function changeVendorStatus(Request $request)
     {
-        // Validate the incoming request
-        $validator = Validator::make($request->all(), [
-            'vendor_id' => 'required|exists:vendors,vendor_id',
-            'status' => 'required|in:UnVerified,Pending,Verified,Rejected,Suspended',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['success' => false, 'errors' => $validator->errors()], 400);
+        $vendor = Vendor::find($request->vendor_id);
+        if ($vendor) {
+            $vendor->status = $request->status;
+            // Approve only if status is Verified
+            $vendor->is_approved = ($request->status === 'Verified') ? 1 : 0;
+            $vendor->save();
+            return response()->json(['success' => true]);
         }
-        // Find the user and update the status
-        $user = Vendor::find($request->vendor_id);
-        $user->status = $request->status; // Update status
-        $user->save();
-
-        return response()->json(['success' => true, 'user' => $user]);
+        return response()->json(['success' => false], 404);
     }
 
     // update admin password
@@ -541,9 +535,5 @@ public function changeProductStatus(Request $request)
             'product' => $product,
         ]);
     }
-
-
-
-
 
 }
