@@ -39,6 +39,8 @@ import SAdminListVendor from "./resources/superadmin/vendor/list-vendors"
 import SAdminNewVendors from "./resources/superadmin/vendor/new-vendors"
 import SAdminListAdmins from "./resources/superadmin/admin/list-admins"
 import ProtectPathSAdmin from "./resources/superadmin/protectpath"
+import SadminManageOrders from "./resources/superadmin/vendor/manage-orders"
+import SadminManageProducts from "./resources/superadmin/vendor/manage-products"
 
 
 import VendorDashboard from "./resources/vendor/dashboard"
@@ -109,12 +111,15 @@ function App() {
           <Route path="/superadmin/dashboard" element={<ProtectPathSAdmin Cmp={SAdminDashboard} />} />
           <Route path="/superadmin/add-category" element={<AddCategory />} />
           <Route path="/superadmin/add-subcategory" element={<AddSubCategory />} />
+          
           <Route path="/superadmin/login" element={<LoginAdmin />} />
           <Route path="/superadmin" element={<ProtectPathSAdmin Cmp={SAdminDashboard} />} />
 
           <Route path="/superadmin/list-users" element={<ProtectPathSAdmin Cmp={SAdminListUsers} />} />
           <Route path="/superadmin/new-Vendors" element={<ProtectPathSAdmin Cmp={SAdminNewVendors} />} />
           <Route path="/superadmin/list-vendors" element={<ProtectPathSAdmin Cmp={SAdminListVendor} />} />
+          <Route path="/superadmin/manage-products" element={<ProtectPathSAdmin Cmp={SadminManageProducts} />} />
+          <Route path="/superadmin/manage-orders" element={<ProtectPathSAdmin Cmp={SadminManageOrders} />} />
           <Route path="/superadmin/list-admins" element={<ProtectPathSAdmin Cmp={SAdminListAdmins} />} />
           <Route path="/superadmin/manage-profile" element={<ProtectPathSAdmin Cmp={SAdminManageProfile} />} />
 

@@ -259,55 +259,63 @@ function ManageProfile() {
 
       {/* Main Content */}
       <div className={`main-content ${sidebarVisible ? "with-sidebar" : "full-width"}`}>
-        <div className="custom-header text-center">
-          <h1 className="h4 mb-0">Update Your Password</h1>
-        </div>
+  <div className="custom-header text-center">
+    <h1 className="h4 mb-0">{content?.update_your_password || "Update Your Password"}</h1>
+  </div>
 
-        <div className="p-0">
-          <h2 className="mb-3">Change Password</h2>
-          <p>Please enter your current password and choose a new one.</p>
+  <div className="p-0">
+    <h2 className="mb-3">{content?.change_password || "Change Password"}</h2>
+    <p>{content?.enter_current_password || "Please enter your current password and choose a new one."}</p>
 
-          <form className="update-password-form mt-4" onSubmit={handleUpdatePassword}>
-            <div className="form-group mb-3 text-start">
-              <label htmlFor="currentPassword" className="form-label">Current Password</label>
-              <input
-                type="password"
-                id="currentPassword"
-                className="form-control"
-                placeholder="Enter current password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-              />
-            </div>
-
-            <div className="form-group mb-3 text-start">
-              <label htmlFor="newPassword" className="form-label">New Password</label>
-              <input
-                type="password"
-                id="newPassword"
-                className="form-control"
-                placeholder="Enter new password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-              />
-            </div>
-
-            <div className="form-group mb-4 text-start">
-              <label htmlFor="confirmPassword" className="form-label">Confirm New Password</label>
-              <input
-                type="password"
-                id="confirmPassword"
-                className="form-control"
-                placeholder="Confirm new password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              />
-            </div>
-
-            <button type="submit" className="btn btn-primary">Update Password</button>
-          </form>
-        </div>
+    <form className="update-password-form mt-4" onSubmit={handleUpdatePassword}>
+      <div className="form-group mb-3 text-start">
+        <label htmlFor="currentPassword" className="form-label">
+          {content?.current_password || "Current Password"}
+        </label>
+        <input
+          type="password"
+          id="currentPassword"
+          className="form-control"
+          placeholder={content?.enter_current_password_placeholder || "Enter current password"}
+          value={currentPassword}
+          onChange={(e) => setCurrentPassword(e.target.value)}
+        />
       </div>
+
+      <div className="form-group mb-3 text-start">
+        <label htmlFor="newPassword" className="form-label">
+          {content?.new_password || "New Password"}
+        </label>
+        <input
+          type="password"
+          id="newPassword"
+          className="form-control"
+          placeholder={content?.enter_new_password_placeholder || "Enter new password"}
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+        />
+      </div>
+
+      <div className="form-group mb-4 text-start">
+        <label htmlFor="confirmPassword" className="form-label">
+          {content?.confirm_new_password || "Confirm New Password"}
+        </label>
+        <input
+          type="password"
+          id="confirmPassword"
+          className="form-control"
+          placeholder={content?.confirm_new_password_placeholder || "Confirm new password"}
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+        />
+      </div>
+
+      <button type="submit" className="btn btn-primary">
+        {content?.update_password || "Update Password"}
+      </button>
+    </form>
+  </div>
+</div>
 
       <ToastContainer />
     </div>

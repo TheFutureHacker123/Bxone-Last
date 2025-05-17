@@ -583,3 +583,7 @@ footer p {
   background: rgba(255,193,7,0.08);
   border-radius: 4px;
 }
+
+.dropdown-toggle::after {
+  display: none !important; /* Hides the default down arrow */
+}

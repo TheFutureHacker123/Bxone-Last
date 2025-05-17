@@ -226,7 +226,7 @@ const filteredProducts = selectedVendorProducts.filter(product =>
 
       <div className={`main-content ${sidebarVisible ? "with-sidebar" : "full-width"}`}>
         <div className="custom-header text-center">
-          <h1 className="h4 mb-0">Manage Orders</h1>
+          <h1 className="h4 mb-0">{content?.manage_orders || "Manage Orders"}</h1>
         </div>
 
         <div style={{ width: '100%', maxWidth: '800px', margin: '0 auto' }}>

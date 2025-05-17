@@ -254,44 +254,44 @@ function Notifications() {
             </div>
 
       <div className={`main-content ${sidebarVisible ? "with-sidebar" : "full-width"}`}>
-        <div className="custom-header text-center">
-          <h1 className="h4 mb-0">Notifications</h1>
-        </div>
+  <div className="custom-header text-center">
+    <h1 className="h4 mb-0">{content?.notifications || "Notifications"}</h1>
+  </div>
 
-        <Container fluid>
-          <Row>
-            <Col className="p-4 d-flex justify-content-center">
-              <Card style={{ width: '80%', maxWidth: '800px' }}>
-                <Card.Header className="text-center">
-                  <h4>Recent Notifications</h4>
-                </Card.Header>
-                <Card.Body>
-                  <ListGroup>
-                    {notifications.length === 0 ? (
-                      <ListGroup.Item className="text-center">
-                        <strong>No notifications available.</strong>
-                      </ListGroup.Item>
-                    ) : (
-                      notifications.map(notification => (
-                        <ListGroup.Item key={notification.notification_id} className="notification-item d-flex justify-content-between align-items-center text-center">
-                          <div className="flex-grow-1">
-                            <strong>{notification.notification_text}</strong>
-                            <br />
-                            <small className="text-muted">{formatDate(notification.created_at)}</small>
-                          </div>
-                          <Button variant="link" onClick={() => handleDeleteNotification(notification.notification_id)}>
-                            <FaTrash />
-                          </Button>
-                        </ListGroup.Item>
-                      ))
-                    )}
-                  </ListGroup>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-        </Container>
-      </div>
+  <Container fluid>
+    <Row>
+      <Col className="p-4 d-flex justify-content-center">
+        <Card style={{ width: '80%', maxWidth: '800px' }}>
+          <Card.Header className="text-center">
+            <h4>{content?.recent_notifications || "Recent Notifications"}</h4>
+          </Card.Header>
+          <Card.Body>
+            <ListGroup>
+              {notifications.length === 0 ? (
+                <ListGroup.Item className="text-center">
+                  <strong>{content?.no_notifications_available || "No notifications available."}</strong>
+                </ListGroup.Item>
+              ) : (
+                notifications.map(notification => (
+                  <ListGroup.Item key={notification.notification_id} className="notification-item d-flex justify-content-between align-items-center text-center">
+                    <div className="flex-grow-1">
+                      <strong>{notification.notification_text}</strong>
+                      <br />
+                      <small className="text-muted">{formatDate(notification.created_at)}</small>
+                    </div>
+                    <Button variant="link" onClick={() => handleDeleteNotification(notification.notification_id)}>
+                      <FaTrash />
+                    </Button>
+                  </ListGroup.Item>
+                ))
+              )}
+            </ListGroup>
+          </Card.Body>
+        </Card>
+      </Col>
+    </Row>
+  </Container>
+</div>
     </div>
   );
 }
