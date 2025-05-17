@@ -1,20 +1,30 @@
-import React, { useState,useEffect } from "react";
-import { Container, Row, Col, Card, ListGroup, Button, Navbar, Nav, Dropdown } from "react-bootstrap";
-import { Link } from "react-router-dom";
-import { FaTachometerAlt, FaUsersCog, FaUsers, FaShoppingCart, FaStar, FaUser, FaList, FaSignOutAlt, FaBars, FaCog, FaFlag, FaAd, FaTruck, FaLock, FaDollarSign, FaComment, FaBox, FaUserCog, FaClipboardList, FaClock, FaCheckCircle, FaStore } from "react-icons/fa"; // Added FaPlus and FaTag
-import Translation from "../../translations/lang.json";
+import React, { useState, useEffect } from "react";
+import { FaBars, FaChartLine, FaStore, FaUsers, FaUser } from "react-icons/fa";
+import { Row, Col, Button, Form, Modal } from "react-bootstrap";
+import { Link,useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Translation from "../../translations/admin.json";
+import "../style/manage-product.css";
 
 function ManageProducts() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [productManagementOpen, setProductManagementOpen] = useState(false);
-
-  const [orderManagementOpen, setOrderManagementOpen] = useState(false);
-  const [messageManagementOpen, setMessageManagementOpen] = useState(false);
-  const [accountSettingOpen, setAccountSettingOpen] = useState(false);
-
+  const [sidebarVisible, setSidebarVisible] = useState(true);
+  const [openDropdown, setOpenDropdown] = useState(null);
+  const [entries, setEntries] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [userStatus, setUserStatus] = useState("Active");
+  const [users, setUsers] = useState([]);
+  const navigate = useNavigate();
+const [selectedVendorProducts, setSelectedVendorProducts] = useState([]);
+const [showProductPopup, setShowProductPopup] = useState(false);
+const [productStatus, setProductStatus] = useState("Active");
+const [productStatuses, setProductStatuses] = useState({});
   const defaultFontSize = 'medium';
   const defaultFontColor = '#000000';
-  const defaultLanguage = 'english'; // Default language
+  const defaultLanguage = 'english';
 
   const [fontSize, setFontSize] = useState(() => localStorage.getItem('fontSize') || defaultFontSize);
   const [fontColor, setFontColor] = useState(() => localStorage.getItem('fontColor') || defaultFontColor);
@@ -24,203 +34,371 @@ function ManageProducts() {
   useEffect(() => {
     document.documentElement.style.setProperty('--font-size', fontSize);
     document.documentElement.style.setProperty('--font-color', fontColor);
-    
+
     localStorage.setItem('fontSize', fontSize);
     localStorage.setItem('fontColor', fontColor);
     localStorage.setItem('language', language);
 
-    // Update content based on selected language
     setContent(Translation[language]);
   }, [fontSize, fontColor, language]);
-  
 
-  const toggleProductManagement = () => {
-    setProductManagementOpen(!productManagementOpen);
+  const toggleSidebar = () => setSidebarVisible(!sidebarVisible);
+  const handleDropdown = (menu) => setOpenDropdown(openDropdown === menu ? null : menu);
+  const handleEntriesChange = (newEntries) => {
+    setEntries(newEntries);
+    setCurrentPage(1);
   };
 
-  const toggleOrderManagement = () => {
-    setOrderManagementOpen(!orderManagementOpen);
+  const handlePrevious = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
   };
-  const toggleMessageManagement = () => {
-    setMessageManagementOpen(!messageManagementOpen);
+
+  const handleNext = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
-  const toggleAccountSetting = () => {
-    setAccountSettingOpen(!accountSettingOpen);
+
+  const logout = () => {
+    localStorage.clear();
+    toast.success(content?.logout || "Logout Successful!", { position: "top-right", autoClose: 3000 });
+    setTimeout(() => navigate("/admin/login"), 1000);
   };
+
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/api/admin/listvendors");
+      const data = await response.json();
+      setUsers(data.users);
+    } catch {
+      toast.error(content?.fetch_failed || "Failed to fetch users.");
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const handleCheckProducts = async (vendorId) => {
+  try {
+    const response = await fetch("http://localhost:8000/api/vendor/productlist", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ vendor_id: vendorId }),
+    });
+
+    const data = await response.json();
+    setSelectedVendorProducts(data);
+    setShowProductPopup(true);
+  } catch (error) {
+    console.error("Failed to fetch vendor products:", error);
+  }
+};
+
+const changeProductStatus = async (product_id, status) => {
+  try {
+    const response = await fetch("http://localhost:8000/api/admin/changeproductstatus", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ product_id, status }),
+    });
+
+    const result = await response.json();
+    if (result.success) {
+      toast.success("Product status updated successfully!");
+      
+      // Refresh the selected vendor products
+      const updatedProducts = selectedVendorProducts.map(product => 
+        product.product_id === product_id ? { ...product, product_status: status } : product
+      );
+      setSelectedVendorProducts(updatedProducts);
+    } else {
+      toast.error(content?.update_failed || "Failed to update status.");
+    }
+  } catch {
+    toast.error(content?.error_occurred || "An error occurred. Please try again.");
+  }
+};
+
+
+
+
+  // Filtering + Pagination
+  const filteredUsers = users.filter(user =>
+    user.email.toLowerCase().startsWith(searchQuery.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredUsers.length / entries);
+  const indexOfLastUser = currentPage * entries;
+  const indexOfFirstUser = indexOfLastUser - entries;
+  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+
   return (
-    <Container fluid>
-      {/* Top Navbar */}
-      <Navbar bg="dark" variant="dark" expand="lg" className="px-3 w-100 fixed-top" style={{ marginBottom: '56px' }}>
-        <Button variant="dark" className="me-3 d-block" onClick={() => setSidebarOpen(!sidebarOpen)}>
-          <FaBars />
-        </Button>
-        <Navbar.Brand>WALIYA MARKET</Navbar.Brand>
-        <Nav className="ms-auto">
-          <Dropdown align="end">
-            <Dropdown.Toggle variant="link" className="text-white dropdown-toggle-no-arrow">
-              <FaUser className="me-2" size={30} />
-            </Dropdown.Toggle>
-            <Dropdown.Menu>
-              <Dropdown.Item as={Link} to="/admin/manage-profile">
-                <FaCog className="me-2" /> Settings
-              </Dropdown.Item>
-              <Dropdown.Item as={Link} to="/vendorlogout">
-                <FaSignOutAlt className="me-2" /> Logout
-              </Dropdown.Item>
-            </Dropdown.Menu>
-          </Dropdown>
-        </Nav>
-      </Navbar>
+    <div className="dashboard-wrapper">
+      <button className="admin-hamburger-btn" onClick={toggleSidebar}>
+        <FaBars style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} />
+      </button>
 
-      <Row>
-        {/* Sidebar */}
-        <Col
-          lg={2}
-          className={`sidebar bg-dark text-white p-3 d-lg-block ${sidebarOpen ? 'sidebar-open' : ''}`}
-          style={{
-            minHeight: "100vh",
-            position: 'fixed',
-            zIndex: 999,
-            top: '56px',
-            left: sidebarOpen ? 0 : '-250px',
-            transition: 'left 0.3s ease',
-          }}
-        >
-          <ListGroup variant="flush">
-            <ListGroup.Item action className="bg-dark text-white border-0 d-flex align-items-center">
-              <FaTachometerAlt className="me-2" />
-              <Link to="/admin/dashboard" style={{ textDecoration: 'none', color: 'white' }}>Dashboard</Link>
-            </ListGroup.Item>
-            {/* Product Management Section with Expandable Content */}
-            <ListGroup.Item action className="bg-dark text-white border-0 d-flex align-items-center" onClick={toggleProductManagement}>
-              <FaUsers className="me-2" />
-              User Management
-            </ListGroup.Item>
+      <div className={`admin-custom-sidebar ${sidebarVisible ? "show" : "hide"}`}>
+        <div className="d-flex align-items-center mb-3">
+          <span className="text-center admin-custom-css flex-grow-1 mt-2 ms-4" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+            {content?.admin_dashboard_title || "Admin Dashboard"}
+          </span>
+        </div>
 
-            {/* Expanded content for Product Management */}
-            <div className={`product-management-dropdown ${productManagementOpen ? 'open' : ''}`}>
-              <ListGroup.Item action className="bg-dark text-white border-0 d-flex align-items-center">
-                <FaUsersCog className="me-2" />
-                <Link to="/admin/list-users" style={{ textDecoration: 'none', color: 'white' }}>List Users</Link>
-              </ListGroup.Item>
-              <ListGroup.Item action className="bg-dark text-white border-0 d-flex align-items-center">
-                <FaComment className="me-2" />
-                <Link to="/admin/user-messages" style={{ textDecoration: 'none', color: 'white' }}>User Messages</Link>
-              </ListGroup.Item>
-            </div>
+        <Link to="/admin/" className="admin-custom-link">
+          <FaChartLine className="me-2" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} />
+          <span style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+            {content?.dashboard || "Dashboard"}
+          </span>
+        </Link>
 
-            {/* Order Management Section with Expandable Content */}
-            <ListGroup.Item action className="bg-dark text-white border-0 d-flex align-items-center" onClick={toggleOrderManagement}>
-              <FaStore className="me-2" />
-              Vendor Management
-            </ListGroup.Item>
-            <div className={`product-management-dropdown ${orderManagementOpen ? 'open' : ''}`}>
-              <ListGroup.Item action className="bg-dark text-white border-0 d-flex align-items-center">
-                <FaList className="me-2" />
-                <Link to="/admin/list-vendors" style={{ textDecoration: 'none', color: 'white' }}>List Vendors</Link>
-              </ListGroup.Item>
-              <ListGroup.Item action className="bg-dark text-white border-0 d-flex align-items-center">
-                <FaBox className="me-2" />
-                <Link to="/admin/manage-products" style={{ textDecoration: 'none', color: 'white' }}>Manage Product</Link>
-              </ListGroup.Item>
-              <ListGroup.Item action className="bg-dark text-white border-0 d-flex align-items-center">
-                <FaShoppingCart className="me-2" />
-                <Link to="/admin/manage-orders" style={{ textDecoration: 'none', color: 'white' }}>Manage Order</Link>
-              </ListGroup.Item>
-              <ListGroup.Item action className="bg-dark text-white border-0 d-flex align-items-center">
-                <FaDollarSign className="me-2" />
-                <Link to="/admin/approve-payout" style={{ textDecoration: 'none', color: 'white' }}>Approve Payouts</Link>
-              </ListGroup.Item>
-              <ListGroup.Item action className="bg-dark text-white border-0 d-flex align-items-center">
-                <FaComment className="me-2" />
-                <Link to="/admin/vendor-messages" style={{ textDecoration: 'none', color: 'white' }}>Vendor Messages</Link>
-              </ListGroup.Item>
-            </div>
+        <div className="dropdown">
+          <div className="admin-custom-link" onClick={() => handleDropdown("products")}>
+            <FaUsers className="me-2" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} />
+            <span style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+              {content?.user_management || "User Management"}
+            </span>
+          </div>
+          {openDropdown === "products" && (
+            <ul className="dropdown-menu admin-custom-dropdown-menu">
+              <li>
+                <Link to="/admin/list-users" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                  {content?.list_users || "List Users"}
+                </Link>
+              </li>
+              <li>
+                <Link to="/admin/user-messages" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                  {content?.user_messages || "User Messages"}
+                </Link>
+              </li>
+            </ul>
+          )}
+        </div>
 
-            {/* Message Management Section with Expandable Content */}
-            <ListGroup.Item action className="bg-dark text-white border-0 d-flex align-items-center" onClick={toggleMessageManagement}>
-              <FaFlag className="me-2" />
-              Banner Management
-            </ListGroup.Item>
-            <div className={`product-management-dropdown ${messageManagementOpen ? 'open' : ''}`}>
-              <ListGroup.Item action className="bg-dark text-white border-0 d-flex align-items-center">
-                <FaAd className="me-2" />
-                <Link to="/admin/banners" style={{ textDecoration: 'none', color: 'white' }}>List Banner</Link>
-              </ListGroup.Item>
-            </div>
+        <div className="dropdown">
+          <div className="admin-custom-link" onClick={() => handleDropdown("orders")}>
+            <FaStore className="me-2" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} />
+            <span style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+              {content?.vendor_management || "Vendor Management"}
+            </span>
+          </div>
+          {openDropdown === "orders" && (
+            <ul className="dropdown-menu admin-custom-dropdown-menu">
+              <li>
+                <Link to="/admin/new-vendors" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                  {content?.new_vendors || "New Vendors"}
+                </Link>
+              </li>
+              <li>
+                <Link to="/admin/list-vendors" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                  {content?.list_of_vendors || "List of Vendors"}
+                </Link>
+              </li>
+              <li>
+                <Link to="/admin/manage-products" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                  {content?.manage_products || "Manage Products"}
+                </Link>
+              </li>
+              <li>
+                <Link to="/admin/manage-orders" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                  {content?.manage_orders || "Manage Orders"}
+                </Link>
+              </li>
+              <li>
+                <Link to="/admin/approve-payout" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                  {content?.approve_payout || "Approve Payout"}
+                </Link>
+              </li>
+              <li>
+                <Link to="/admin/vendor-messages" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                  {content?.vendor_messages || "Vendor Messages"}
+                </Link>
+              </li>
+            </ul>
+          )}
+        </div>
 
-            {/* Account Management Section with Expandable Content */}
-            <ListGroup.Item action className="bg-dark text-white border-0 d-flex align-items-center" onClick={toggleAccountSetting}>
-              <FaCog className="me-2" />
-              Account Settings
-            </ListGroup.Item>
-            <div className={`product-management-dropdown ${accountSettingOpen ? 'open' : ''}`}>
-              <ListGroup.Item action className="bg-dark text-white border-0 d-flex align-items-center">
-                <FaUserCog className="me-2" />
-                <Link to="/admin/manage-profile" style={{ textDecoration: 'none', color: 'white' }}>Manage Profile</Link>
-              </ListGroup.Item>
-              <ListGroup.Item action className="bg-dark text-white border-0 d-flex align-items-center">
-                <FaLock className="me-2" />
-                <Link to="/admin/manage-password" style={{ textDecoration: 'none', color: 'white' }}>Update Password</Link>
-              </ListGroup.Item>
-            </div>
-          </ListGroup>
-        </Col>
+        <div className="dropdown">
+          <div className="admin-custom-link" onClick={() => handleDropdown("profile")}>
+            <FaUser className="me-2" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} />
+            <span style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+              {content?.profile || "Profile"}
+            </span>
+          </div>
+          {openDropdown === "profile" && (
+            <ul className="dropdown-menu admin-custom-dropdown-menu">
+              <li>
+                <li><Link to="/admin/settings" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>{content?.settings || "Settings"}</Link></li>
+                <Link to="/admin/manage-password" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                  {content?.update_password || "Update Password"}
+                </Link>
+              </li>
+              <li>
+                <a onClick={logout} className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                  {content?.logout || "Logout"}
+                </a>
+              </li>
+            </ul>
+          )}
+        </div>
+      </div>
 
-        {/* Main Content */}
-        <Col
-          lg={sidebarOpen ? 10 : 12}
-          className="p-4"
-          style={{
-            marginLeft: sidebarOpen ? '250px' : '0',
-            transition: 'margin-left 0.3s ease',
-            paddingTop: '56px'
-          }}
-        >
-          <h3>User Dashboard</h3>
-          <Row className="mt-4">
-            <Col md={3}>
-              <Card className="text-center text-white bg-danger">
-                <Card.Body className="d-flex flex-column align-items-center">
-                  <FaClipboardList size={30} />
-                  <Card.Title>Total Orders</Card.Title>
-                  <Card.Text>0</Card.Text>
-                </Card.Body>
-              </Card>
+      <div className={`main-content ${sidebarVisible ? "with-sidebar" : "full-width"}`}>
+        <div className="custom-header text-center">
+          <h1 className="h4 mb-0">Manage Products</h1>
+        </div>
+
+        <div style={{ width: '100%', maxWidth: '800px', margin: '0 auto' }}>
+          <Row className="mb-3 d-flex justify-content-between align-items-center">
+            <Col xs="auto" className="d-flex align-items-center">
+              <label className="me-2">{content?.show || "Show"}</label>
+              <Form.Select
+                value={entries}
+                onChange={(e) => handleEntriesChange(Number(e.target.value))}
+                style={{ width: '100px' }}
+              >
+                {[10, 25, 50, 100].map((num) => (
+                  <option key={num} value={num}>{num}</option>
+                ))}
+              </Form.Select>
+              <label className="ms-2">{content?.entries || "Entries"}</label>
             </Col>
-            <Col md={3}>
-              <Card className="text-center text-white bg-success">
-                <Card.Body className="d-flex flex-column align-items-center">
-                  <FaClock size={30} />
-                  <Card.Title>Pending Orders</Card.Title>
-                  <Card.Text>0</Card.Text>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col md={3}>
-              <Card className="text-center text-white bg-primary">
-                <Card.Body className="d-flex flex-column align-items-center">
-                  <FaCheckCircle size={30} />
-                  <Card.Title>Complete Orders</Card.Title>
-                  <Card.Text>0</Card.Text>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col md={3}>
-              <Card className="text-center text-white bg-info">
-                <Card.Body className="d-flex flex-column align-items-center">
-                  <FaStar size={30} />
-                  <Card.Title>Reviews</Card.Title>
-                  <Card.Text>0</Card.Text>
-                </Card.Body>
-              </Card>
+
+            <Col xs="auto" className="d-flex align-items-center mt-3 mt-sm-0">
+              <label className="me-2">{content?.search || "Search:"}</label>
+              <Form.Control
+                type="text"
+                placeholder={content?.search_placeholder || "Search"}
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentPage(1);
+                }}
+                style={{ width: '150px' }}
+              />
             </Col>
           </Row>
-        </Col>
-      </Row>
-    </Container>
+        </div>
+
+        <div style={{ width: '100%', maxWidth: '800px', margin: '0 auto', position: 'relative' }}>
+          <div style={{ height: '440px', border: '1px solid #ddd', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#f9f9f9' }}>
+            <div style={{ overflowY: 'auto', height: 'calc(100% - 60px)', padding: '1rem' }}>
+              {currentUsers.length > 0 ? (
+                currentUsers.map((user) => (
+                  <div
+                    key={user.vendor_id}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '1rem',
+                      backgroundColor: '#fff',
+                      borderRadius: '8px',
+                      boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+                      marginBottom: '10px'
+                    }}
+                  >
+                    <div>
+                      <h5 style={{ margin: 0 }}>{user.name}</h5>
+                      <p style={{ margin: 0, color: '#666' }}>{user.email}</p>
+                    </div>
+                    <div>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                         onClick={() => handleCheckProducts(user.vendor_id)}
+                      >
+                        Check Products
+                      </Button>
+
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p>{content?.no_users_found || "No users found."}</p>
+              )}
+            </div>
+
+            {/* Pagination Controls */}
+            <div
+              style={{
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                width: '100%',
+                height: '60px',
+                backgroundColor: '#fff',
+                borderTop: '1px solid #ddd',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '0 1rem'
+              }}
+            >
+              <Button variant="secondary" onClick={handlePrevious} disabled={currentPage === 1}>
+                {content?.previous || "Previous"}
+              </Button>
+              <div>
+                {content?.page || "Page"} {currentPage} {content?.of || "of"} {totalPages || 1}
+              </div>
+              <Button variant="secondary" onClick={handleNext} disabled={currentPage === totalPages || totalPages === 0}>
+                {content?.next || "Next"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+{showProductPopup && (
+  <div className="popup-overlay">
+    <div className="popup-content">
+      <button className="close-btn" onClick={() => setShowProductPopup(false)}>✖</button>
+      <h2>Vendor Products</h2>
+      <div className="product-grid">
+       {showProductPopup && (
+  <div className="popup-overlay">
+    <div className="popup-content">
+      <button className="close-btn" onClick={() => setShowProductPopup(false)}>✖</button>
+      <h2>Vendor Products</h2>
+      <div className="product-grid">
+        {selectedVendorProducts.map((product) => (
+          <div key={product.product_id} className="product-card">
+            <img src={`http://localhost:8000/storage/${product.product_img1}`} alt={product.product_name} />
+            <h3>{product.product_name}</h3>
+            <p><strong>Price:</strong> ${product.product_price}</p>
+            <p><strong>Stock:</strong> {product.total_product}</p>
+            <p><strong>Category:</strong> {product.category_name} / {product.sub_category_name}</p>
+            <p><strong>Status:</strong> {product.product_status}</p>
+            
+            <Form.Select
+  value={productStatuses[product.product_id] || product.product_status}
+  onChange={async (e) => {
+    const newStatus = e.target.value;
+    setProductStatuses((prev) => ({
+      ...prev,
+      [product.product_id]: newStatus,
+    }));
+    await changeProductStatus(product.product_id, newStatus);
+  }}
+>
+  <option value="Active">Active</option>
+  <option value="Ban">Ban</option>
+  
+</Form.Select>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+)}
+      </div>
+    </div>
+  </div>
+)}
+
+      <ToastContainer />
+    </div>
   );
 }
 
 export default ManageProducts;
-//hi

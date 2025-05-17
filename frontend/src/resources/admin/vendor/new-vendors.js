@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { FaBars, FaChartLine, FaStore, FaUsers, FaUser } from "react-icons/fa";
 import { Row, Col, Button, Form, Modal } from "react-bootstrap";
 import { Link,useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Translation from "../../translations/admin.json";
 import "../style/new-vendors.css";
 
@@ -532,6 +533,7 @@ function NewVendors() {
           </Button>
         </Modal.Footer>
       </Modal>
+      <ToastContainer />
     </div>
   );
 }

@@ -21,7 +21,7 @@ return new class extends Migration {
             $table->unsignedInteger('vendor_id'); // Foreign key reference
             $table->unsignedInteger('category_id'); // Foreign key reference
             $table->unsignedInteger('sub_category_id'); // Foreign key reference
-            $table->enum('product_status', ['Active', 'Inactive'])->default('Active'); // Enum for status
+            $table->enum('product_status', ['Active', 'Inactive','Ban'])->default('Active'); // Enum for status
             $table->timestamps(); // Adding created_at and updated_at timestamps
 
             // Foreign key constraints

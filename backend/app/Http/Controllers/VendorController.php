@@ -426,7 +426,10 @@ class VendorController extends Controller
         return response()->json(['message' => 'Product not found'], 404);
     }
 
-   public function orderlist(Request $request)
+ 
+ 
+ 
+    public function orderlist(Request $request)
 {
     // Get vendor_id and order_status from the request
     $vendor_id = $request->input('vendor_id');
@@ -456,7 +459,7 @@ class VendorController extends Controller
             'user_id',
             'product_id',
             'address_id',
-            'payment_method',
+            // 'payment_method',
             'created_at as order_time',
             'order_status',
             'total_paid',
@@ -466,31 +469,35 @@ class VendorController extends Controller
 
     // Format the response
     $formattedOrders = $orders->map(function ($order) {
-        $address = $order->address;
-        $fullAddress = $address
-            ? trim("{$address->country}, {$address->state}, {$address->city}, " . ($address->post ? $address->post : ''), ', ')
-            : 'Address not available';
+    $address = $order->address;
+    $fullAddress = $address
+        ? trim("{$address->country}, {$address->state}, {$address->city}, " . ($address->post ? $address->post : ''), ', ')
+        : 'Address not available';
 
-        return [
-            'order_id' => $order->order_id,
-            'product_id' => $order->product_id,
-            'product_name' => $order->product->product_name ?? 'N/A',
-            'product_image' => $order->product->product_img1 ?? null,
-            'payment_method' => $order->payment_method,
-            'order_time' => $order->order_time ? $order->order_time->toDateTimeString() : 'N/A',
-            'order_status' => $order->order_status,
-
-            // Extra info
-            'address' => $fullAddress,
-            'phone' => $address->phone ?? 'N/A',
-            'full_name' => $address->full_name ?? 'N/A',
-            'total_paid' => $order->total_paid,
-            'ordered_quantity' => $order->orderd_quantity,
-        ];
-    });
+    return [
+        'order_id' => $order->order_id,
+        'product_id' => $order->product_id,
+        'product_name' => $order->product->product_name ?? 'N/A',
+        'product_image' => $order->product->product_img1 ?? null,
+        'payment_method' => $order->payment_method,
+        'order_time' => $order->created_at ? \Carbon\Carbon::parse($order->created_at)->toDateTimeString() : 'N/A', // Convert to Carbon instance
+        'order_status' => $order->order_status,
+        'address' => $fullAddress,
+        'phone' => $address->phone ?? 'N/A',
+        'full_name' => $address->full_name ?? 'N/A',
+        'total_paid' => $order->total_paid,
+        'ordered_quantity' => $order->orderd_quantity,
+    ];
+});
 
     return response()->json($formattedOrders);
 }
+
+
+
+
+
+
 
     public function updateorderstatus(Request $request)
     {
@@ -716,6 +723,74 @@ class VendorController extends Controller
         ],
     ]);
 }
+
+
+
+public function orderlistforadmin(Request $request)
+{
+    // Get vendor_id and order_status from the request
+    $vendor_id = $request->input('vendor_id');
+
+    // Retrieve orders with product and address details
+    $orders = Orders::where('vendor_id', $vendor_id)
+            ->with([
+            'product' => function ($query) {
+                $query->select('product_id', 'product_name', 'product_img1');
+            },
+            'address' => function ($query) {
+                $query->select(
+                    'address_id',
+                    'full_name',
+                    'phone',
+                    'country',
+                    'state',
+                    'city',
+                    'post'
+                );
+            }
+        ])
+        ->select(
+            'order_id',
+            'user_id',
+            'product_id',
+            'address_id',
+            'payment_method',
+            'created_at as order_time',
+            'order_status',
+            'total_paid',
+            'orderd_quantity'
+        )
+        ->get();
+
+    // Format the response
+    $formattedOrders = $orders->map(function ($order) {
+    $address = $order->address;
+    $fullAddress = $address
+        ? trim("{$address->country}, {$address->state}, {$address->city}, " . ($address->post ? $address->post : ''), ', ')
+        : 'Address not available';
+
+    return [
+        'order_id' => $order->order_id,
+        'product_id' => $order->product_id,
+        'product_name' => $order->product->product_name ?? 'N/A',
+        'product_image' => $order->product->product_img1 ?? null,
+        'payment_method' => $order->payment_method,
+        'order_time' => $order->created_at ? \Carbon\Carbon::parse($order->created_at)->toDateTimeString() : 'N/A', // Convert to Carbon instance
+        'order_status' => $order->order_status,
+        'address' => $fullAddress,
+        'phone' => $address->phone ?? 'N/A',
+        'full_name' => $address->full_name ?? 'N/A',
+        'total_paid' => $order->total_paid,
+        'ordered_quantity' => $order->orderd_quantity,
+    ];
+});
+
+    return response()->json($formattedOrders);
+}
+
+
+
+
 
 
 }
