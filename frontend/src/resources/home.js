@@ -4,6 +4,9 @@ import { ToastContainer, toast } from "react-toastify";
 import Translation from "./translations/lang.json";
 import "react-toastify/dist/ReactToastify.css";
 import "./user/styles/home.css";
+import { Modal, Button } from "react-bootstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
+import { FaEye } from "react-icons/fa";
 
 function Home() {
   const [isNavOpen, setNavOpen] = useState(true);
@@ -19,6 +22,13 @@ function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [loggedInUser, setLoggedInUser] = useState(null);
+  const [showQuickView, setShowQuickView] = useState(false);
+  const [quickViewProduct, setQuickViewProduct] = useState(null);
+  const [userRating, setUserRating] = useState(0);
+  const [quickViewImage, setQuickViewImage] = useState(null);
+  const [email, setEmail] = useState("");
+  const [subscriptionMessage, setSubscriptionMessage] = useState("");
+  const [subscriptionStatus, setSubscriptionStatus] = useState(""); // 'success' or 'error'
 
   const defaultFontSize = "medium";
   const defaultFontColor = "#000000";
@@ -46,6 +56,7 @@ function Home() {
 
   useEffect(() => {
     const user = localStorage.getItem("user-info");
+    console.log("User Info:", user);
     if (user) {
       setLoggedInUser(JSON.parse(user));
     } else {
@@ -58,63 +69,56 @@ function Home() {
       setLoading(true);
       setError(null);
       try {
-        // Fetch Top Products
-        const topProductsResponse = await fetch(
-          "http://localhost:8000/api/topproduct",
-          {
+        // Start all fetches in parallel
+        const [
+          topProductsResponse,
+          featuredVendorsResponse,
+          bestSellingVendorsResponse,
+          categoriesResponse,
+        ] = await Promise.all([
+          fetch("http://localhost:8000/api/topproduct", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
             },
-          }
-        );
-        if (!topProductsResponse.ok) {
-          throw new Error(`HTTP error! status: ${topProductsResponse.status}`);
-        }
-        const topProductsData = await topProductsResponse.json();
-        console.log("Top Products Result:", topProductsData);
-        const products = Array.isArray(topProductsData) ? topProductsData : [];
-        setSearchResult(products);
-        setProductsToDisplay(products);
+          }),
+          fetch("http://localhost:8000/api/featured-vendors"),
+          fetch("http://localhost:8000/api/best-selling-vendors"),
+          fetch("http://localhost:8000/api/vendor/get-categories"),
+        ]);
 
-        // Fetch Featured Vendors
-        const featuredVendorsResponse = await fetch(
-          "http://localhost:8000/api/featured-vendors"
-        );
-        if (!featuredVendorsResponse.ok) {
+        if (!topProductsResponse.ok)
+          throw new Error(`HTTP error! status: ${topProductsResponse.status}`);
+        if (!featuredVendorsResponse.ok)
           throw new Error(
             `HTTP error! status: ${featuredVendorsResponse.status}`
           );
-        }
-        const featuredVendorsData = await featuredVendorsResponse.json();
-        console.log("Featured Vendors:", featuredVendorsData.featured_vendors);
-        setFeaturedVendors(featuredVendorsData.featured_vendors);
-
-        // Fetch Best Selling Vendors
-        const bestSellingVendorsResponse = await fetch(
-          "http://localhost:8000/api/best-selling-vendors"
-        );
-        if (!bestSellingVendorsResponse.ok) {
+        if (!bestSellingVendorsResponse.ok)
           throw new Error(
             `HTTP error! status: ${bestSellingVendorsResponse.status}`
           );
-        }
-        const bestSellingVendorsData = await bestSellingVendorsResponse.json();
-        console.log(
-          "Best Selling Vendors:",
-          bestSellingVendorsData.best_selling_vendors
-        );
-        setBestSellingVendors(bestSellingVendorsData.best_selling_vendors);
-
-        // Fetch Categories
-        const categoriesResponse = await fetch(
-          "http://localhost:8000/api/vendor/get-categories"
-        );
-        if (!categoriesResponse.ok) {
+        if (!categoriesResponse.ok)
           throw new Error(`HTTP error! status: ${categoriesResponse.status}`);
-        }
-        const categoriesData = await categoriesResponse.json();
+
+        // Parse all JSON in parallel
+        const [
+          topProductsData,
+          featuredVendorsData,
+          bestSellingVendorsData,
+          categoriesData,
+        ] = await Promise.all([
+          topProductsResponse.json(),
+          featuredVendorsResponse.json(),
+          bestSellingVendorsResponse.json(),
+          categoriesResponse.json(),
+        ]);
+
+        const products = Array.isArray(topProductsData) ? topProductsData : [];
+        setSearchResult(products);
+        setProductsToDisplay(products);
+        setFeaturedVendors(featuredVendorsData.featured_vendors);
+        setBestSellingVendors(bestSellingVendorsData.best_selling_vendors);
         setCategories(categoriesData);
       } catch (err) {
         setError(err.message);
@@ -211,7 +215,7 @@ function Home() {
           Accept: "application/json",
           Authorization: "Bearer " + JSON.parse(storedUser).token,
         },
-        body: JSON.stringify({ product_id: productid }),
+        body: JSON.stringify({ product_id: productid, user_id: JSON.parse(storedUser).user_id }),
       });
 
       const result = await response.json();
@@ -266,6 +270,45 @@ function Home() {
     }, 1000);
   }
 
+  const handleRateProduct = async (rating) => {
+    setUserRating(rating);
+    toast.success(`You rated this product ${rating} stars!`);
+    // TODO: Send rating to backend here
+  };
+
+  const handleSubscription = async (event) => {
+    event.preventDefault();
+    if (!email) {
+      setSubscriptionMessage("Please enter your email.");
+      setSubscriptionStatus("error");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:8000/api/subscribe", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSubscriptionMessage(data.message || "Successfully subscribed!");
+        setSubscriptionStatus("success");
+        setEmail("");
+      } else {
+        setSubscriptionMessage(data.message || "Failed to subscribe.");
+        setSubscriptionStatus("error");
+      }
+    } catch (error) {
+      setSubscriptionMessage("An error occurred while subscribing.");
+      setSubscriptionStatus("error");
+    }
+  };
+
   if (loading) {
     return <div>{content?.loading || "Loading..."}</div>;
   }
@@ -285,15 +328,15 @@ function Home() {
         <div className="container-fluid">
           <div className="row align-items-center">
             <div className="col-md-6 text-start d-flex align-items-center">
-            {!loggedInUser && (
-              <Link
-                to="/vendor/login"
-                className="text-dark text-decoration-none me-3"
-              >
-                <i className="bi bi-shop me-1"></i> Vendor Log In
-              </Link>
-            )}
-          </div>
+              {!loggedInUser && (
+                <Link
+                  to="/vendor/login"
+                  className="text-dark text-decoration-none me-3"
+                >
+                  <i className="bi bi-shop me-1"></i> Vendor Log In
+                </Link>
+              )}
+            </div>
             <div className="col-md-6 text-end d-flex align-items-center justify-content-end">
               {/* Search Bar, Category Dropdown, and Search Button */}
 
@@ -610,63 +653,235 @@ function Home() {
         </div>
 
         {/* Product Overview */}
-<h2>{content?.product_overview || "Product Overview"}</h2>
-<div className="row g-4">
-  {Array.isArray(productsToDisplay) &&
-    productsToDisplay.map((product) => (
-      <div className="col-md-3 col-sm-6" key={product.product_id}>
-        <div className="card product-card h-100">
-          <div className="img-container">
-            <Link
-              to={"/productdetails/" + product.product_id}
-              className="text-decoration-none"
-            >
-              <img
-                src={
-                  "http://localhost:8000/storage/" + product.product_img1
-                }
-                className="card-img-top product-image"
-                alt={product.product_name}
-              />
-            </Link>
-            <div className="overlay">
-              <div className="icon-container">
-                <div
-                  className="action-icon"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    addToCart(product.product_id);
-                  }}
-                  title={content?.add_to_cart || "Add to Cart"}
-                >
-                  <i className="bi bi-cart-plus"></i>
-                </div>
-                {loggedInUser && (
-                  <div
-                    className="action-icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      addToWishlist(product.product_id);
-                    }}
-                    title={content?.add_to_wishlist || "Add to Wishlist"}
-                  >
-                    <i className="bi bi-heart"></i>
+        <h2>{content?.product_overview || "Product Overview"}</h2>
+        <div className="row g-4">
+          {Array.isArray(productsToDisplay) &&
+            productsToDisplay.map((product) => (
+              <div className="col-md-3 col-sm-6" key={product.product_id}>
+                <div className="card product-card h-100">
+                  <div className="img-container position-relative">
+                    <Link
+                      to={"/productdetails/" + product.product_id}
+                      className="text-decoration-none"
+                    >
+                      <img
+                        src={
+                          "http://localhost:8000/storage/" +
+                          product.product_img1
+                        }
+                        className="card-img-top product-image"
+                        alt={product.product_name}
+                      />
+                    </Link>
+                    <div className="overlay">
+                      <div className="icon-container d-flex">
+                        <div
+                          className="action-icon"
+                          title={content?.add_to_cart || "Add to Cart"}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            addToCart(product.product_id);
+                          }}
+                        >
+                          <i className="bi bi-cart-plus"></i>
+                        </div>
+                        {loggedInUser && (
+                          <div
+                            className="action-icon"
+                            title={
+                              content?.add_to_wishlist || "Add to Wishlist"
+                            }
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              addToWishlist(product.product_id);
+                            }}
+                          >
+                            <i className="bi bi-heart"></i>
+                          </div>
+                        )}
+                        {/* Quick View Icon */}
+                        <div
+                          className="action-icon"
+                          title={content?.quick_view || "Quick View"}
+                          style={{ position: "relative" }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setQuickViewProduct(product);
+                            setShowQuickView(true);
+                            setUserRating(product.rating || 0);
+                            setQuickViewImage(
+                              "http://localhost:8000/storage/" +
+                                product.product_img1
+                            );
+                          }}
+                          onMouseOver={(e) => {
+                            e.currentTarget.setAttribute(
+                              "title",
+                              content?.quick_view || "Quick View"
+                            );
+                          }}
+                        >
+                          <FaEye />
+                          <span
+                            className="quick-view-tooltip"
+                            style={{
+                              display: "none",
+                              position: "absolute",
+                              top: "100%",
+                              left: "50%",
+                              transform: "translateX(-50%)",
+                              background: "#222",
+                              color: "#fff",
+                              padding: "2px 8px",
+                              borderRadius: "4px",
+                              fontSize: "0.85em",
+                              whiteSpace: "nowrap",
+                              zIndex: 10,
+                            }}
+                          >
+                            {content?.quick_view || "Quick View"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                )}
-                {/* Quick View will go here later */}
+                  <div className="card-body text-center">
+                    <h5 className="card-title" style={{ color: "black" }}>
+                      {product.product_name}
+                    </h5>
+                    <p className="card-text">${product.product_price}</p>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-          <div className="card-body text-center">
-            <h5 className="card-title" style={{ color: "black" }}>
-              {product.product_name}
-            </h5>
-            <p className="card-text">${product.product_price}</p>
-          </div>
+            ))}
         </div>
-      </div>
-    ))}
-</div>
+
+        {/* Quick View Modal */}
+        <Modal
+          show={showQuickView}
+          onHide={() => setShowQuickView(false)}
+          centered
+          size="lg"
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>{quickViewProduct?.product_name}</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {quickViewProduct && (
+              <div className="row">
+                <div className="col-md-6">
+                  {/* Main Image */}
+                  <div className="mb-3 text-center">
+                    <img
+                      src={
+                        quickViewImage ||
+                        "http://localhost:8000/storage/" +
+                          quickViewProduct.product_img1
+                      }
+                      alt={quickViewProduct.product_name}
+                      className="img-fluid mb-2"
+                      style={{ maxHeight: 250, cursor: "pointer" }}
+                      onClick={() => {
+                        // Open image in new tab for larger visibility
+                        window.open(
+                          quickViewImage ||
+                            "http://localhost:8000/storage/" +
+                              quickViewProduct.product_img1,
+                          "_blank"
+                        );
+                      }}
+                    />
+                    <div className="d-flex flex-wrap gap-2 justify-content-center mt-2">
+                      {[1, 2, 3, 4, 5].map((i) => {
+                        const img = quickViewProduct[`product_img${i}`];
+                        return (
+                          img && (
+                            <img
+                              key={i}
+                              src={"http://localhost:8000/storage/" + img}
+                              alt={quickViewProduct.product_name + " " + i}
+                              className="img-thumbnail"
+                              style={{
+                                width: 60,
+                                height: 60,
+                                objectFit: "cover",
+                                border:
+                                  quickViewImage ===
+                                  "http://localhost:8000/storage/" + img
+                                    ? "2px solid #ffc107"
+                                    : "1px solid #ccc",
+                                cursor: "pointer",
+                              }}
+                              onClick={() =>
+                                setQuickViewImage(
+                                  "http://localhost:8000/storage/" + img
+                                )
+                              }
+                            />
+                          )
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+                <div className="col-md-6">
+                  <p>
+                    <strong>{content?.price || "Price"}:</strong> $
+                    {quickViewProduct.product_price}
+                  </p>
+                  <p>
+                    <strong>{content?.available || "Available"}:</strong>{" "}
+                    {quickViewProduct.total_product}
+                  </p>
+                  <p>
+                    <strong>{content?.description || "Description"}:</strong>{" "}
+                    {quickViewProduct.product_desc}
+                  </p>
+                  {/* Rating display */}
+                  <div className="mb-2">
+                    <strong>{content?.rating || "Rating"}:</strong>{" "}
+                    <span style={{ color: "#ffc107" }}>
+                      {Array.from({ length: 5 }).map((_, idx) => (
+                        <i
+                          key={idx}
+                          className={
+                            idx < (quickViewProduct.rating || 0)
+                              ? "bi bi-star-fill"
+                              : "bi bi-star"
+                          }
+                        ></i>
+                      ))}
+                    </span>
+                    <span className="ms-2">
+                      {quickViewProduct.rating
+                        ? quickViewProduct.rating.toFixed(1)
+                        : "0.0"}
+                    </span>
+                  </div>
+                  {/* User can rate */}
+                  <div>
+                    <strong>{content?.your_rating || "Your Rating"}:</strong>{" "}
+                    {Array.from({ length: 5 }).map((_, idx) => (
+                      <i
+                        key={idx}
+                        className={
+                          idx < userRating ? "bi bi-star-fill" : "bi bi-star"
+                        }
+                        style={{ cursor: "pointer", color: "#ffc107" }}
+                        onClick={() => handleRateProduct(idx + 1)}
+                      ></i>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowQuickView(false)}>
+              {content?.close || "Close"}
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </div>
 
       {/* Footer */}
@@ -771,7 +986,7 @@ function Home() {
               </div>
             </div>
 
-            {/* Newsletter Subscription Column */}
+            {/* Newsletter Subscription Column (updated) */}
             <div className="col-md-3">
               <h5 className="mb-3">{content?.newsletter || "Newsletter"}</h5>
               <div>
@@ -779,36 +994,124 @@ function Home() {
                   {content?.newsletter_signup_text ||
                     "Sign up for our latest news and offers."}
                 </p>
-                <form className="form-container">
+                <form className="form-container" onSubmit={handleSubscription}>
                   <div className="subscription-component">
                     <div>
-                      {" "}
                       <input
                         type="email"
                         className="form-control form-control-sm rounded-0 me-2 flex-grow-1"
                         placeholder={content?.your_email || "Your email"}
                         aria-label="Email"
                         required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                       />
                     </div>
                     <div>
-                      {" "}
                       <button className="subscription-button" type="submit">
                         {content?.subscribe || "Subscribe"}
                       </button>
                     </div>
                   </div>
                 </form>
+                {subscriptionMessage && (
+                  <p
+                    className={
+                      subscriptionStatus === "success"
+                        ? "text-success mt-2"
+                        : "text-danger mt-2"
+                    }
+                  >
+                    {subscriptionMessage}
+                  </p>
+                )}
                 {/* Payment Methods moved here */}
                 <div className="mt-4">
                   <h6 className="mb-2">
                     {content?.payment_methods || "Payment Methods"}
                   </h6>
-                  <div className="d-flex flex-wrap gap-2">
-                    <i className="bi bi-credit-card-fill fs-5 text-light"></i>
-                    <i className="bi bi-paypal fs-5 text-light"></i>
-                    <i className="bi bi-currency-bitcoin fs-5 text-light"></i>
-                    <i className="bi bi-bank fs-5 text-light"></i>
+                  <div className="d-flex flex-wrap gap-3 align-items-center">
+                    {/* Telebirr SVG */}
+                    <span
+                      title="Telebirr"
+                      style={{
+                        background: "#fff",
+                        borderRadius: 8,
+                        padding: 4,
+                        boxShadow: "0 1px 4px #e3f2fd",
+                      }}
+                    >
+                      <img
+                        src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Telebirr_logo.png"
+                        alt="Telebirr"
+                        style={{
+                          height: 32,
+                          width: "auto",
+                          objectFit: "contain",
+                        }}
+                      />
+                    </span>
+                    {/* CBE Birr SVG */}
+                    <span
+                      title="CBE Birr"
+                      style={{
+                        background: "#fff",
+                        borderRadius: 8,
+                        padding: 4,
+                        boxShadow: "0 1px 4px #e3f2fd",
+                      }}
+                    >
+                      <img
+                        src="https://seeklogo.com/images/C/cbe-birr-logo-6B7A3C2B6C-seeklogo.com.png"
+                        alt="CBE Birr"
+                        style={{
+                          height: 32,
+                          width: "auto",
+                          objectFit: "contain",
+                        }}
+                      />
+                    </span>
+                    {/* Amole */}
+                    <span
+                      title="Amole"
+                      style={{
+                        background: "#fff",
+                        borderRadius: 8,
+                        padding: 4,
+                        boxShadow: "0 1px 4px #e3f2fd",
+                      }}
+                    >
+                      <img
+                        src="https://amolepay.com/assets/images/amole-logo.png"
+                        alt="Amole"
+                        style={{
+                          height: 32,
+                          width: "auto",
+                          objectFit: "contain",
+                        }}
+                      />
+                    </span>
+                    {/* HelloCash */}
+                    <span
+                      title="HelloCash"
+                      style={{
+                        background: "#fff",
+                        borderRadius: 8,
+                        padding: 4,
+                        boxShadow: "0 1px 4px #e3f2fd",
+                      }}
+                    >
+                      <img
+                        src="https://hellocash.et/images/logo.png"
+                        alt="HelloCash"
+                        style={{
+                          height: 32,
+                          width: "auto",
+                          objectFit: "contain",
+                        }}
+                      />
+                    </span>
+                    {/* Add more as needed */}
                   </div>
                 </div>
               </div>

@@ -123,7 +123,7 @@ body {
 .search-bar input {
   border: none;
   outline: none;
-  padding: 5px;
+  padding: 8px;
   font-size: 14px;
   flex: 1;
 }
@@ -559,4 +559,27 @@ footer p {
 .card-text {
   font-size: 1rem;
   color: #555;
+}
+
+/* Top nav bar shadow and border */
+.top-nav-bar {
+  z-index: 1040;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  border-bottom: 1px solid #eaeaea;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+}
+
+/* Navbar brand spacing */
+.navbar-brand {
+  letter-spacing: 1px;
+}
+
+/* Navbar link hover */
+.navbar-dark .navbar-nav .nav-link:hover,
+.navbar-dark .navbar-nav .nav-link.active {
+  color: #ffc107 !important;
+  background: rgba(255,193,7,0.08);
+  border-radius: 4px;
 }
