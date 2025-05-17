@@ -725,15 +725,14 @@ class VendorController extends Controller
 }
 
 
-
 public function orderlistforadmin(Request $request)
 {
-    // Get vendor_id and order_status from the request
+    // Get vendor_id from the request
     $vendor_id = $request->input('vendor_id');
 
-    // Retrieve orders with product and address details
+    // Retrieve orders with product, address, and user details
     $orders = Orders::where('vendor_id', $vendor_id)
-            ->with([
+        ->with([
             'product' => function ($query) {
                 $query->select('product_id', 'product_name', 'product_img1');
             },
@@ -747,6 +746,9 @@ public function orderlistforadmin(Request $request)
                     'city',
                     'post'
                 );
+            },
+            'user' => function ($query) {
+                $query->select('user_id', 'email'); // Retrieve the email
             }
         ])
         ->select(
@@ -764,26 +766,27 @@ public function orderlistforadmin(Request $request)
 
     // Format the response
     $formattedOrders = $orders->map(function ($order) {
-    $address = $order->address;
-    $fullAddress = $address
-        ? trim("{$address->country}, {$address->state}, {$address->city}, " . ($address->post ? $address->post : ''), ', ')
-        : 'Address not available';
+        $address = $order->address;
+        $fullAddress = $address
+            ? trim("{$address->country}, {$address->state}, {$address->city}, " . ($address->post ? $address->post : ''), ', ')
+            : 'Address not available';
 
-    return [
-        'order_id' => $order->order_id,
-        'product_id' => $order->product_id,
-        'product_name' => $order->product->product_name ?? 'N/A',
-        'product_image' => $order->product->product_img1 ?? null,
-        'payment_method' => $order->payment_method,
-        'order_time' => $order->created_at ? \Carbon\Carbon::parse($order->created_at)->toDateTimeString() : 'N/A', // Convert to Carbon instance
-        'order_status' => $order->order_status,
-        'address' => $fullAddress,
-        'phone' => $address->phone ?? 'N/A',
-        'full_name' => $address->full_name ?? 'N/A',
-        'total_paid' => $order->total_paid,
-        'ordered_quantity' => $order->orderd_quantity,
-    ];
-});
+        return [
+            'order_id' => $order->order_id,
+            'product_id' => $order->product_id,
+            'product_name' => $order->product->product_name ?? 'N/A',
+            'product_img1' => $order->product->product_img1 ?? null,
+            'payment_method' => $order->payment_method,
+            'created_at' => $order->created_at ? \Carbon\Carbon::parse($order->created_at)->toDateTimeString() : 'N/A',
+            'order_status' => $order->order_status,
+            'address' => $fullAddress,
+            'phone' => $address->phone ?? 'N/A',
+            'full_name' => $address->full_name ?? 'N/A',
+            'email' => $order->user->email ?? 'N/A', // Include user email
+            'total_paid' => $order->total_paid,
+            'ordered_quantity' => $order->orderd_quantity,
+        ];
+    });
 
     return response()->json($formattedOrders);
 }

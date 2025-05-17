@@ -13,6 +13,7 @@ function ManageOrders() {
   const [entries, setEntries] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchOrderQuery, setSearchOrderQuery] = useState("");
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [userStatus, setUserStatus] = useState("Active");
@@ -101,6 +102,11 @@ const [productStatuses, setProductStatuses] = useState({});
   const filteredUsers = users.filter(user =>
     user.email.toLowerCase().startsWith(searchQuery.toLowerCase())
   );
+
+const filteredProducts = selectedVendorProducts.filter(product =>
+  product.order_id.toString().includes(searchOrderQuery)
+);
+
 
   const totalPages = Math.ceil(filteredUsers.length / entries);
   const indexOfLastUser = currentPage * entries;
@@ -326,35 +332,38 @@ const [productStatuses, setProductStatuses] = useState({});
 {showProductPopup && (
   <div className="popup-overlay">
     <div className="popup-content">
-      <button className="close-btn" onClick={() => setShowProductPopup(false)}>✖</button>
+      <button className="close-btn"  onClick={() => {setShowProductPopup(false);setSearchOrderQuery("");}}>✖</button>
       <h2>Vendor Products</h2>
       <div className="product-grid">
        {showProductPopup && (
   <div className="popup-overlay">
     <div className="popup-content">
-      <button className="close-btn" onClick={() => setShowProductPopup(false)}>✖</button>
+       <button className="close-btn"  onClick={() => {setShowProductPopup(false);setSearchOrderQuery("");}}>✖</button>
       <Form.Control
                 type="text"
                 placeholder={content?.search_placeholder || "Search"}
-                value={searchQuery}
+                value={searchOrderQuery}
                 onChange={(e) => {
-                  setSearchQuery(e.target.value);
+                  setSearchOrderQuery(e.target.value);
                 }}
                 style={{ width: '150px' }}
               />
       <div className="product-grid">
-        {selectedVendorProducts.map((product) => (
-          <div key={product.product_id} className="product-card">
-            <img src={`http://localhost:8000/storage/${product.product_img1}`} alt={product.product_name} />
-            <h3>{product.product_name}</h3>
-            <p><strong>Price:</strong> ${product.product_price}</p>
-            <p><strong>Stock:</strong> {product.total_product}</p>
-            <p><strong>Category:</strong> {product.category_name} / {product.sub_category_name}</p>
-            <p><strong>Status:</strong> {product.product_status}</p>
-            
-          
-          </div>
-        ))}
+        {filteredProducts.map((product) => (
+  <div key={product.order_id} className="product-card">
+    <img src={`http://localhost:8000/storage/${product.product_img1}`} alt={product.product_name} />
+    <h3>Product Name: {product.product_name}</h3>
+    <p><strong>Sold To:</strong> {product.full_name}</p>
+    <p><strong>Email:</strong> {product.email}</p>
+    <p><strong>Address:</strong> {product.address}</p>
+    <p><strong>Phone Number:</strong> {product.phone}</p>
+    <p><strong>Order Quantity:</strong> {product.ordered_quantity}</p>
+    <p><strong>Total Paid:</strong> {product.total_paid}</p>
+    <p><strong>Status:</strong> {product.order_status}</p>
+    <p><strong>Product Id:</strong> {product.order_id}</p>
+    <p><strong>Ordered Date:</strong> {product.created_at}</p>
+  </div>
+))}
       </div>
     </div>
   </div>
