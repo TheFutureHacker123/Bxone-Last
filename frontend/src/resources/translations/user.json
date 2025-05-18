@@ -228,7 +228,8 @@
     "large": "ትልቅ",
     "your_shipped_items": "የተላኩ እቃዎችዎ",
     "request_refund": "መመላለሻ ጠይቅ",
-    "no_shipped_products": "የተላኩ ምርቶች የሉም!"
+    "no_shipped_products": "የተላኩ ምርቶች የሉም!",
+    "customer_service": "የደንበኞች አገልግሎት"
   },
   "afan_oromo": {
     "your_shopping_cart": "Gaarii Bittaa Keessan",
@@ -331,17 +332,18 @@
     "close": "Cufi",
     "save_address": "Teessoo Olkaa'i",
     "english": "English",
-    "amharic": "አማርኛ",
+    "amharic": "Amharic",
     "afan_oromo": "Afaan Oromoo",
     "ethiopian_somali": "Somali",
-    "tigrinya": "ትግሪኛ",
+    "tigrinya": "Tigrinya",
     "font_sizes": "",
     "small": "Small",
     "medium": "Medium",
     "large": "Large",
     "your_shipped_items": "Your Shipped Items",
     "request_refund": "Request Refund",
-    "no_shipped_products": "There are no Shipped products!"
+    "no_shipped_products": "There are no Shipped products!",
+      "customer_service": "Tajaajila Maamilaa"
   },
   "tigrinya": {
     "your_shopping_cart": "እቃዎት ዘንቢል",
@@ -456,6 +458,7 @@
     "your_shipped_items": "የተላኩ እቃዎችዎ",
     "request_refund": "መመላለሻ ጠይቅ",
     "no_shipped_products": "የተላኩ ምርቶች የሉም!"
+
   },
   "ethiopian_somali": {
     "your_shopping_cart": "Gaariga Wax Iibsigaaga",
@@ -559,10 +562,10 @@
     "save_address": "Kaydi Cinwaanka",
     "languages": "",
     "english": "English",
-    "amharic": "አማርኛ",
+    "amharic": "amharic",
     "afan_oromo": "Afaan Oromoo",
     "ethiopian_somali": "Somali",
-    "tigrinya": "ትግሪኛ",
+    "tigrinya": "tigrinya",
     "font_sizes": "",
     "small": "Yar",
     "medium": "Dhexdhexaad",
@@ -570,5 +573,7 @@
     "your_shipped_items": "Alaabta La Diray",
     "request_refund": "Codso Soo Celin",
     "no_shipped_products": "Alaab La Diray Ma Jirto!"
+   
+
   }
 }

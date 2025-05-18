@@ -359,7 +359,7 @@ function Home() {
                   to="/vendor/login"
                   className="text-dark text-decoration-none me-3"
                 >
-                  <i className="bi bi-shop me-1"></i> Vendor Log In
+                  <i className="bi bi-shop me-1"></i> {content?.login_as_vendor || "Vendor Log In"}
                 </Link>
               )}
             </div>
@@ -452,7 +452,7 @@ function Home() {
                       paddingLeft: "8px",
                     }} /* Adjusted paddingLeft */
                   >
-                    <option>All Categories</option>
+                    <option>{content?.all_category || "All Categories"}</option>
                     {categories.map((cat) => (
                       <option
                         key={cat.category_category_id}
@@ -526,7 +526,7 @@ function Home() {
               ) : (
                 <li className="nav-item">
                   <Link className="nav-link" to="/login">
-                    Log In / Register
+                    {content?.login_register || "Log In / Register"}
                   </Link>
                 </li>
               )}
@@ -749,7 +749,7 @@ function Home() {
           </div>
           <div className="mb-2">
             <label htmlFor="sortSelect" className="me-2">
-              {content?.sort_sort_by || "Sort By"}:
+              {content?.sort_by || "Sort By"}:
             </label>
             <select
               id="sortSelect"
@@ -1165,7 +1165,7 @@ function Home() {
                       }}
                     >
                       <img
-                        src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Telebirr_logo.png"
+                        src="https://ethiopianlogos.com/logos/tele_birr/tele_birr.svg"
                         alt="Telebirr"
                         style={{
                           height: 32,
@@ -1185,7 +1185,7 @@ function Home() {
                       }}
                     >
                       <img
-                        src="https://seeklogo.com/images/C/cbe-birr-logo-6B7A3C2B6C-seeklogo.com.png"
+                        src="https://ethiopianlogos.com/logos/cbe_birr_light/cbe_birr_light.svg"
                         alt="CBE Birr"
                         style={{
                           height: 32,
@@ -1205,7 +1205,7 @@ function Home() {
                       }}
                     >
                       <img
-                        src="https://amolepay.com/assets/images/amole-logo.png"
+                        src="https://ethiopianlogos.com/logos/amole/amole.svg"
                         alt="Amole"
                         style={{
                           height: 32,
@@ -1225,7 +1225,7 @@ function Home() {
                       }}
                     >
                       <img
-                        src="https://hellocash.et/images/logo.png"
+                        src="https://z-p3-scontent.fadd1-1.fna.fbcdn.net/v/t39.30808-6/463868196_8595481737233725_797605725820873396_n.png?_nc_cat=109&ccb=1-7&_nc_sid=a5f93a&_nc_ohc=yOJ3bDWbf-kQ7kNvwGqcKYj&_nc_oc=AdkG08NLdwCc8ZW3aA5gS9s1IQYwKsbVJvcsZxVLU5c6wDZysXToMn3gIqS-ICMMmZo&_nc_zt=23&_nc_ht=z-p3-scontent.fadd1-1.fna&_nc_gid=6zNEfKaJ-k0jCM0DvQvy_Q&oh=00_AfJ57nKezR2SUJjDwMJqRA9-gKKBZF1N6CtvH1YaxqNA0Q&oe=682F651C"
                         alt="HelloCash"
                         style={{
                           height: 32,

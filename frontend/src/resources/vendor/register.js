@@ -213,9 +213,8 @@ const RegisterVendor = () => {
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder={content?.enter_your_email || "Enter your email"}
                         />
-                        {emailError && <div className="invalid-feedback">{emailError}</div>}
+                        {emailError && <div className="text-danger invalid-feedback">{emailError}</div>}
                     </div>
-
                     <div className="form-group mb-3 vendor-form-group">
                         <label htmlFor="password" className="form-label vendor-form-label">
                             <FaLock className="me-2" /> {content?.password || "Password"}
@@ -231,7 +230,7 @@ const RegisterVendor = () => {
                             }}
                             placeholder={content?.enter_your_password || "Enter your password"}
                         />
-                        {passwordError && <div className="invalid-feedback">{passwordError}</div>}
+                        {passwordError && <div className="text-danger invalid-feedback">{passwordError}</div>}
 
                         <ul className="password-requirements">
                             <li className={passReqMet.length ? 'met' : ''}>
@@ -264,7 +263,7 @@ const RegisterVendor = () => {
                             onChange={(e) => setPassConfirm(e.target.value)}
                             placeholder={content?.confirm_your_password || "Confirm your password"}
                         />
-                        {passConfirmError && <div className="invalid-feedback">{passConfirmError}</div>}
+                        {passConfirmError && <div className="text-danger invalid-feedback">{passConfirmError}</div>}
                     </div>
 
                     <button type="submit" className="btn btn-success vendor-btn-submit w-100">

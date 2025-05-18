@@ -68,24 +68,24 @@ function Login() {
     };
 
     const validateForm = () => {
-        const newErrors = {};
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const newErrors = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        if (!formData.email.trim()) {
-            newErrors.email = "Email is required";
-        } else if (!emailRegex.test(formData.email)) {
-            newErrors.email = "Please enter a valid email address";
-        }
+    if (!formData.email.trim()) {
+        newErrors.email = content?.email_required || "Email is required";
+    } else if (!emailRegex.test(formData.email)) {
+        newErrors.email = content?.invalid_email || "Please enter a valid email address";
+    }
 
-        if (!formData.password) {
-            newErrors.password = "Password is required";
-        } else if (formData.password.length < 8) {
-            newErrors.password = "Password must be at least 8 characters";
-        }
+    if (!formData.password) {
+        newErrors.password = content?.password_required || "Password is required";
+    } else if (formData.password.length < 8) {
+        newErrors.password = content?.password_length || "Password must be at least 8 characters";
+    }
 
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+};
 
     const login = async (e) => {
         e.preventDefault();
@@ -180,7 +180,7 @@ function Login() {
                             id="email"
                             placeholder={content?.enter_your_email || "Enter your email"}
                         />
-                        {errors.email && <div className="invalid-feedback d-block">{errors.email}</div>}
+                        {errors.email && <div className="text-danger invalid-feedback d-block">{errors.email}</div>}
                     </div>
                     <div className="mb-3">
                         <label htmlFor="password" className="custom-form-label text-start d-block">{content?.password || "Password"}</label>
@@ -193,7 +193,7 @@ function Login() {
                             id="password"
                             placeholder={content?.enter_your_password || "Enter your password"}
                         />
-                        {errors.password && <div className="invalid-feedback d-block">{errors.password}</div>}
+                        {errors.password && <div className="text-danger invalid-feedback d-block">{errors.password}</div>}
                     </div>
                     <button
                         type="submit"
