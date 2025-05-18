@@ -8,13 +8,20 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('otps', function (Blueprint $table) {
-            $table->increments('id'); // Auto-increment primary key
-            $table->unsignedInteger('user_id'); // Foreign key to users table
-            $table->string('otp'); // The actual OTP code
-            $table->timestamp('expires_at')->nullable(); // When the OTP expires
-            $table->timestamp('time_stamp', 6)->useCurrent()->useCurrentOnUpdate();
-            // Foreign key constraint
-            $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
+            $table->increments('id'); // Primary key
+            $table->unsignedInteger('user_id')->nullable(); // Foreign key for user
+            $table->string('otp'); // OTP field
+            $table->dateTime('expires_at'); // Expiration time
+            $table->dateTime('time_stamp'); // Timestamp for when OTP was created
+            $table->unsignedInteger('vendor_id')->nullable(); // Foreign key for vendor
+            $table->unsignedInteger('admin_id')->nullable(); // Foreign key for admin
+            
+            // Foreign key constraints
+            $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade'); // Added this line
+            $table->foreign('vendor_id')->references('vendor_id')->on('vendors')->onDelete('cascade');
+            $table->foreign('admin_id')->references('admin_id')->on('admins')->onDelete('cascade');
+
+            $table->timestamps(); // Optional if you want to track created_at and updated_at
         });
     }
 
