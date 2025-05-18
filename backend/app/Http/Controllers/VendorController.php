@@ -224,22 +224,22 @@ class VendorController extends Controller
             'personal_city' => 'required|string|max:100',
             'personal_state' => 'required|string|max:100',
             'personal_phone' => 'required|string|max:100',
-            'personal_unique_id' => ['required', 'regex:/^100\d{9}$/'],
-            'idPhotoFront' => 'required|image|max:2048',
-            'idPhotoBack' => 'required|image|max:2048',
+            'personal_unique_id' =>'required',
+            'idPhotoFront' => 'required|image',
+            'idPhotoBack' => 'required|image',
             'business_name' => 'required|string|max:100',
             'business_address' => 'required|string|max:100',
             'business_city' => 'required|string|max:100',
             'business_phone' => 'required|string|max:100',
             'blicense_number' => 'required|integer',
-            'addressProofImage' => 'required|image|max:2048',
-            'otherProofImages.*' => 'image|max:2048', // Up to 5 images
+            'addressProofImage' => 'required|image',
+            'otherProofImages.*' => 'image', // Up to 5 images
             'bank_name' => 'required|string|max:100',
             'account_name' => 'required|string|max:100',
             'account_number' => 'required|string|max:100',
             'vendor_id' => 'required|integer', // Accept vendor_id from user
             'verified_by' => 'nullable|integer', // Accept verified_by from user
-            'logo' => 'nullable|image|max:2048',
+            'logo' => 'nullable|image',
         ]);
 
         if ($validator->fails()) {

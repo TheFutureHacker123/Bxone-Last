@@ -20,11 +20,12 @@ function SAdminListAdmins() {
   const [userStatus, setUserStatus] = useState("Active");
   const [users, setUsers] = useState([]);
   const [newUser, setNewUser] = useState({ email: '', password: '', name: '', phone: '', image: null });
+  const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
   const defaultFontSize = 'medium';
   const defaultFontColor = '#000000';
-  const defaultLanguage = 'english'; // Default language
+  const defaultLanguage = 'english';
 
   const [fontSize, setFontSize] = useState(() => localStorage.getItem('fontSize') || defaultFontSize);
   const [fontColor, setFontColor] = useState(() => localStorage.getItem('fontColor') || defaultFontColor);
@@ -34,15 +35,11 @@ function SAdminListAdmins() {
   useEffect(() => {
     document.documentElement.style.setProperty('--font-size', fontSize);
     document.documentElement.style.setProperty('--font-color', fontColor);
-
     localStorage.setItem('fontSize', fontSize);
     localStorage.setItem('fontColor', fontColor);
     localStorage.setItem('language', language);
-
-    // Update content based on selected language
     setContent(Translation[language]);
   }, [fontSize, fontColor, language]);
-
 
   const toggleSidebar = () => setSidebarVisible(!sidebarVisible);
   const handleDropdown = (menu) => setOpenDropdown(openDropdown === menu ? null : menu);
@@ -78,7 +75,6 @@ function SAdminListAdmins() {
 
   const changeUserStatus = async () => {
     try {
-      console.log("Changing user status:", { admin_id: selectedUserId, status: userStatus }); // Debugging line
       const response = await fetch("http://localhost:8000/api/admin/changeuserstatusadmin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -97,9 +93,6 @@ function SAdminListAdmins() {
     }
   };
 
-
-
-
   const filteredUsers = users.filter(user =>
     user.email.toLowerCase().startsWith(searchQuery.toLowerCase())
   );
@@ -109,10 +102,66 @@ function SAdminListAdmins() {
   const indexOfFirstUser = indexOfLastUser - entries;
   const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
 
+  const validateUser = () => {
+    const newErrors = {};
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const nameRegex = /^[A-Za-z\s]+$/; // Allow alphabetic characters and spaces
+    const phoneRegexPlus = /^\+\d{12}$/;
+    const phoneRegexZero = /^0\d{9}$/;
 
+    if (!newUser.name.trim()) {
+        newErrors.name = "Name is required";
+    } else if (newUser.name.length < 3) {
+        newErrors.name = "Name must be at least 3 characters long"; // Minimum length check
+    } else if (!nameRegex.test(newUser.name)) {
+        newErrors.name = "Name can only contain alphabetic characters (a-z, A-Z)";
+    }
 
+    if (!newUser.email.trim()) {
+        newErrors.email = "Email is required";
+    } else if (!emailRegex.test(newUser.email)) {
+        newErrors.email = "Invalid email format";
+    }
+
+    if (!newUser.password) {
+        newErrors.password = "Password is required";
+    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}/.test(newUser.password)) {
+        newErrors.password = "Password must contain at least 8 characters, one uppercase, one lowercase, one number, and one special character";
+    }
+
+    if (!newUser.phone.trim()) {
+        newErrors.phone = "Phone number is required";
+    } else if (!phoneRegexPlus.test(newUser.phone) && !phoneRegexZero.test(newUser.phone)) {
+        newErrors.phone = "Phone number must start with + and have 13 digits or start with 0 and have 10 digits";
+    }
+
+    // Validate image
+    if (!newUser.image) {
+        newErrors.image = "Select photo!";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0; // Return true if no errors
+};
+
+  
+const handleInputChange = (e) => {
+  const { name, value } = e.target;
+
+  // Restrict input based on current value
+  if (name === 'phone') {
+    if (value.startsWith('+') && value.length > 13) return;
+    if (value.startsWith('0') && value.length > 10) return;
+  }
+
+  setNewUser((prev) => ({ ...prev, [name]: value }));
+};
 
   const handleAddUser = async () => {
+    if (!validateUser()) {
+      return; // Stop execution if validation fails
+    }
+
     const formData = new FormData();
     formData.append("email", newUser.email);
     formData.append("password", newUser.password);
@@ -121,7 +170,6 @@ function SAdminListAdmins() {
     if (newUser.image) formData.append("image", newUser.image);
 
     try {
-      console.log("Form Data:", formData); // Debugging line
       const response = await fetch("http://localhost:8000/api/superadmin/addadmins", {
         method: "POST",
         body: formData,
@@ -134,7 +182,9 @@ function SAdminListAdmins() {
         setShowAddModal(false);
         setNewUser({ name: "", email: "", password: "", phone: "", image: null });
         fetchUsers();
-      } else {
+      } else if(result.status === "exist"){
+        toast.error("Admin already exists.", { position: "top-right", autoClose: 3000 });
+      } else{
         toast.error("Failed to add user. Please try again.", { position: "top-right", autoClose: 3000 });
       }
     } catch (error) {
@@ -143,15 +193,13 @@ function SAdminListAdmins() {
     }
   };
 
-
-
   return (
     <div className="dashboard-wrapper">
       <button className="admin-hamburger-btn" onClick={toggleSidebar}>
         <FaBars className="me-2" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} />
       </button>
 
-      <div className={`admin-custom-sidebar ${sidebarVisible ? "show" : "hide"}`}>
+<div className={`admin-custom-sidebar ${sidebarVisible ? "show" : "hide"}`}>
         <div className="d-flex align-items-center mb-3">
           <text className="text-center admin-custom-css flex-grow-1 mt-2 ms-4" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
             {content?.admin_dashboard_title || "Admin Dashboard"}
@@ -291,7 +339,6 @@ function SAdminListAdmins() {
             <Col xs="auto">
               <Button variant="success" onClick={() => setShowAddModal(true)}>Add User</Button>
             </Col>
-
           </Row>
         </div>
 
@@ -322,6 +369,7 @@ function SAdminListAdmins() {
         </div>
       </div>
 
+      {/* Edit User Status Modal */}
       <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
         <Modal.Header closeButton><Modal.Title>Edit User Status</Modal.Title></Modal.Header>
         <Modal.Body>
@@ -339,31 +387,61 @@ function SAdminListAdmins() {
         </Modal.Footer>
       </Modal>
 
+      {/* Add User Modal */}
       <Modal show={showAddModal} onHide={() => setShowAddModal(false)}>
         <Modal.Header closeButton><Modal.Title>Add User</Modal.Title></Modal.Header>
         <Modal.Body>
           <Form>
             <Form.Group className="mb-3">
               <Form.Label>Email</Form.Label>
-              <Form.Control type="email" value={newUser.email} onChange={(e) => setNewUser({ ...newUser, email: e.target.value })} />
+              <Form.Control 
+                type="email" 
+                name="email" 
+                value={newUser.email} 
+                onChange={handleInputChange} 
+              />
+              {errors.email && <div className="text-danger">{errors.email}</div>}
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Password</Form.Label>
-              <Form.Control type="password" value={newUser.password} onChange={(e) => setNewUser({ ...newUser, password: e.target.value })} />
+              <Form.Control 
+                type="password" 
+                name="password" 
+                value={newUser.password} 
+                onChange={handleInputChange} 
+              />
+              {errors.password && <div className="text-danger">{errors.password}</div>}
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Name</Form.Label>
-              <Form.Control type="text" value={newUser.name} onChange={(e) => setNewUser({ ...newUser, name: e.target.value })} />
+              <Form.Control 
+                type="text" 
+                name="name" 
+                value={newUser.name} 
+                onChange={handleInputChange} 
+              />
+              {errors.name && <div className="text-danger">{errors.name}</div>}
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Phone Number</Form.Label>
-              <Form.Control type="text" value={newUser.phone} onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })} />
-            </Form.Group>
+  <Form.Label>Phone Number</Form.Label>
+  <Form.Control 
+    type="text" 
+    name="phone" 
+    value={newUser.phone} 
+    onChange={handleInputChange} 
+    maxLength={newUser.phone.startsWith('+') ? 13 : 10} // Dynamic maxLength
+  />
+  {errors.phone && <div className="text-danger">{errors.phone}</div>}
+</Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Profile Image</Form.Label>
-              <Form.Control type="file" accept="image/*" onChange={(e) => setNewUser({ ...newUser, image: e.target.files[0] })} />
-            </Form.Group>
-
+    <Form.Label>Profile Image</Form.Label>
+    <Form.Control 
+        type="file" 
+        accept="image/*" 
+        onChange={(e) => setNewUser({ ...newUser, image: e.target.files[0] })} 
+    />
+    {errors.image && <div className="text-danger">{errors.image}</div>}
+</Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>

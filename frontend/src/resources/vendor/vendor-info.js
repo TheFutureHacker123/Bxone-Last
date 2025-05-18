@@ -387,6 +387,7 @@ const VendorInfo = () => {
     formData.append("vendor_id", vendorId);
 
     try {
+      console.warn("Fuck",formData);
       const response = await fetch(
         "http://localhost:8000/api/vendor/vendorinfo",
         {
@@ -480,17 +481,19 @@ const VendorInfo = () => {
 
         <label>State/Region</label>
         <select
-          name="personal_state"
-          value={personalData.personal_state}
-          onChange={handlePersonalChange}
-        >
-          <option value="">Select Region</option>
-          {ethiopianRegions.map((region) => (
-            <option key={region} value={region}>
-              {region}
-            </option>
-          ))}
-        </select>
+  className="custom-select"
+  name="personal_state"
+  value={personalData.personal_state}
+  onChange={handlePersonalChange}
+>
+  <option value="">Select Region</option>
+  {ethiopianRegions.map((region) => (
+    <option key={region} value={region}>
+      {region}
+    </option>
+  ))}
+</select>
+
         {personalErrors.personal_state && (
           <p className="error-message">{personalErrors.personal_state}</p>
         )}
@@ -599,17 +602,19 @@ const VendorInfo = () => {
 
         <label>Business State/Region</label>
         <select
-          name="business_state"
-          value={businessData.business_state}
-          onChange={handleBusinessChange}
-        >
-          <option value="">Select Region</option>
-          {ethiopianRegions.map((region) => (
-            <option key={region} value={region}>
-              {region}
-            </option>
-          ))}
-        </select>
+  className="custom-select"
+  name="business_state"
+  value={businessData.business_state}
+  onChange={handleBusinessChange}
+>
+  <option value="">Select Region</option>
+  {ethiopianRegions.map((region) => (
+    <option key={region} value={region}>
+      {region}
+    </option>
+  ))}
+</select>
+
         {businessErrors.business_state && (
           <p className="error-message">{businessErrors.business_state}</p>
         )}
@@ -692,17 +697,19 @@ const VendorInfo = () => {
       <form onSubmit={handleVendorSubmit}>
         <label>Bank Name</label>
         <select
-          name="bank_name"
-          value={bankData.bank_name}
-          onChange={handleBankChange}
-        >
-          <option value="">Select Bank</option>
-          {ethiopianBanks.map((bank) => (
-            <option key={bank} value={bank}>
-              {bank}
-            </option>
-          ))}
-        </select>
+  className="custom-select"
+  name="bank_name"
+  value={bankData.bank_name}
+  onChange={handleBankChange}
+>
+  <option value="">Select Bank</option>
+  {ethiopianBanks.map((bank) => (
+    <option key={bank} value={bank}>
+      {bank}
+    </option>
+  ))}
+</select>
+
         {bankErrors.bank_name && (
           <p className="error-message">{bankErrors.bank_name}</p>
         )}
@@ -712,14 +719,16 @@ const VendorInfo = () => {
           <>
             <label>Account Type</label>
             <select
-              name="account_type"
-              value={bankData.account_type || ""}
-              onChange={handleBankChange}
-            >
-              <option value="">Select Type</option>
-              <option value="branch">Branch Account (13 digits)</option>
-              <option value="wallet">Wallet/Digital Account (16 digits)</option>
-            </select>
+  className="custom-select"
+  name="account_type"
+  value={bankData.account_type || ""}
+  onChange={handleBankChange}
+>
+  <option value="">Select Type</option>
+  <option value="branch">Branch Account (13 digits)</option>
+  <option value="wallet">Wallet/Digital Account (16 digits)</option>
+</select>
+
             {bankErrors.account_type && (
               <p className="error-message">{bankErrors.account_type}</p>
             )}

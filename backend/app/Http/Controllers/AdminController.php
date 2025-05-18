@@ -252,28 +252,28 @@ public function loginadmin(Request $request)
 
 
 
+   public function listnewvendors(Request $request)
+{
+    // Fetch only UnVerified vendors who have personalInfo
+    $vendors = Vendor::with('personalInfo')
+        ->where('status', 'UnVerified')
+        ->whereHas('personalInfo') // Ensures only vendors with related personalInfo
+        ->get();
 
-
-    public function listnewvendors(Request $request)
-    {
-        // Fetch all vendors with their personal info
-           $vendors = Vendor::with('personalInfo')
-           ->where('status', 'UnVerified') // Filter by status
-           ->get();
-    
-        // Prepare response data
-        $responseData = [];
-        foreach ($vendors as $vendor) {
-            $responseData[] = [
-                'email' => $vendor->email,
-                'personal_name' => $vendor->personalInfo->personal_name ?? "N/A",
-                'vendor_id' => $vendor->vendor_id,
-            ];
-        }
-    
-        // Return the response as JSON
-        return response()->json(['success' => true, 'data' => $responseData]);
+    // Prepare response data
+    $responseData = [];
+    foreach ($vendors as $vendor) {
+        $responseData[] = [
+            'email' => $vendor->email,
+            'personal_name' => $vendor->personalInfo->personal_name,
+            'vendor_id' => $vendor->vendor_id,
+        ];
     }
+
+    // Return the response as JSON
+    return response()->json(['success' => true, 'data' => $responseData]);
+}
+
 
 
 
@@ -506,16 +506,23 @@ public function editSubCategory(Request $request) {
 
 public function addAdmins(Request $request)
 {
-    // ✅ Step 1: Validate request data
+    // Check if admin with the same email already exists
+    if (Admin::where('email', $request->email)->exists()) {
+        return response()->json([
+            'success' => false,
+            'status' => 'exist',
+        ], 409); // 409 Conflict is appropriate for duplicate resources
+    }
+
+    // Proceed with validation after duplicate check
     $validated = $request->validate([
         'name'         => 'required|string|max:255',
         'phone'        => 'required|numeric',
-        'email'        => 'required|email|unique:admins,email',
+        'email'        => 'required|email',
         'password'     => 'required|min:8',
         'profile_img'  => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
     ]);
 
-    // ✅ Step 2: Handle image upload (optional)
     if ($request->hasFile('profile_img')) {
         $imageName = Str::uuid() . '.' . $request->file('profile_img')->getClientOriginalExtension();
         $path = 'profile_img/' . $imageName;
@@ -525,7 +532,6 @@ public function addAdmins(Request $request)
         $validated['profile_img'] = null;
     }
 
-    // ✅ Step 3: Create new Admin
     $admin = Admin::create([
         'phone'         => $validated['phone'],
         'name'          => $validated['name'],
@@ -542,6 +548,7 @@ public function addAdmins(Request $request)
         'admin' => $admin
     ], 201);
 }
+
 
 
 public function addNotification(Request $request)
