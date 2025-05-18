@@ -104,43 +104,49 @@ function AddSubCategory() {
   const handleDropdown = (menu) => setOpenDropdown(openDropdown === menu ? null : menu);
 
   const handleAddSubcategory = async () => {
-    if (subcategoryName.trim() && selectedCategory) {
-      const adminInfo = localStorage.getItem('admin-info');
-      const parsedInfo = JSON.parse(adminInfo);
-      const admin_id = parsedInfo.admin_id;
+  if (!subcategoryName.trim() || !selectedCategory) {
+    toast.error("Please fill in all fields");
+    return;
+  }
 
-      const newSubcategory = {
-        admin_id,
-        sub_category_name: subcategoryName.trim(),
-        category_id: selectedCategory,
-      };
+  const validSubcategoryName = /^[a-zA-Z0-9 ]+$/;
+  if (!validSubcategoryName.test(subcategoryName.trim())) {
+    toast.error("Subcategory name must only contain letters, numbers, and spaces.");
+    return;
+  }
 
-      try {
-        const response = await fetch('http://localhost:8000/api/add-subcategories', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newSubcategory),
-        });
-        const result = await response.json();
-        if (result.success) {
-          // Fetch updated subcategories after adding
-          await fetchSubcategories();
-          toast.success(result.message);
-        } else {
-          toast.error(result.message);
-        }
-      } catch (error) {
-        console.error("Error adding subcategory:", error);
-        toast.error("Error adding subcategory");
-      }
+  const adminInfo = localStorage.getItem('admin-info');
+  const parsedInfo = JSON.parse(adminInfo);
+  const admin_id = parsedInfo.admin_id;
 
+  const newSubcategory = {
+    admin_id,
+    sub_category_name: subcategoryName.trim(),
+    category_id: selectedCategory,
+  };
+
+  try {
+    const response = await fetch('http://localhost:8000/api/add-subcategories', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newSubcategory),
+    });
+    const result = await response.json();
+    if (response.ok && result.success) {
+      await fetchSubcategories();
+      toast.success(result.message || "Subcategory added successfully");
       setSubcategoryName("");
       setSelectedCategory("");
       setShowAddSubcategoryModal(false);
     } else {
-      toast.error("Please fill in all fields");
+      toast.error(result.message || "Failed to add subcategory");
     }
-  };
+  } catch (error) {
+    console.error("Error adding subcategory:", error);
+    toast.error("Error adding subcategory");
+  }
+};
+
 
 
   const handleDeleteSubcategory = async () => {
@@ -169,36 +175,57 @@ function AddSubCategory() {
 
 
   const handleEditSubcategory = async () => {
-    if (subcategoryToEdit !== null && subcategoryName.trim() && selectedCategory) {
-      const updatedSubcategory = {
-        sub_category_id: subcategoryToEdit,
-        sub_category_name: subcategoryName.trim(),
-        category_id: selectedCategory,
-      };
-      try {
-        const response = await fetch('http://localhost:8000/api/edit-subcategory', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(updatedSubcategory),
-        });
-        const result = await response.json();
-        if (result.success) {
-          // Fetch updated subcategories after editing
-          await fetchSubcategories();
-          toast.success("Subcategory updated successfully");
-        } else {
-          toast.error(result.message);
-        }
-      } catch (error) {
-        console.error("Error editing subcategory:", error);
-        toast.error("Error editing subcategory");
-      }
+  if (subcategoryToEdit === null) {
+    toast.error("No subcategory selected for editing.");
+    return;
+  }
+
+  if (!subcategoryName.trim()) {
+    toast.error("Subcategory name cannot be empty.");
+    return;
+  }
+
+  const validSubcategoryName = /^[a-zA-Z0-9 ]+$/;
+  if (!validSubcategoryName.test(subcategoryName.trim())) {
+    toast.error("Subcategory name must only contain letters, numbers, and spaces.");
+    return;
+  }
+
+  if (!selectedCategory) {
+    toast.error("Please select a category.");
+    return;
+  }
+
+  const updatedSubcategory = {
+    sub_category_id: subcategoryToEdit,
+    sub_category_name: subcategoryName.trim(),
+    category_id: selectedCategory,
+  };
+
+  try {
+    const response = await fetch('http://localhost:8000/api/edit-subcategory', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedSubcategory),
+    });
+    const result = await response.json();
+
+    if (response.ok && result.success) {
+      await fetchSubcategories();
+      toast.success("Subcategory updated successfully");
       setShowEditSubcategoryModal(false);
       setSubcategoryName("");
       setSelectedCategory("");
       setSubcategoryToEdit(null);
+    } else {
+      toast.error(result.message || "Failed to update subcategory.");
     }
-  };
+  } catch (error) {
+    console.error("Error editing subcategory:", error);
+    toast.error("Error editing subcategory");
+  }
+};
+
 
 
   const logout = () => {

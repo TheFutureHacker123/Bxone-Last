@@ -93,35 +93,48 @@ function AddCategory() {
 
 
 
-  const handleAddCategory = async () => {
-    if (!categoryName) return;
+ const handleAddCategory = async () => {
+  if (!categoryName) {
+    toast.error("Category name cannot be empty.");
+    return;
+  }
 
-    try {
-      const response = await fetch("http://localhost:8000/api/add-categories", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          admin_id: adminId,
-          category_name: categoryName,
-        }),
-      });
+  const validCategoryName = /^[a-zA-Z0-9 ]+$/;
+  if (!validCategoryName.test(categoryName)) {
+    toast.error("Category name must only contain letters, numbers, and spaces.");
+    return;
+  }
 
-      const data = await response.json();
-      if (data.success) {
-        toast.success("Category added successfully!");
-        fetchCategories(); // Reload categories
-        handleCloseAddCategoryModal();
-      } else {
-        toast.error("Failed to add category");
-      }
-    } catch (err) {
-      toast.error("Failed to add category");
+  try {
+    const response = await fetch("http://localhost:8000/api/add-categories", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        admin_id: adminId,
+        category_name: categoryName,
+      }),
+    });
+
+    const data = await response.json();
+    if (response.ok && data.success) {
+      toast.success("Category added successfully!");
+      fetchCategories(); // Reload categories
+      handleCloseAddCategoryModal();
+    } else {
+      toast.error(data.message || "Failed to add category.");
     }
-  };
+  } catch (err) {
+    toast.error("An error occurred. Please try again.");
+  }
+};
+
 
   const handleEditCategory = async () => {
-    if (categoryToEdit === null || !categoryName) return;
 
+  if (!categoryName) {
+    toast.error("Category name cannot be empty.");
+    return;
+  }
     const categoryId = categories[categoryToEdit]?.category_id;
 
     if (!categoryId) {
@@ -129,39 +142,37 @@ function AddCategory() {
       return;
     }
 
-    try {
-      // Send the update to the backend first
-      const response = await fetch("http://localhost:8000/api/edit-category", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          admin_id: adminId,
-          category_id: categoryId,
-          category_name: categoryName,
-        }),
-      });
+  const validCategoryName = /^[a-zA-Z0-9 ]+$/;
 
-      const data = await response.json();
+  if (!validCategoryName.test(categoryName)) {
+    toast.error("Category name must only contain letters, numbers, and spaces.");
+    return;
+  }
 
-      if (data) {
-        toast.success("Category updated successfully!");
+  try {
+    const response = await fetch("http://localhost:8000/api/edit-category", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        admin_id: adminId,
+        category_id: categoryId,
+        category_name: categoryName,
+      }),
+    });
 
-        // Only update UI after successful backend update
-        const updatedCategory = categories.map((cat, index) =>
-          index === categoryToEdit ? { ...cat, category_name: categoryName } : cat
-        );
-        setCategories(updatedCategory);
+    const data = await response.json();
 
-        fetchCategories(); // Refresh all categories (optional but better)
-        handleCloseEditCategoryModal();
-      } else {
-        toast.error("Failed to update category");
-      }
-    } catch (err) {
-      toast.error("Failed to update category");
-      console.error(err);
+    if (response.ok) {
+      toast.success("Category updated successfully!");
+      handleCloseEditCategoryModal();
+      fetchCategories(); // Optional: refresh category list
+    } else {
+      toast.error(data.message || "Failed to update category.");
     }
-  };
+  } catch (error) {
+    toast.error("An error occurred. Please try again.");
+  }
+};
 
 
   const handleDeleteCategory = async () => {

@@ -19,42 +19,58 @@ use App\Models\Product;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 class AdminController extends Controller
 {
     //
-    public function loginadmin(Request $request)
-    {
-        // Validate request data
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string|min:6',
-        ]);
-  
-        // Find admin by email
-        $admin = Admin::where('email', $request->email)->first();
-    
-        if ($admin && Hash::check($request->password, $admin->password)) {
-            // Auth success
-            return response()->json([
-                'success' => true,
-                'message' => 'Login successful.',
-                'admin' => [
-                'admin_id' => $admin->admin_id,
-                //'email' => $admin->email,
-                //'password' => $admin->password, // Be careful exposing this!
-                'admin_role_id' => $admin->admin_role_id,
-                 ], // Optional: You can return admin info
-                // 'token' => $token // Optional: If using Laravel Sanctum or Passport
-             ]);
-        } else {
-            // Auth failed
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid email or password.',
-            ], 401);
-        }
+public function loginadmin(Request $request)
+{
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required|string|min:6',
+    ]);
+
+    // Find admin by email
+    $admin = Admin::where('email', $request->email)->first();
+
+    if (!$admin) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid email or password.',
+        ], 401);
     }
+
+    // Check status before password verification
+    if ($admin->status === 'Suspended') {
+        return response()->json([
+            'success' => false,
+            'status' => 'Suspended',
+        ], 403);
+    } elseif ($admin->status !== 'Active') {
+        return response()->json([
+            'success' => false,
+            'status' => 'Your account status does not allow login.',
+        ], 403);
+    }
+
+    // Check password
+    if (Hash::check($request->password, $admin->password)) {
+        return response()->json([
+            'success' => true,
+            'message' => 'Login successful.',
+            'admin' => [
+                'admin_id' => $admin->admin_id,
+                'admin_role_id' => $admin->admin_role_id,
+            ],
+        ]);
+    } else {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid email or password.',
+        ], 401);
+    }
+}
 
 
 
@@ -264,30 +280,40 @@ class AdminController extends Controller
 
 public function addCategories(Request $request)
 {
-    // Validate the request
-    $validated = $request->validate([
-        'admin_id' => 'required|exists:admins,admin_id',
-        'category_name' => 'required|string|max:50',
-    ]);
+    try {
+        // Validate including unique rule for category_name
+        $validated = $request->validate([
+            'admin_id' => 'required|exists:admins,admin_id',
+            'category_name' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('category', 'category_name')
+            ],
+        ], [
+            'category_name.unique' => 'Category name already exists.',
+        ]);
+    } catch (ValidationException $e) {
+        return response()->json([
+            'success' => false,
+            'message' => $e->errors()['category_name'][0],
+        ], 422);
+    }
 
-    // Fetch the admin
     $admin = Admin::where('admin_id', $validated['admin_id'])->first();
 
-    // Check if the admin role is SuperAdmin
-    if ($admin->admin_role_id !== 'SuperAdmin') {
+    if (!$admin || $admin->admin_role_id !== 'SuperAdmin') {
         return response()->json([
             'success' => false,
             'message' => 'Only SuperAdmins are allowed to add categories.'
-        ], 403); // 403 Forbidden
+        ], 403);
     }
 
-    // Create the category
     $category = Category::create([
         'admin_id' => $validated['admin_id'],
         'category_name' => $validated['category_name'],
     ]);
 
-    // Return a success response
     return response()->json([
         'success' => true,
         'message' => 'Category added successfully.',
@@ -309,14 +335,44 @@ public function deleteCategory(Request $request) {
     return response()->json(['success' => true]);
 }
 
-public function editCategory(Request $request) {
-    $request->validate(['category_id' => 'required', 'category_name' => 'required']);
-    $category = Category::find($request->category_id);
-    if ($category) {
-        $category->category_name = $request->category_name;
-        $category->save();
+public function editCategory(Request $request)
+{
+    try {
+        $request->validate([
+            'category_id' => 'required|exists:category,category_id',
+            'category_name' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('category', 'category_name')->ignore($request->category_id, 'category_id'),
+            ],
+        ], [
+            'category_name.unique' => 'Category name already exists.',
+        ]);
+    } catch (ValidationException $e) {
+        return response()->json([
+            'success' => false,
+            'message' => $e->validator->errors()->first('category_name'),
+        ], 422);
     }
-    return response()->json($category);
+
+    $category = Category::find($request->category_id);
+
+    if (!$category) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Category not found.'
+        ], 404);
+    }
+
+    $category->category_name = $request->category_name;
+    $category->save();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Category updated successfully.',
+        'data' => $category
+    ]);
 }
 
 
@@ -325,14 +381,32 @@ public function editCategory(Request $request) {
 
 public function addSubCategories(Request $request)
 {
-    // Step 1: Validate the incoming request
-    $validated = $request->validate([
-        'admin_id' => 'required|exists:admins,admin_id',
-        'category_id' => 'required|exists:category,category_id',
-        'sub_category_name' => 'required|string|max:50',
-    ]);
+    try {
+        $validated = $request->validate([
+            'admin_id' => 'required|exists:admins,admin_id',
+            'category_id' => 'required|exists:category,category_id',
+            'sub_category_name' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('sub_category')
+                    ->where(function ($query) use ($request) {
+                        return $query->where('category_id', $request->category_id);
+                    })
+                    ->ignore($request->sub_category_id ?? null, 'sub_category_id'),
+            ],
+        ], [
+            'sub_category_name.unique' => 'Sub category already exists for this category.',
+        ]);
+    } catch (ValidationException $e) {
+        // Return the validation error message in JSON with 422 status
+        return response()->json([
+            'success' => false,
+            'message' => $e->errors()['sub_category_name'][0], // specific validation message
+        ], 422);
+    }
 
-    // Step 2: Check if the admin is a SuperAdmin
+    // Check if admin is SuperAdmin
     $admin = Admin::where('admin_id', $validated['admin_id'])->first();
 
     if (!$admin || $admin->admin_role_id !== 'SuperAdmin') {
@@ -342,18 +416,17 @@ public function addSubCategories(Request $request)
         ], 403);
     }
 
-    // Step 3: Create the subcategory
+    // Create subcategory
     $subCategory = SubCategory::create([
         'admin_id' => $validated['admin_id'],
         'category_id' => $validated['category_id'],
         'sub_category_name' => $validated['sub_category_name'],
     ]);
 
-    // Step 4: Return JSON response
     return response()->json([
         'success' => true,
         'message' => 'Subcategory added successfully.',
-        'data' => $subCategory
+        'data' => $subCategory,
     ], 201);
 }
 
@@ -385,35 +458,49 @@ public function deleteSubCategory(Request $request) {
 }
 
 public function editSubCategory(Request $request) {
-    // Validate the incoming request
-    $request->validate([
-        'sub_category_id' => 'required',
-        'sub_category_name' => 'required',
-        'category_id' => 'required|exists:category,category_id'  // Ensure category exists
-    ]);
-
-    // Find the subcategory by ID
-    $subcategory = SubCategory::find($request->sub_category_id);
-
-    // If subcategory exists, update the fields
-    if ($subcategory) {
-        $subcategory->sub_category_name = $request->sub_category_name;
-        $subcategory->category_id = $request->category_id;  // Link to the category
-        $subcategory->save();
-
-        // Return the updated subcategory with a success message
-        return response()->json([
-            'success' => true,
-            'message' => 'Subcategory updated successfully.',
-            'data' => $subcategory
+    try {
+        // Validate including unique rule for sub_category_name within the same category, ignoring current subcategory
+        $validated = $request->validate([
+            'sub_category_id' => 'required|exists:sub_category,sub_category_id',
+            'sub_category_name' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('sub_category')
+                    ->where(function ($query) use ($request) {
+                        return $query->where('category_id', $request->category_id);
+                    })
+                    ->ignore($request->sub_category_id, 'sub_category_id'),
+            ],
+            'category_id' => 'required|exists:category,category_id'
+        ], [
+            'sub_category_name.unique' => 'Subcategory name already exists for this category.',
         ]);
+    } catch (ValidationException $e) {
+        return response()->json([
+            'success' => false,
+            'message' => $e->errors()['sub_category_name'][0],
+        ], 422);
     }
 
-    // Return an error response if subcategory does not exist
+    $subcategory = SubCategory::find($validated['sub_category_id']);
+
+    if (!$subcategory) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Subcategory not found.'
+        ], 404);
+    }
+
+    $subcategory->sub_category_name = $validated['sub_category_name'];
+    $subcategory->category_id = $validated['category_id'];
+    $subcategory->save();
+
     return response()->json([
-        'success' => false,
-        'message' => 'Subcategory not found.'
-    ], 404); // Not Found status code
+        'success' => true,
+        'message' => 'Subcategory updated successfully.',
+        'data' => $subcategory,
+    ]);
 }
 
 

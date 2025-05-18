@@ -48,26 +48,32 @@ function LoginAdmin() {
 
         let result = await response.json();
 
-        if (result.success) {
-          toast.success(content?.login_success || "Login successful!", {
-            position: "top-right",
-            autoClose: 3000,
-          });
-          localStorage.setItem("admin-info", JSON.stringify(result.admin));
+        if (result.status === "Suspended") {
+  toast.error(result.message || "You are suspended. Please contact admin.", {
+    position: "top-right",
+    autoClose: 3000,
+  });
+} else if (result.success) {
+  toast.success(result.message || content?.login_success || "Login successful!", {
+    position: "top-right",
+    autoClose: 3000,
+  });
+  localStorage.setItem("admin-info", JSON.stringify(result.admin));
 
-          setTimeout(() => {
-            if (result.admin.admin_role_id === "SuperAdmin") {
-              navigate("/superadmin/");
-            } else {
-              navigate("/admin/");
-            }
-          }, 1000);
-        } else {
-          toast.error(content?.login_failed || "Login failed. Please try again.", {
-            position: "top-right",
-            autoClose: 3000,
-          });
-        }
+  setTimeout(() => {
+    if (result.admin.admin_role_id === "SuperAdmin") {
+      navigate("/superadmin/");
+    } else {
+      navigate("/admin/");
+    }
+  }, 1000);
+} else {
+  toast.error(result.message || content?.login_failed || "Login failed. Please try again.", {
+    position: "top-right",
+    autoClose: 3000,
+  });
+}
+
       } catch (error) {
         toast.error(content?.error_occurred || 'An error occurred. Please try again later.');
       }
