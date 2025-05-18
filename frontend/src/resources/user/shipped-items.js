@@ -74,7 +74,7 @@ function ShippedItems() {
       <nav className="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
         <div className="container-fluid">
           <a className="navbar-brand text-warning" href="/">
-            {content?.home || 'Dashboard'}
+             Habesha Mart
           </a>
           <button
             className="navbar-toggler"
@@ -89,10 +89,10 @@ function ShippedItems() {
           <div className={`${isNavOpen ? 'show' : 'collapse'} navbar-collapse`} id="navbarNav">
             <ul className="navbar-nav mx-auto">
               <li className="nav-item">
-                <div className="search-bar d-flex align-items-center">
+                {/* <div className="search-bar d-flex align-items-center">
                   <input type="text" className="form-control" placeholder={`${content?.search_products || 'Search products...'}`} />
                   <button className="btn btn-warning ms-2">{content?.search || 'Search'}</button>
-                </div>
+                </div> */}
               </li>
             </ul>
             <ul className="navbar-nav">

@@ -384,12 +384,12 @@ function Home() {
                       to="/wishlist"
                       className="text-dark text-decoration-none"
                     >
-                      Wishlist <i className="bi bi-heart ms-1 fs-sm"></i>
+                        {content?.carts || "Wishlist"}  <i className="bi bi-heart ms-1 fs-sm"></i>
                     </Link>
                   </div>
                   <div className="d-inline-block me-3">
                     <Link to="/cart" className="text-dark text-decoration-none">
-                      Cart <i className="bi bi-bag ms-1 fs-sm"></i>
+                      {content?.carts || "Cart"} <i className="bi bi-bag ms-1 fs-sm"></i>
                     </Link>
                   </div>
                 </>
@@ -526,7 +526,7 @@ function Home() {
               ) : (
                 <li className="nav-item">
                   <Link className="nav-link" to="/login">
-                    {content?.login_register || "Log In / Register"}
+                    {content?.login_register || "Log In / Register"}  
                   </Link>
                 </li>
               )}

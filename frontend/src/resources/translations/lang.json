@@ -1,6 +1,7 @@
 {
   "english": {
     "welcome": "Welcome to our market!",
+    "wishlist": "Wishlist",
     "best_selling_vendors": "Best Selling Vendors",
     "product_overview": "Product Overview",
     "product_name": "Product Name",
@@ -112,6 +113,7 @@
   },
   "amharic": {
     "welcome": "እንኳን ወደ ገበያችን በደህና መጡ!",
+    
     "best_selling_vendors": "ምርጥ ሽያጭ አቅራቢዎች",
     "product_overview": "የምርት አጠቃላይ እይታ",
     "product_name": "የምርት ስም",

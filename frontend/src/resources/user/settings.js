@@ -277,14 +277,14 @@ function Settings() {
         >
           {content?.back || "Back"}
         </Button>
-        <Button
+        {/* <Button
           variant="primary"
           type="button"
           className="custom-button-save mt-3 "
           style={{ color: "var(--font-color)" }}
         >
           {content?.save_settings || "Save Settings"}
-        </Button>
+        </Button> */}
         <Button
           variant="secondary"
           style={{ fontSize: "var(--font-size)", color: "var(--font-color)" }}
