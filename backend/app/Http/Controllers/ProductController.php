@@ -18,7 +18,7 @@ class ProductController extends Controller
     {
 
         // Get the search query from user input
-        $searchQuery = $request->input('query');
+        $searchQuery = $request->input('searchproduct');
 
         $products = Product::where('product_name', 'like', '%' . $searchQuery . '%')
             ->select('product_id', 'product_name', 'total_product', 'product_price', 'product_img1', 'product_img2', 'product_img3', 'product_img4', 'product_img5', 'product_desc', 'vendor_id', 'category_id', 'sub_category_id') // Select only the desired fields

@@ -73,7 +73,7 @@ function VendorDashboard() {
   }, []);
 
   useEffect(() => {
-    if (vendorInfo && !vendorInfo.is_approved) {
+    if (vendorInfo && !vendorInfo.has_completed_info) {
       // Redirect or show message
       navigate("/vendor/dashboard");
       toast.error("Your account must be approved by admin to add coupons.");

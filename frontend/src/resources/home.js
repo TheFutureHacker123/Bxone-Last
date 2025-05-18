@@ -263,6 +263,7 @@ function Home() {
   async function search(e) {
     e.preventDefault();
     let items = { searchproduct };
+    console.warn("Fuck",items);
     try {
       let response = await fetch("http://localhost:8000/api/search", {
         method: "POST",
