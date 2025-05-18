@@ -3,6 +3,7 @@ import { FaBars, FaChartLine, FaBox, FaUser, FaPen, FaTimes, FaShoppingCart, FaC
 import { Container, Row, Col, Card, Button, Modal, Form, Image } from "react-bootstrap";
 import { ToastContainer, toast } from 'react-toastify';
 import Translation from "../../translations/vendor.json";
+
 import { Link, useNavigate } from "react-router-dom";
 import "../style/add-coupons.css";
 
@@ -117,41 +118,61 @@ function AddCoupons() {
     };
 
     const addCoupon = async (e) => {
-        e.preventDefault();
-        const vendorInfo = JSON.parse(localStorage.getItem('vendor-info'));
-        const vendorId = vendorInfo?.vendor_id;
+  e.preventDefault();
+  const vendorInfo = JSON.parse(localStorage.getItem('vendor-info'));
+  const vendorId = vendorInfo?.vendor_id;
 
-        try {
-            const response = await fetch("http://localhost:8000/api/product/addcoupon", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    product_id: productId,
-                    vendor_id: vendorId,
-                    product_name: productName,
-                    coupon_code: couponCode,
-                    discount_price: discountPrice,
-                    expiry_date: expiryDate,
-                    status: status
-                })
-            });
+  // Validations
+  if (!productName ) {
+    toast.error("Select product name.");
+    return;
+  }
+if (!couponCode || !/^[A-Za-z0-9]+$/.test(couponCode)) {
+  toast.error("Enter a valid coupon code (letters and numbers only).");
+  return;
+}
 
-            const data = await response.json();
-            if (response.ok) {
-                // Fetch coupons again to refresh the list
-                fetchCoupons(vendorId);
-                toast.success(data.message);
-                handleCloseAddCouponModal();
-            } else {
-                toast.error(data.message);
-            }
-        } catch (error) {
-            console.error("Error adding coupon:", error);
-            toast.error("Failed to add coupon.");
-        }
-    };
+  if (!discountPrice || isNaN(discountPrice) || Number(discountPrice) <= 0) {
+    toast.error("Discount price must be a positive number.");
+    return;
+  }
+
+  if (!expiryDate) {
+    toast.error("Please select an expiry date.");
+    return;
+  }
+
+  try {
+    const response = await fetch("http://localhost:8000/api/product/addcoupon", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        product_id: productId,
+        vendor_id: vendorId,
+        product_name: productName,
+        coupon_code: couponCode,
+        discount_price: discountPrice,
+        expiry_date: expiryDate,
+        status: status
+      })
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      fetchCoupons(vendorId); // Refresh list
+      toast.success(data.message);
+      handleCloseAddCouponModal();
+    } else {
+      toast.error(data.message || "Failed to add coupon.");
+    }
+  } catch (error) {
+    console.error("Error adding coupon:", error);
+    toast.error("An error occurred while adding the coupon.");
+  }
+};
+
 
     const handleDropdown = (menu) => {
         setOpenDropdown(openDropdown === menu ? null : menu);
@@ -175,43 +196,69 @@ function AddCoupons() {
     };
 
     const editCoupon = async (e) => {
-        e.preventDefault();
-        if (!selectedCoupon) {
-            toast.error("Selected coupon is invalid.");
-            return;
-        }
-        try {
-            const vendorInfo = JSON.parse(localStorage.getItem('vendor-info'));
-            const vendorId = vendorInfo?.vendor_id;
-            const response = await fetch("http://localhost:8000/api/product/editcoupon", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    vendor_id: vendorId,
-                    coupon_id: selectedCoupon.coupon_id,
-                    product_id: productId, // Use updated product ID
-                    product_name: productName,
-                    coupon_code: couponCode,
-                    discount_price: discountPrice,
-                    expiry_date: expiryDate,
-                    status: status
-                })
-            });
-            const data = await response.json();
-            if (response.ok) {
-                fetchCoupons(vendorId); // Refresh the coupons list after a successful update
-                toast.success(data.message);
-                handleCloseEditCouponModal();
-            } else {
-                toast.error(data.message);
-            }
-        } catch (error) {
-            console.error("Error editing coupon:", error);
-            toast.error("Failed to edit coupon.");
-        }
-    };
+  e.preventDefault();
+
+  if (!selectedCoupon) {
+    toast.error("Selected coupon is invalid.");
+    return;
+  }
+
+  const vendorInfo = JSON.parse(localStorage.getItem('vendor-info'));
+  const vendorId = vendorInfo?.vendor_id;
+
+  // Validations
+  if (!productName) {
+    toast.error("Select product name.");
+    return;
+  }
+
+  if (!couponCode || !/^[A-Za-z0-9]+$/.test(couponCode)) {
+    toast.error("Enter a valid coupon code (letters and numbers only).");
+    return;
+  }
+
+  if (!discountPrice || isNaN(discountPrice) || Number(discountPrice) <= 0) {
+    toast.error("Discount price must be a positive number.");
+    return;
+  }
+
+  if (!expiryDate) {
+    toast.error("Please select an expiry date.");
+    return;
+  }
+
+  try {
+    const response = await fetch("http://localhost:8000/api/product/editcoupon", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        vendor_id: vendorId,
+        coupon_id: selectedCoupon.coupon_id,
+        product_id: productId,
+        product_name: productName,
+        coupon_code: couponCode,
+        discount_price: discountPrice,
+        expiry_date: expiryDate,
+        status: status
+      })
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      fetchCoupons(vendorId); // Refresh the coupons list after a successful update
+      toast.success(data.message);
+      handleCloseEditCouponModal();
+    } else {
+      toast.error(data.message || "Failed to edit coupon.");
+    }
+  } catch (error) {
+    console.error("Error editing coupon:", error);
+    toast.error("Failed to edit coupon.");
+  }
+};
+
 
     const deleteCoupon = async (couponId) => {
         try {
@@ -464,21 +511,41 @@ function AddCoupons() {
                                     </Form.Control>
                                 </Form.Group>
                                 <Form.Group controlId="couponCode">
-                                    <Form.Label>{content?.coupon_code || "Coupon Code"}</Form.Label>
-                                    <Form.Control type="text" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} placeholder={content?.enter_coupon_code || "Enter coupon code"} />
-                                </Form.Group>
-                                <Form.Group controlId="discountPrice">
-                                    <Form.Label>{content?.discount_price || "Discount Price"}</Form.Label>
-                                    <Form.Control type="text" value={discountPrice} onChange={(e) => setDiscountPrice(e.target.value)} placeholder={content?.enter_discount_price || "Enter discount price"} />
-                                </Form.Group>
-                                <Form.Group controlId="expiryDate">
-                                    <Form.Label>{content?.expiry_date || "Expiry Date"}</Form.Label>
-                                    <Form.Control
-                                        type="date"
-                                        value={expiryDate}
-                                        onChange={(e) => setExpiryDate(e.target.value)}
-                                    />
-                                </Form.Group>
+  <Form.Label>{content?.coupon_code || "Coupon Code"}</Form.Label>
+  <Form.Control
+    type="text"
+    value={couponCode}
+    onChange={(e) => setCouponCode(e.target.value.toUpperCase())} // force uppercase
+    placeholder={content?.enter_coupon_code || "Enter coupon code"}
+  />
+</Form.Group>
+
+<Form.Group controlId="discountPrice">
+  <Form.Label>{content?.discount_price || "Discount Price"}</Form.Label>
+  <Form.Control
+    type="number"
+    min="1" // restrict value in UI
+    value={discountPrice}
+    onChange={(e) => {
+      const val = Number(e.target.value);
+      if (val >= 1 || e.target.value === "") {
+        setDiscountPrice(e.target.value);
+      }
+    }}
+    placeholder={content?.enter_discount_price || "Enter discount price"}
+  />
+</Form.Group>
+
+                               <Form.Group controlId="expiryDate">
+  <Form.Label>{content?.expiry_date || "Expiry Date"}</Form.Label>
+  <Form.Control
+    type="date"
+    value={expiryDate}
+    min={new Date(Date.now() + 86400000).toISOString().split("T")[0]} // Set min to tomorrow
+    onChange={(e) => setExpiryDate(e.target.value)}
+  />
+</Form.Group>
+
                                 <Form.Group controlId="status">
                                     <Form.Label>{content?.status || "Status"}</Form.Label>
                                     <Form.Control
@@ -521,21 +588,41 @@ function AddCoupons() {
                                     </Form.Control>
                                 </Form.Group>
                                 <Form.Group controlId="couponCode">
-                                    <Form.Label>{content?.coupon_code || "Coupon Code"}</Form.Label>
-                                    <Form.Control type="text" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} placeholder={content?.enter_coupon_code || "Enter coupon code"} />
-                                </Form.Group>
-                                <Form.Group controlId="discountPrice">
-                                    <Form.Label>{content?.discount_price || "Discount Price"}</Form.Label>
-                                    <Form.Control type="text" value={discountPrice} onChange={(e) => setDiscountPrice(e.target.value)} placeholder={content?.enter_discount_price || "Enter discount price"} />
-                                </Form.Group>
-                                <Form.Group controlId="expiryDate">
-                                    <Form.Label>{content?.expiry_date || "Expiry Date"}</Form.Label>
-                                    <Form.Control
-                                        type="date"
-                                        value={expiryDate}
-                                        onChange={(e) => setExpiryDate(e.target.value)}
-                                    />
-                                </Form.Group>
+  <Form.Label>{content?.coupon_code || "Coupon Code"}</Form.Label>
+  <Form.Control
+    type="text"
+    value={couponCode}
+    onChange={(e) => setCouponCode(e.target.value.toUpperCase())} // Enforce uppercase
+    placeholder={content?.enter_coupon_code || "Enter coupon code"}
+  />
+</Form.Group>
+
+<Form.Group controlId="discountPrice">
+  <Form.Label>{content?.discount_price || "Discount Price"}</Form.Label>
+  <Form.Control
+    type="number"
+    min="1" // Prevent inputting 0 or negative numbers
+    value={discountPrice}
+    onChange={(e) => {
+      const val = Number(e.target.value);
+      if (val >= 1 || e.target.value === "") {
+        setDiscountPrice(e.target.value);
+      }
+    }}
+    placeholder={content?.enter_discount_price || "Enter discount price"}
+  />
+</Form.Group>
+
+                               <Form.Group controlId="expiryDate">
+  <Form.Label>{content?.expiry_date || "Expiry Date"}</Form.Label>
+  <Form.Control
+    type="date"
+    value={expiryDate}
+    min={new Date(Date.now() + 86400000).toISOString().split("T")[0]} // Only allow future dates
+    onChange={(e) => setExpiryDate(e.target.value)}
+  />
+</Form.Group>
+
                                 <Form.Group controlId="status">
                                     <Form.Label>{content?.status || "Status"}</Form.Label>
                                     <Form.Control
@@ -556,6 +643,8 @@ function AddCoupons() {
                     </Modal>
                 </Container>
             </div>
+            
+                    <ToastContainer />
         </div>
     );
 }

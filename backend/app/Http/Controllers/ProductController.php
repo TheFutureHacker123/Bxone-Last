@@ -391,44 +391,77 @@ class ProductController extends Controller
         return response()->json(['success' => true, 'refund_items' => $orders]);
     }
 
-    public function addCoupon(Request $request)
-    {
-        // Validate the incoming request data
-        $request->validate([
-            'product_id' => 'required|exists:product,product_id',
-            'vendor_id' => 'required|exists:vendors,vendor_id',
-            'product_name' => 'required|string|max:255',
-            'coupon_code' => 'required|string|max:255|unique:coupons,coupon_code',
-            'discount_price' => 'required|numeric|min:0',
-            'expiry_date' => 'required|date|after:today',
-            'status' => 'required|in:active,inactive',
-        ]);
 
-        // Check if vendor is approved
-        $vendor = \App\Models\Vendor::find($request->vendor_id);
-        if (!$vendor || !$vendor->is_approved) {
-            return response()->json([
-                'message' => 'Vendor not approved to add coupons.'
-            ], 403);
-        }
-
-        // Create a new coupon using the validated data
-        $coupon = Coupon::create([
-            'product_id' => $request->product_id,
-            'vendor_id' => $request->vendor_id,
-            'product_name' => $request->product_name,
-            'coupon_code' => $request->coupon_code,
-            'discount_price' => $request->discount_price,
-            'expiry_date' => $request->expiry_date,
-            'status' => $request->status,
-        ]);
-
-        // Return a response indicating success
+    
+ public function addCoupon(Request $request)
+{
+    // Check if coupon code already exists before validation
+    if (Coupon::where('coupon_code', strtoupper($request->coupon_code))->exists()) {
         return response()->json([
-            'message' => 'Coupon added successfully!',
-            'coupon' => $coupon
-        ], 201);
+            'message' => 'The coupon already exists.'
+        ], 409); // 409 Conflict
     }
+
+    // Validate the incoming request data (after checking for duplicate)
+    $request->validate([
+        'product_id'      => 'required|exists:product,product_id',
+        'vendor_id'       => 'required|exists:vendors,vendor_id',
+        'product_name'    => 'required|string|max:255',
+        'coupon_code'     => 'required|string|max:255',
+        'discount_price'  => 'required|numeric|min:0',
+        'expiry_date'     => 'required|date|after:today',
+        'status'          => 'required|in:active,inactive',
+    ]);
+
+    // Check if vendor is approved
+    $vendor = \App\Models\Vendor::find($request->vendor_id);
+    if (!$vendor || !$vendor->is_approved) {
+        return response()->json([
+            'message' => 'Vendor not approved to add coupons.'
+        ], 403);
+    }
+
+    // Check product existence and price comparison
+    $product = \App\Models\Product::find($request->product_id);
+    if (!$product) {
+        return response()->json([
+            'message' => 'Product not found.'
+        ], 404);
+    }
+
+    if ($request->discount_price >= $product->product_price) {
+        return response()->json([
+            'message' => 'Discount price cannot be greater than or equal to product price.',
+        ], 422);
+    }
+
+    // Limit coupon count per vendor to 20
+    $couponCount = Coupon::where('vendor_id', $request->vendor_id)->count();
+    if ($couponCount >= 20) {
+        return response()->json([
+            'message' => 'You can’t add more than 20 coupons.'
+        ], 403);
+    }
+
+    // Create the coupon
+    $coupon = Coupon::create([
+        'product_id'      => $request->product_id,
+        'vendor_id'       => $request->vendor_id,
+        'product_name'    => $request->product_name,
+        'coupon_code'     => strtoupper($request->coupon_code),
+        'discount_price'  => $request->discount_price,
+        'expiry_date'     => $request->expiry_date,
+        'status'          => $request->status,
+    ]);
+
+    return response()->json([
+        'message' => 'Coupon added successfully!',
+        'coupon' => $coupon
+    ], 201);
+}
+
+
+
 
     public function listCoupon(Request $request)
     {
@@ -476,53 +509,77 @@ class ProductController extends Controller
         ]);
     }
 
-    public function editCoupon(Request $request)
-    {
-        // Validate the incoming request data
-        $request->validate([
-            'coupon_id'      => 'required|exists:coupons,coupon_id',
-            'product_id'     => 'required|exists:product,product_id',
-            'product_name'   => 'required|string|max:255',
-            'coupon_code'    => 'required|string|max:255',
-            'discount_price' => 'required|numeric|min:0',
-            'expiry_date'    => 'required|date|after_or_equal:today',
-            'status'         => 'required|in:active,inactive',
-            'vendor_id'      => 'required|exists:vendors,vendor_id' // Validate vendor_id if needed
-        ]);
 
-        $vendor_id = $request->vendor_id; // Define vendor_id
 
-        // Find the coupon by its ID
-        $coupon = Coupon::find($request->coupon_id);
 
-        if (!$coupon) {
-            return response()->json([
-                'message' => 'Coupon not found.',
-            ], 404);
-        }
 
-        // Update the coupon fields
-        $coupon->product_id = $request->product_id;
-        $coupon->product_name = $request->product_name;
-        $coupon->coupon_code = $request->coupon_code;
-        $coupon->discount_price = $request->discount_price;
-        $coupon->expiry_date = $request->expiry_date;
-        $coupon->status = $request->status;
+   public function editCoupon(Request $request)
+{
+    // Validate the incoming request data
+    $request->validate([
+        'coupon_id'      => 'required|exists:coupons,coupon_id',
+        'product_id'     => 'required|exists:product,product_id',
+        'product_name'   => 'required|string|max:255',
+        'coupon_code'    => 'required|string|max:255',
+        'discount_price' => 'required|numeric|min:0',
+        'expiry_date'    => 'required|date|after_or_equal:today',
+        'status'         => 'required|in:active,inactive',
+        'vendor_id'      => 'required|exists:vendors,vendor_id'
+    ]);
 
-        // Save the updated coupon
-        $coupon->save();
+    $vendor_id = $request->vendor_id;
 
-        // Retrieve the coupons
-        $coupons = Coupon::with('product')
-            ->where('vendor_id', $vendor_id) // Use the defined vendor_id
-            ->get();
+    // Get the related product
+    $product = Product::find($request->product_id);
 
-        // Return the response
+    if (!$product) {
         return response()->json([
-            'message' => 'Coupons retrieved successfully.',
-            'coupon' => $coupons
-        ]);
+            'message' => 'Product not found.',
+        ], 404);
     }
+
+    // Check if discount price is less than product price
+    if ($request->discount_price >= $product->product_price) {
+        return response()->json([
+            'message' => 'Discount price cannot be greater than or equal to product price.',
+        ], 422);
+    }
+
+    // Find the coupon
+    $coupon = Coupon::find($request->coupon_id);
+
+    if (!$coupon) {
+        return response()->json([
+            'message' => 'Coupon not found.',
+        ], 404);
+    }
+
+    // Update coupon fields
+    $coupon->product_id = $request->product_id;
+    $coupon->product_name = $request->product_name;
+    $coupon->coupon_code = strtoupper($request->coupon_code); // Optional: force uppercase
+    $coupon->discount_price = $request->discount_price;
+    $coupon->expiry_date = $request->expiry_date;
+    $coupon->status = $request->status;
+
+    $coupon->save();
+
+    // Get all coupons for this vendor
+    $coupons = Coupon::with('product')
+        ->where('vendor_id', $vendor_id)
+        ->get();
+
+    return response()->json([
+        'message' => 'Coupons retrieved successfully.',
+        'coupon' => $coupons
+    ]);
+}
+
+
+
+
+
+
 
     public function oneVendorProducts(Request $request)
     {

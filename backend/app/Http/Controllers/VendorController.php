@@ -313,66 +313,75 @@ class VendorController extends Controller
     }
 
     public function addproduct(Request $request)
-    {
-        // ✅ Step 1: Validate request data
-        $validated = $request->validate([
-            'product_name'      => 'required|string|max:100',
-            'total_product'     => 'required|integer',
-            'product_price'     => 'required|numeric',
-            'product_desc'      => 'required|string|max:100',
-            'vendor_id'         => 'required|exists:vendors,vendor_id',
-            'category_id'       => 'required|exists:category,category_id',
-            'sub_category_id'   => 'required|exists:sub_category,sub_category_id',
-            'status'            => 'in:Active,Inactive',
-            'product_img1'      => 'required|image|mimes:jpeg,png,jpg,gif',
-            // 'product_img1'      => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'product_img2'      => 'nullable|image|mimes:jpeg,png,jpg,gif',
-            'product_img3'      => 'nullable|image|mimes:jpeg,png,jpg,gif',
-            'product_img4'      => 'nullable|image|mimes:jpeg,png,jpg,gif',
-            'product_img5'      => 'nullable|image|mimes:jpeg,png,jpg,gif',
-        ]);
-
-        $vendor = Vendor::find($request->vendor_id);
-        if (!$vendor || !$vendor->is_approved) {
-            return response()->json(['message' => 'Vendor not approved'], 403);
-        }
-
-        // ✅ Step 2: Handle image uploads
-        $imageFields = ['product_img1', 'product_img2', 'product_img3', 'product_img4', 'product_img5'];
-
-        foreach ($imageFields as $field) {
-            if ($request->hasFile($field)) {
-                $imageName = Str::uuid() . '.' . $request->file($field)->getClientOriginalExtension();
-                $path = 'products/' . $imageName;
-                $request->file($field)->storeAs('public/products', $imageName);
-                $validated[$field] = $path;
-            } else {
-                $validated[$field] = null;
-            }
-        }
-        // ✅ Step 3: Create product
-        $product = Product::create([
-            'product_name'      => $validated['product_name'],
-            'total_product'     => $validated['total_product'],
-            'product_price'     => $validated['product_price'],
-            'product_desc'      => $validated['product_desc'],
-            'vendor_id'         => $validated['vendor_id'],
-            'category_id'       => $validated['category_id'],
-            'sub_category_id'   => $validated['sub_category_id'],
-            'product_status'            => $validated['product_status'] ?? 'Active',
-            'product_img1'      => $validated['product_img1'],
-            'product_img2'      => $validated['product_img2'],
-            'product_img3'      => $validated['product_img3'],
-            'product_img4'      => $validated['product_img4'],
-            'product_img5'      => $validated['product_img5'],
-        ]);
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Product added successfully!',
-            'data' => $product
-        ], 201);
+{
+    // ✅ Step 1: Check if vendor exists and is approved
+    $vendor = Vendor::find($request->vendor_id);
+    if (!$vendor || !$vendor->is_approved) {
+        return response()->json(['message' => 'Vendor not approved'], 403);
     }
+
+    // ✅ Step 2: Check vendor's existing product count
+    $productCount = Product::where('vendor_id', $request->vendor_id)->count();
+    if ($productCount >= 20) {
+        return response()->json([
+            'message' => 'You can’t add more than 20 products.'
+        ], 403);
+    }
+
+    // ✅ Step 3: Validate request data
+    $validated = $request->validate([
+        'product_name'      => 'required|string|max:100',
+        'total_product'     => 'required|integer',
+        'product_price'     => 'required|numeric',
+        'product_desc'      => 'required|string|max:100',
+        'vendor_id'         => 'required|exists:vendors,vendor_id',
+        'category_id'       => 'required|exists:category,category_id',
+        'sub_category_id'   => 'required|exists:sub_category,sub_category_id',
+        'status'            => 'in:Active,Inactive',
+        'product_img1'      => 'required|image|mimes:jpeg,png,jpg,gif',
+        'product_img2'      => 'nullable|image|mimes:jpeg,png,jpg,gif',
+        'product_img3'      => 'nullable|image|mimes:jpeg,png,jpg,gif',
+        'product_img4'      => 'nullable|image|mimes:jpeg,png,jpg,gif',
+        'product_img5'      => 'nullable|image|mimes:jpeg,png,jpg,gif',
+    ]);
+
+    // ✅ Step 4: Handle image uploads
+    $imageFields = ['product_img1', 'product_img2', 'product_img3', 'product_img4', 'product_img5'];
+    foreach ($imageFields as $field) {
+        if ($request->hasFile($field)) {
+            $imageName = Str::uuid() . '.' . $request->file($field)->getClientOriginalExtension();
+            $path = 'products/' . $imageName;
+            $request->file($field)->storeAs('public/products', $imageName);
+            $validated[$field] = $path;
+        } else {
+            $validated[$field] = null;
+        }
+    }
+
+    // ✅ Step 5: Create the product
+    $product = Product::create([
+        'product_name'      => $validated['product_name'],
+        'total_product'     => $validated['total_product'],
+        'product_price'     => $validated['product_price'],
+        'product_desc'      => $validated['product_desc'],
+        'vendor_id'         => $validated['vendor_id'],
+        'category_id'       => $validated['category_id'],
+        'sub_category_id'   => $validated['sub_category_id'],
+        'product_status'    => $validated['status'] ?? 'Active',
+        'product_img1'      => $validated['product_img1'],
+        'product_img2'      => $validated['product_img2'],
+        'product_img3'      => $validated['product_img3'],
+        'product_img4'      => $validated['product_img4'],
+        'product_img5'      => $validated['product_img5'],
+    ]);
+
+    return response()->json([
+        'status' => 'success',
+        'message' => 'Product added successfully!',
+        'data' => $product
+    ], 201);
+}
+
 
     public function productlist(Request $request)
     {

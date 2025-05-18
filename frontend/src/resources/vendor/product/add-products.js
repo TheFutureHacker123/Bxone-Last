@@ -120,70 +120,105 @@ function AddProduct() {
 
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const vendorInfo = JSON.parse(localStorage.getItem("vendor-info")); // Get vendor info
-    const vendor_id = vendorInfo?.vendor_id;
+  const vendorInfo = JSON.parse(localStorage.getItem("vendor-info"));
+  const vendor_id = vendorInfo?.vendor_id;
 
-    if (!vendor_id) {
-      toast.error(content?.vendor_id_not_found || "Vendor ID not found. Please login again.");
-      return;
-    }
+  if (!vendor_id) {
+    toast.error(content?.vendor_id_not_found || "Vendor ID not found. Please login again.");
+    return;
+  }
 
-    const formData = new FormData();
-    formData.append("product_name", productData.product_name);
-    formData.append("total_product", productData.total_product);
-    formData.append("product_price", productData.product_price);
-    formData.append("product_desc", productData.product_desc);
-    formData.append("vendor_id", vendor_id); // Important
-    formData.append("category_id", selectedCategory);
-    formData.append("sub_category_id", selectedSubCategory);
-    formData.append("product_img1", productData.product_img1);
+  // Individual field validation with early return
+  if (!selectedCategory) {
+    toast.error(content?.select_category_prompt || "Select a category.");
+    return;
+  }
 
-    // Optional images (can be null)
-    if (productData.product_img2) formData.append("product_img2", productData.product_img2);
-    if (productData.product_img3) formData.append("product_img3", productData.product_img3);
-    if (productData.product_img4) formData.append("product_img4", productData.product_img4);
-    if (productData.product_img5) formData.append("product_img5", productData.product_img5);
+  if (!selectedSubCategory) {
+    toast.error(content?.select_subcategory_prompt || "Select a subcategory.");
+    return;
+  }
 
-    try {
-      console.log("Submitting product data:", productData);
-      console.log("Submitting formData:", formData);
+  const productNameRegex = /^[A-Za-z0-9 ]+$/;
+  if (!productNameRegex.test(productData.product_name)) {
+    toast.error(content?.invalid_product_name || "Product name can only contain letters, numbers, and spaces.");
+    return;
+  }
 
-      const res = await fetch("http://localhost:8000/api/vendor/addproduct", {
-        method: "POST",
-        body: formData,
+ if (!productData.total_product || isNaN(productData.total_product) || Number(productData.total_product) <= 0) {
+  toast.error(content?.enter_total_product || "Enter a positive total product number greater than zero.");
+  return;
+}
+
+if (!productData.product_price || isNaN(productData.product_price) || Number(productData.product_price) <= 0) {
+  toast.error(content?.enter_product_price || "Enter a positive product price greater than zero.");
+  return;
+}
+
+
+  if (!productData.product_desc.trim()) {
+    toast.error(content?.enter_product_description || "Enter product description.");
+    return;
+  }
+
+  if (!productData.product_img1) {
+    toast.error(content?.product_image_required || "At least one product image is required.");
+    return;
+  }
+
+  // Prepare FormData if all valid
+  const formData = new FormData();
+  formData.append("product_name", productData.product_name);
+  formData.append("total_product", productData.total_product);
+  formData.append("product_price", productData.product_price);
+  formData.append("product_desc", productData.product_desc);
+  formData.append("vendor_id", vendor_id);
+  formData.append("category_id", selectedCategory);
+  formData.append("sub_category_id", selectedSubCategory);
+  formData.append("product_img1", productData.product_img1);
+
+  if (productData.product_img2) formData.append("product_img2", productData.product_img2);
+  if (productData.product_img3) formData.append("product_img3", productData.product_img3);
+  if (productData.product_img4) formData.append("product_img4", productData.product_img4);
+  if (productData.product_img5) formData.append("product_img5", productData.product_img5);
+
+  try {
+    const res = await fetch("http://localhost:8000/api/vendor/addproduct", {
+      method: "POST",
+      body: formData,
+    });
+
+    const result = await res.json();
+
+    if (result.status === "success") {
+      toast.success(content?.product_added_success || "Product added successfully!", {
+        position: "top-right",
+        autoClose: 3000,
       });
 
-      const result = await res.json();
-      console.log("Response from server:", result);
-
-      if (result.status === "success") {
-        toast.success(content?.product_added_success || "Product added successfully!", {
-          position: "top-right",
-          autoClose: 3000,
-        });
-
-        setProductData({
-          product_name: "",
-          total_product: "",
-          product_price: "",
-          product_desc: "",
-          product_img1: null,
-          product_img2: null,
-          product_img3: null,
-          product_img4: null,
-          product_img5: null,
-        });
-        setSelectedCategory("");
-        setSelectedSubCategory("");
-      } else {
-        toast.error(content?.product_add_failed || "Failed to add product!");
-      }
-    } catch (err) {
-      toast.error(content?.error_occurred || "An error occurred. Try again.");
+      setProductData({
+        product_name: "",
+        total_product: "",
+        product_price: "",
+        product_desc: "",
+        product_img1: null,
+        product_img2: null,
+        product_img3: null,
+        product_img4: null,
+        product_img5: null,
+      });
+      setSelectedCategory("");
+      setSelectedSubCategory("");
+    } else {
+      toast.error(result.message);
     }
-  };
+  } catch (err) {
+    toast.error(content?.error_occurred || "An error occurred. Try again.");
+  }
+};
+
 
 
   const openEditProductModal = (product) => {
@@ -306,65 +341,99 @@ function AddProduct() {
 
 
   const handleEditProduct = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const vendorInfo = JSON.parse(localStorage.getItem("vendor-info"));
-    const vendor_id = vendorInfo?.vendor_id;
+  const vendorInfo = JSON.parse(localStorage.getItem("vendor-info"));
+  const vendor_id = vendorInfo?.vendor_id;
 
-    if (!vendor_id) {
-      alert("Vendor ID not found. Please login again.");
-      return;
+  if (!vendor_id) {
+    toast.error("Vendor ID not found. Please login again.");
+    return;
+  }
+
+  // Validation
+  const nameRegex = /^[A-Za-z0-9 ]+$/;
+
+  if (!selectedCategory) {
+    toast.error("Please select a category.");
+    return;
+  }
+
+  if (!selectedSubCategory) {
+    toast.error("Please select a subcategory.");
+    return;
+  }
+
+  if (!selectedProduct.name || !nameRegex.test(selectedProduct.name)) {
+    toast.error("Product name must contain only letters, numbers, and spaces.");
+    return;
+  }
+
+  if (
+    !selectedProduct.totalProduct ||
+    isNaN(selectedProduct.totalProduct) ||
+    Number(selectedProduct.totalProduct) <= 0
+  ) {
+    toast.error("Total product must be a positive number greater than zero.");
+    return;
+  }
+
+  if (
+    !selectedProduct.price ||
+    isNaN(selectedProduct.price) ||
+    Number(selectedProduct.price) <= 0
+  ) {
+    toast.error("Product price must be a positive number greater than zero.");
+    return;
+  }
+
+  if (selectedProduct.description && selectedProduct.description.length > 255) {
+    toast.error("Product description cannot exceed 255 characters.");
+    return;
+  }
+
+
+
+  const formData = new FormData();
+  formData.append("product_id", selectedProduct.id);
+  formData.append("product_name", selectedProduct.name);
+  formData.append("total_product", selectedProduct.totalProduct);
+  formData.append("product_price", selectedProduct.price);
+  formData.append("product_desc", selectedProduct.description);
+  formData.append("vendor_id", vendor_id);
+  formData.append("category_id", selectedCategory);
+  formData.append("sub_category_id", selectedSubCategory);
+
+  selectedImages.forEach((image, index) => {
+    if (image) {
+      formData.append(`product_img${index + 1}`, image);
     }
+  });
 
-    const formData = new FormData();
-    formData.append("product_id", selectedProduct.id);
-    formData.append("product_name", selectedProduct.name);
-    formData.append("total_product", selectedProduct.totalProduct);
-    formData.append("product_price", selectedProduct.price);
-    formData.append("product_desc", selectedProduct.description);
-    formData.append("vendor_id", vendor_id);
-    formData.append("category_id", selectedCategory);
-    formData.append("sub_category_id", selectedSubCategory);
-
-    // Log the selected images
-    selectedImages.forEach((image, index) => {
-      if (image) {
-        console.log(`Image ${index + 1}:`, image.name);
-        formData.append(`product_img${index + 1}`, image);
-      }
+  try {
+    const res = await fetch("http://localhost:8000/api/vendor/editproduct", {
+      method: "POST",
+      body: formData,
     });
+    const result = await res.json();
 
-    // Log FormData contents for debugging
-    for (let [key, value] of formData.entries()) {
-      console.log(key, value);
+    if (result.status === "success") {
+      toast.success("Product updated successfully!");
+      setProductList((prev) =>
+        prev.map((product) =>
+          product.product_id === selectedProduct.id ? { ...product, ...selectedProduct } : product
+        )
+      );
+      handleCloseEditProductModal();
+    } else {
+      toast.error("Failed to update product.");
     }
+  } catch (err) {
+    console.error("Error while updating product:", err);
+    toast.error("An error occurred. Please try again.");
+  }
+};
 
-    try {
-      const res = await fetch("http://localhost:8000/api/vendor/editproduct", {
-        method: "POST",
-        body: formData,
-      });
-      const result = await res.json();
-
-      if (result.status === "success") {
-        toast.success("Product updated successfully!");
-
-        // Update local product list
-        setProductList((prev) =>
-          prev.map((product) =>
-            product.product_id === selectedProduct.id ? { ...product, ...selectedProduct } : product
-          )
-        );
-
-        handleCloseEditProductModal();
-      } else {
-        toast.error("Failed to update product.");
-      }
-    } catch (err) {
-      console.error("Error while updating product:", err);
-      toast.error("An error occurred. Please try again.");
-    }
-  };
 
 
 
@@ -625,21 +694,46 @@ function AddProduct() {
                     required placeholder={content?.enter_product_name || "Enter product name"} />
                 </Form.Group>
                 <Form.Group controlId="totalProduct">
-                  <Form.Label>{content?.total_product || "Total Product"}</Form.Label>
-                  <Form.Control type="number"
-                    name="total_product"
-                    value={productData.total_product}
-                    onChange={handleInputChange}
-                    required placeholder={content?.enter_total_product || "Enter total product"} />
-                </Form.Group>
-                <Form.Group controlId="productPrice">
-                  <Form.Label>{content?.product_price || "Product Price"}</Form.Label>
-                  <Form.Control type="number"
-                    name="product_price"
-                    value={productData.product_price}
-                    onChange={handleInputChange}
-                    required placeholder={content?.enter_product_price || "Enter product price"} />
-                </Form.Group>
+  <Form.Label>{content?.total_product || "Total Product"}</Form.Label>
+  <Form.Control
+    type="number"
+    name="total_product"
+    value={productData.total_product}
+    onChange={(e) => {
+      const val = e.target.value;
+      if (val === "" || Number(val) < 1) {
+        // Prevent value less than 1, reset to 1 or empty string if you prefer
+        setProductData((prev) => ({ ...prev, total_product: "1" }));
+      } else {
+        handleInputChange(e);
+      }
+    }}
+    min={1}
+    required
+    placeholder={content?.enter_total_product || "Enter total product"}
+  />
+</Form.Group>
+
+<Form.Group controlId="productPrice">
+  <Form.Label>{content?.product_price || "Product Price"}</Form.Label>
+  <Form.Control
+    type="number"
+    name="product_price"
+    value={productData.product_price}
+    onChange={(e) => {
+      const val = e.target.value;
+      if (val === "" || Number(val) < 1) {
+        setProductData((prev) => ({ ...prev, product_price: "1" }));
+      } else {
+        handleInputChange(e);
+      }
+    }}
+    min={1}
+    required
+    placeholder={content?.enter_product_price || "Enter product price"}
+  />
+</Form.Group>
+
                 <Form.Group controlId="productDescription">
                   <Form.Label>{content?.product_description || "Product Description"}</Form.Label>
                   <Form.Control as="textarea" name="product_desc"
@@ -726,26 +820,43 @@ function AddProduct() {
               </Form.Group>
 
               <Form.Group controlId="totalProduct">
-                <Form.Label>{content?.total_product || "Total Product"}</Form.Label>
-                <Form.Control
-                  type="number"
-                  value={selectedProduct?.totalProduct || ""}
-                  onChange={(e) => setSelectedProduct({ ...selectedProduct, totalProduct: e.target.value })}
-                  placeholder={content?.enter_total_product || "Enter total product"}
-                  required
-                />
-              </Form.Group>
+  <Form.Label>{content?.total_product || "Total Product"}</Form.Label>
+  <Form.Control
+    type="number"
+    value={selectedProduct?.totalProduct || ""}
+    onChange={(e) => {
+      const val = e.target.value;
+      if (val === "" || Number(val) < 1) {
+        setSelectedProduct(prev => ({ ...prev, totalProduct: "1" }));
+      } else {
+        setSelectedProduct(prev => ({ ...prev, totalProduct: val }));
+      }
+    }}
+    min={1}
+    placeholder={content?.enter_total_product || "Enter total product"}
+    required
+  />
+</Form.Group>
 
-              <Form.Group controlId="productPrice">
-                <Form.Label>{content?.product_price || "Product Price"}</Form.Label>
-                <Form.Control
-                  type="number"
-                  value={selectedProduct?.price || ""}
-                  onChange={(e) => setSelectedProduct({ ...selectedProduct, price: e.target.value })}
-                  placeholder={content?.enter_product_price || "Enter product price"}
-                  required
-                />
-              </Form.Group>
+<Form.Group controlId="productPrice">
+  <Form.Label>{content?.product_price || "Product Price"}</Form.Label>
+  <Form.Control
+    type="number"
+    value={selectedProduct?.price || ""}
+    onChange={(e) => {
+      const val = e.target.value;
+      if (val === "" || Number(val) < 1) {
+        setSelectedProduct(prev => ({ ...prev, price: "1" }));
+      } else {
+        setSelectedProduct(prev => ({ ...prev, price: val }));
+      }
+    }}
+    min={1}
+    placeholder={content?.enter_product_price || "Enter product price"}
+    required
+  />
+</Form.Group>
+
 
               <Form.Group controlId="productDescription">
                 <Form.Label>{content?.product_description || "Product Description"}</Form.Label>
