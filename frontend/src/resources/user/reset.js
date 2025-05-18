@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
-import Translation from "../translations/lang.json";
 import 'react-toastify/dist/ReactToastify.css';
 import './styles/reset.css'; // Import custom CSS file
 
@@ -11,7 +10,6 @@ function Reset() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -66,7 +64,7 @@ function Reset() {
     try {
       const response = await fetch("http://localhost:8000/api/updatepassword", {
         method: 'POST',
-        body: JSON.stringify({ email, password: newPassword,password_confirmation:confirmPassword }),
+        body: JSON.stringify({ email, password: newPassword,"password_confirmation":confirmPassword }),
         headers: {
           "Content-Type": 'application/json',
           "Accept": 'application/json'
@@ -86,6 +84,37 @@ function Reset() {
       }
     } catch (error) {
       toast.error("An error occurred while updating password");
+    }
+  }
+
+  async function getcode(e) {
+    e.preventDefault();
+
+    if (!email) {
+      toast.error("Email can't be blank");
+      return;
+    }
+
+    try {
+
+      const response = await fetch("http://localhost:8000/api/getcode", {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+        headers: {
+          "Content-Type": 'application/json',
+          "Accept": 'application/json'
+        }
+      });
+
+      const result = await response.json();
+
+      if (result.message === 'Otp sent successfully') {
+        toast.success("Check your email for the code!");
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      toast.error("An error occurred. Please try again later.");
     }
   }
 
@@ -114,7 +143,7 @@ function Reset() {
                 placeholder="Enter OTP"
                 required
               />
-              <button onClick={(e) => { e.preventDefault(); /* Call getcode if needed */ }} className="btn btn-warning">Get Code</button>
+              <button onClick={getcode} className="btn btn-warning">Get Code</button>
             </div>
           </div>
 
