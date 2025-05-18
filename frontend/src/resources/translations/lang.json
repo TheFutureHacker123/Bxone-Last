@@ -114,6 +114,7 @@
   },
   "amharic": {
     "welcome": "እንኳን ወደ ገበያችን በደህና መጡ!",
+    "wishlist": "የፈለጉት ዝርዝር",
     "best_selling_vendors": "ምርጥ ሽያጭ አቅራቢዎች",
     "product_overview": "የምርት አጠቃላይ እይታ",
     "product_name": "የምርት ስም",
@@ -232,6 +233,7 @@
   },
   "afan_oromo": {
     "welcome": "Baga nagaan dhuftan!",
+    "wishlist": "Tarree Fedhii",
     "product_name": "Maqaa Oomishaa",
     "category": "Kutaa",
     "add_to_cart": "Gaarichaa irratti dabali",
@@ -333,6 +335,7 @@
   },
   "ethiopian_somali": {
     "HabeshaMart": "HabeshaMart",
+    "wishlist": "Liiska Rabitaanka",
     "welcome": "Ku soo dhawoow Suuqaheenna!",
     "product_name": "Magaca Alaabta",
     "add_to_cart": "Ku dar Gaariga",
@@ -438,6 +441,7 @@
   },
   "tigrinya": {
     "HabeshaMart": "HabeshaMart",
+    "wishlist": "ዝኾነ ነገር ዝደልዮ ዝርዝር",
     "welcome": "እንቋዕ ብደሓን መጻእኩም ናብ ዕዳጋና!",
     "product_name": "ስም ፍርዪ",
     "add_to_cart": "ናብ ጃሕታ ወስኽ",

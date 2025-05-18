@@ -384,7 +384,7 @@ function Home() {
                       to="/wishlist"
                       className="text-dark text-decoration-none"
                     >
-                        {content?.carts || "Wishlist"}  <i className="bi bi-heart ms-1 fs-sm"></i>
+                        {content?.wishlist || "Wishlist"}  <i className="bi bi-heart ms-1 fs-sm"></i>
                     </Link>
                   </div>
                   <div className="d-inline-block me-3">
