@@ -21,6 +21,13 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+
+use App\Models\Otp;
+
+use Illuminate\Support\Facades\Mail;
+use App\Mail\RawHtmlMail;
+
+
 class AdminController extends Controller
 {
     //
@@ -152,42 +159,6 @@ public function loginadmin(Request $request)
     }
 
     // update admin password
-
-    public function updatepassword(Request $request)
-    {
-        // Validate the incoming request
-        $validator = Validator::make($request->all(), [
-            'admin_id' => 'required|exists:admins,admin_id',
-            'current_password' => 'required|string|min:6',
-            'new_password' => 'required|string|min:6|confirmed',
-        ]);
-
-        if($request->password_confirmation !== $request->new_password){ 
-            return response()->json([
-                 'success' => false,
-                 'message' => 'Password confirmation does not match.',
-             ], 400); // HTTP 400 for bad request
-         }
- 
-
-
-        // Find the admin and check the old password
-        $admin = Admin::find($request->admin_id);
-        if (Hash::check($request->current_password, $admin->password)) {
-            // Update password
-            $admin->password = Hash::make($request->new_password);
-            $admin->save();
-
-            return response()->json(['success' => true, 'message' => 'Password updated successfully.']);
-        } else {
-            return response()->json(['success' => false, 'message' => 'Old password is incorrect.'], 401);
-        }
-    }
-
-
-
-
-
 
 
 
@@ -629,5 +600,93 @@ public function changeProductStatus(Request $request)
             'product' => $product,
         ]);
     }
+
+
+
+public function getcode(Request $request)
+{
+    // Validate the incoming request
+    $request->validate([
+        'email' => 'required|email',
+    ]);
+
+    // Generate a random 6-digit OTP code
+    $otpCode = rand(100000, 999999);
+
+    // Find the admin by email
+    $admin = Admin::where('email', $request->input('email'))->first();
+
+    if (!$admin) {
+        return response()->json(['message' => 'Admin not found'], 404);
+    }
+
+    // Save the OTP to the database
+    Otp::create([
+        'admin_id' => $admin->admin_id, // Assuming admin_id is the primary key in admin table
+        'otp' => $otpCode,
+        'expires_at' => now()->addMinutes(1), // Set expiration time (e.g., 1 minute)
+        'time_stamp' => now(),
+    ]);
+
+    // Prepare email data
+    $data = [
+        'to' => $admin->email,
+        'subject' => 'Your OTP Code',
+        'message' => "Your OTP code is: {$otpCode}. It is valid for 1 minute.",
+    ];
+    // Send the OTP email
+    Mail::to($data['to'])->send(new RawHtmlMail($data['subject'], $data['message']));
+
+    // Return response
+    return response()->json(['message' => 'OTP sent successfully'], 200);
+}
+
+
+ public function updatepassword(Request $request)
+{
+    // Validate the incoming request
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required|string|min:8|confirmed', // Validate password and confirmation
+    ]);
+    // Find the user by email
+    $user = Admin::where('email', $request->input('email'))->first();
+
+    if (!$user) {
+        return response()->json(['message' => 'Admin not found'], 404);
+    }
+
+    // Update the user's password
+    $user->password = Hash::make($request->input('password'));
+    $user->save();
+
+    return response()->json(['message' => 'Password updated successfully']);
+}
+
+
+public function reset(Request $request)
+{
+    // Validate the incoming request
+    $request->validate([
+        'email' => 'required|email',
+        'otp' => 'required|string',
+    ]);
+
+    // Find the OTP entry by email and OTP
+    $otpEntry = Otp::where('otp', $request->input('otp'))
+        ->whereHas('admin', function ($query) use ($request) {
+            $query->where('email', $request->input('email'));
+        })
+        ->first();
+
+    // Check if the OTP entry exists and is not expired
+    if ($otpEntry && $otpEntry->expires_at > now()) {
+        return response()->json(['message' => 'Correct email and OTP']);
+    }
+
+    return response()->json(['message' => 'Invalid or expired OTP'], 400);
+}
+
+
 
 }

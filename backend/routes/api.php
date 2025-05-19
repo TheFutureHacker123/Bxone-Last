@@ -171,3 +171,9 @@ Route::post('/reset', [UserController::class, 'reset']);
 Route::post('/vendor/updatepassword', [VendorController::class, 'updatepassword']);
 Route::post('/vendor/getcode', [VendorController::class, 'getcode']);
 Route::post('/vendor/reset', [VendorController::class, 'reset']);
+
+
+
+Route::post('/admin/updatepassword', [AdminController::class, 'updatepassword']);
+Route::post('/admin/getcode', [AdminController::class, 'getcode']);
+Route::post('/admin/reset', [AdminController::class, 'reset']);
