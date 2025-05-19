@@ -15,6 +15,7 @@ return new class extends Migration {
             $table->unsignedInteger('vendor_id')->nullable(); // Foreign key reference to vendors, nullable
             $table->unsignedInteger('admin_id')->nullable(); // Foreign key reference to admins, nullable
             $table->unsignedInteger('product_id')->nullable(); // Foreign key reference to products, nullable
+            $table->enum('writen_by', ['Admin','Vendor',"User"])->default('Vendor');
             $table->timestamps(); // Adding created_at and updated_at timestamps
             
             // Foreign key constraints

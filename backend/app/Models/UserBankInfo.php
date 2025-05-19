@@ -19,7 +19,7 @@ class UserBankInfo extends Model
         'ifsc_code',
         'branch',
     ];
-
+public $timestamps = true; //new
     // If you want to define the relationship to User:
     public function user()
     {

@@ -21,6 +21,7 @@ class Notification extends Model
         'order_id', // Add this line
     ];
 
+    public $timestamps = true; //new
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');

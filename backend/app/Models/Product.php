@@ -29,7 +29,7 @@ class Product extends Model
         'product_status',
     ];
 
-    public $timestamps = true; // You are using timestamps in migration
+    public $timestamps = true; 
 
     // Relationships (optional but good practice)
     public function vendor()

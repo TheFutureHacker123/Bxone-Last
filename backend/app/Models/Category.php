@@ -16,6 +16,7 @@ class Category extends Model
     // Specify which columns are fillable
     protected $fillable = ['category_name', 'admin_id'];
 
+    public $timestamps = true; //new
     // Define the relationship: One Category has many SubCategories
     public function subCategories()
     {

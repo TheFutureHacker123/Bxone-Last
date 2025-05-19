@@ -9,7 +9,7 @@ class Chat extends Model
 {
     use HasFactory;
 
-    protected $table = 'chats'; // Explicit table name
+    protected $table = 'chat'; // Explicit table name
     protected $primaryKey = 'chat_id';
 
     protected $fillable = [
@@ -19,6 +19,7 @@ class Chat extends Model
         'vendor_id',
         'admin_id',
         'product_id',
+        'writen_by',
     ];
 
     public $timestamps = true;

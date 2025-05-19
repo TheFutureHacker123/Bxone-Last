@@ -28,6 +28,7 @@ class Cart extends Model
         'total_added',
     ];
 
+    public $timestamps = true; //new
     // Relationships
     public function user()
     {

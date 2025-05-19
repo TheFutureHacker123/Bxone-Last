@@ -31,6 +31,8 @@ class Orders extends Model
         'updated_at' => 'datetime',
     ];
 
+
+    public $timestamps = true; //new
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');

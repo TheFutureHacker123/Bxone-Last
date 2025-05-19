@@ -7,6 +7,7 @@ use App\Http\Controllers\VendorController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\Api\SubscriptionController;
 /*
@@ -177,3 +178,11 @@ Route::post('/vendor/reset', [VendorController::class, 'reset']);
 Route::post('/admin/updatepassword', [AdminController::class, 'updatepassword']);
 Route::post('/admin/getcode', [AdminController::class, 'getcode']);
 Route::post('/admin/reset', [AdminController::class, 'reset']);
+
+
+
+Route::post('/fetchChat', [MessageController::class, 'fetchChat']);
+
+Route::post('/addChat', [MessageController::class, 'addChat']);
+
+

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaBars, FaChartLine, FaBox, FaShoppingCart, FaComments, FaUser, } from "react-icons/fa";
+import { FaBars, FaChartLine, FaBox, FaShoppingCart, FaComments, FaUser } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from 'react-toastify';
 import { Container, Row, Col, Card, ListGroup, Button, Modal, Form } from "react-bootstrap";
@@ -13,9 +13,14 @@ function AdminMessages() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
+  const [admins, setAdmins] = useState([]);
   const navigate = useNavigate();
 
+  const vendorInfo = JSON.parse(localStorage.getItem("vendor-info"));
+  const vendorId = vendorInfo?.vendor_id;
 
+
+  
   const defaultFontSize = 'medium';
   const defaultFontColor = '#000000';
   const defaultLanguage = 'english'; // Default language
@@ -38,46 +43,54 @@ function AdminMessages() {
   }, [fontSize, fontColor, language]);
 
 
-  const toggleSidebar = () => {
-    setSidebarVisible(!sidebarVisible);
-  };
-
   const handleDropdown = (menu) => {
     setOpenDropdown(openDropdown === menu ? null : menu);
+  };
+
+  useEffect(() => {
+    fetchAdmins();
+  }, []);
+
+  const fetchAdmins = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/api/admin/listadmins");
+      const data = await response.json();
+      setAdmins(data.users);
+    } catch (error) {
+      console.error("Error fetching admins:", error);
+    }
+  };
+
+  const fetchChat = async (adminId) => {
+    try {
+      const response = await fetch("http://localhost:8000/api/fetchChat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ vendor_id: vendorId, admin_id: adminId }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        setMessages(data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching chat:", error);
+    }
   };
 
   const handleShow = (user) => {
     setSelectedUser(user);
     setShowModal(true);
-    setMessages([
-      { text: "Your request has been received.", sender: "admin", time: formatTime(new Date()) },
-      { text: "Thank you for your message!", sender: "me", time: formatTime(new Date()) },
-    ]);
+    fetchChat(user.admin_id);
   };
 
   const handleClose = () => {
     setShowModal(false);
     setSelectedUser(null);
     setMessage('');
+    setMessages([]);
   };
-
-  const handleSendMessage = () => {
-    if (message.trim()) {
-      setMessages(prevMessages => [...prevMessages, { text: message, sender: 'me', time: formatTime(new Date()) }]);
-      setMessage('');
-    }
-  };
-
-  const formatTime = (date) => {
-    return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-  };
-
-  const users = [
-    { id: 1, name: "Admin 1", email: "admin1@example.com", lastMessage: "How can I assist you today?" },
-    { id: 2, name: "Admin 2", email: "admin2@example.com", lastMessage: "Your feedback is important to us!" },
-    { id: 3, name: "Admin 3", email: "admin3@example.com", lastMessage: "We are here to help!" },
-    { id: 4, name: "Admin 4", email: "admin4@example.com", lastMessage: "Let us know your queries!" },
-  ];
 
   function logout() {
       localStorage.clear();
@@ -93,6 +106,37 @@ function AdminMessages() {
         navigate("/vendor/login");
       }, 1000);
     }
+
+  const handleSendMessage = async () => {
+    if (message.trim()) {
+      const newMessage = {
+        message,
+        vendor_id: vendorId,
+        admin_id: selectedUser.admin_id,
+        writen_by: "Vendor", // Change to "Admin" if sending as admin
+      };
+      try {
+        const response = await fetch("http://localhost:8000/api/addChat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newMessage),
+        });
+        const data = await response.json();
+        if (data.success) {
+          setMessages(prevMessages => [...prevMessages, { message, writen_by: "Vendor", created_at: new Date().toISOString() }]);
+          setMessage('');
+        }
+      } catch (error) {
+        console.error("Error sending message:", error);
+      }
+    }
+  };
+
+  const toggleSidebar = () => {
+    setSidebarVisible(!sidebarVisible);
+  };
 
   return (
     <div className="dashboard-wrapper">
@@ -239,29 +283,20 @@ function AdminMessages() {
 
         <Container fluid>
           <Row>
-            <Col
-              lg={10}
-              className="p-4 d-flex justify-content-center align-items-center"
-              style={{
-                width: '100%',
-              }}
-            >
+            <Col lg={10} className="p-4 d-flex justify-content-center align-items-center">
               <Card style={{ width: '80%', maxWidth: '1200px' }}>
                 <Card.Header>
                   <h4 className="text-center">Admin Messages</h4>
                 </Card.Header>
                 <Card.Body>
                   <ListGroup>
-                    {users.map(user => (
-                      <ListGroup.Item key={user.id} className="d-flex justify-content-between align-items-center">
+                    {admins.map(admin => (
+                      <ListGroup.Item key={admin.admin_id} className="d-flex justify-content-between align-items-center">
                         <div>
-                          <strong>{user.name}</strong><br />
-                          <small>{user.email}</small>
+                          <strong>{admin.name}</strong><br />
+                          <small>{admin.email}</small>
                         </div>
-                        <div className="text-muted">
-                          <small>{user.lastMessage}</small>
-                        </div>
-                        <Button variant="outline-primary" size="sm" onClick={() => handleShow(user)}>
+                        <Button variant="outline-primary" size="sm" onClick={() => handleShow(admin)}>
                           View Messages
                         </Button>
                       </ListGroup.Item>
@@ -273,40 +308,40 @@ function AdminMessages() {
           </Row>
 
           {/* Modal for Viewing Messages */}
-          <Modal show={showModal} onHide={handleClose} size="lg">
-            <Modal.Header closeButton>
-              <Modal.Title>{selectedUser ? selectedUser.name : ''}</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <div style={{ height: '350px', overflowY: 'scroll', marginBottom: '20px' }}>
-                {messages.map((msg, index) => (
-                  <div key={index} className={`message ${msg.sender === 'me' ? 'my-message' : 'user-message'}`} style={{ display: 'flex', justifyContent: msg.sender === 'me' ? 'flex-end' : 'flex-start' }}>
-                    <span>{msg.text}</span>
-                    <span style={{ fontSize: 'small', marginLeft: '10px', marginTop: '5px', alignSelf: 'flex-end' }}>{msg.time}</span>
-                  </div>
-                ))}
-              </div>
-              <Form>
-                <Form.Group controlId="messageInput">
-                  <Form.Control
-                    type="text"
-                    placeholder="Type your message..."
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    style={{ width: '100%' }}
-                  />
-                </Form.Group>
-              </Form>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="secondary" onClick={handleClose}>
-                Cancel
-              </Button>
-              <Button variant="primary" onClick={handleSendMessage}>
-                Send
-              </Button>
-            </Modal.Footer>
-          </Modal>
+          <Modal show={showModal} onHide={handleClose} size="lg" className="custom-modal">
+  <Modal.Header closeButton>
+    <Modal.Title>{selectedUser ? selectedUser.name : ''}</Modal.Title>
+  </Modal.Header>
+  <Modal.Body className="modal-body">
+    <div className="message-container">
+      {messages.map((msg, index) => (
+        <div key={index} className={`message ${msg.writen_by === 'Vendor' ? 'my-message' : 'user-message'}`}>
+          <span>{msg.message}</span>
+          <span className="timestamp">{new Date(msg.created_at).toLocaleTimeString()}</span>
+        </div>
+      ))}
+    </div>
+    
+  </Modal.Body>
+  <Form>
+      <Form.Group controlId="messageInput">
+        <Form.Control
+          type="text"
+          placeholder="Type your message..."
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+        />
+      </Form.Group>
+    </Form>
+  <Modal.Footer>
+    <Button variant="secondary" onClick={handleClose}>
+      Cancel
+    </Button>
+    <Button variant="primary" onClick={handleSendMessage}>
+      Send
+    </Button>
+  </Modal.Footer>
+</Modal>
         </Container>
       </div>
     </div>

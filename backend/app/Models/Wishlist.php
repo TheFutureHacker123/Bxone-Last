@@ -14,7 +14,7 @@ class Wishlist extends Model
     protected $primaryKey = 'id';
 
     protected $fillable = ['user_id', 'product_id'];
-
+public $timestamps = true;//new
     public function product()
     {
         return $this->belongsTo(Product::class, 'product_id');
