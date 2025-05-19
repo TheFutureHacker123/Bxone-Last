@@ -4,15 +4,19 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Address;
 use App\Models\Notification;
 use App\Models\Review;
 use App\Models\Product;
 use App\Models\UserBankInfo; // Add this at the top with other models
+use App\Models\Otp;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 
+use Illuminate\Support\Facades\Mail;
+use App\Mail\RawHtmlMail;
 
 class UserController extends Controller
 {
@@ -237,4 +241,107 @@ class UserController extends Controller
             'bank_info' => $bankInfo
         ]);
     }
+ public function send(Request $request)
+    {
+        $data = $request->validate([
+            'to' => 'required|email',
+            'subject' => 'OTP',
+            'message' => 'required|string',
+        ]);
+
+        Mail::to($data['to'])->send(new RawHtmlMail($data['subject'], $data['message']));
+
+        return response()->json(['message' => 'Email sent successfully']);
+    }
+
+
+ public function getcode(Request $request)
+{
+    // Validate the incoming request
+    $request->validate([
+        'email' => 'required|email',
+    ]);
+
+    // Generate a random 6-digit OTP code
+    $otpCode = rand(100000, 999999);
+
+    // Find the user by email
+    $user = User::where('email', $request->input('email'))->first();
+
+    if (!$user) {
+        return response()->json(['message' => 'User not found'], 404);
+    }
+
+    // Save the OTP to the database
+    Otp::create([
+        'user_id' => $user->user_id, // Assuming user_id is the primary key in users table
+        'otp' => $otpCode,
+        'expires_at' => now()->addMinutes(1), // Set expiration time (e.g., 10 minutes)
+        'time_stamp' => now(),
+    ]);
+
+    // Prepare email data
+    $data = [
+        'to' => $user->email,
+        'subject' => 'Your OTP Code',
+        'message' => "Your OTP code is: {$otpCode}. It is valid for 1 minutes.",
+    ];
+
+    // Send the OTP email
+    Mail::to($data['to'])->send(new RawHtmlMail($data['subject'], $data['message']));
+
+    // Return response
+    return response()->json(['message' => 'Otp sent successfully']);
+}
+
+
+ public function updatepassword(Request $request)
+{
+    // Validate the incoming request
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required|string|min:8|confirmed', // Validate password and confirmation
+    ]);
+    // Find the user by email
+    $user = User::where('email', $request->input('email'))->first();
+
+    if (!$user) {
+        return response()->json(['message' => 'User not found'], 404);
+    }
+
+    // Update the user's password
+    $user->password = Hash::make($request->input('password'));
+    $user->save();
+
+    return response()->json(['message' => 'Password updated successfully']);
+}
+
+
+public function reset(Request $request)
+{
+    // Validate the incoming request
+    $request->validate([
+        'email' => 'required|email',
+        'otp' => 'required|string',
+    ]);
+
+    // Find the OTP entry by email and OTP
+    $otpEntry = Otp::where('otp', $request->input('otp'))
+        ->whereHas('user', function ($query) use ($request) {
+            $query->where('email', $request->input('email'));
+        })
+        ->first();
+
+    // Check if the OTP entry exists and is not expired
+    if ($otpEntry && $otpEntry->expires_at > now()) {
+        return response()->json(['message' => 'Correct email and OTP']);
+    }
+
+    return response()->json(['message' => 'Invalid or expired OTP'], 400);
+}
+
+
+
+
+
 }

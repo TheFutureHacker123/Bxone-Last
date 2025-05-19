@@ -157,3 +157,11 @@ Route::get('callback/{reference}', 'App\Http\Controllers\ChapaController@callbac
 
 
 Route::get('/new-arrivals', [ProductController::class, 'newArrivals']);
+
+
+Route::post('/send-email', [UserController::class, 'send']);
+
+
+Route::post('/updatepassword', [UserController::class, 'updatepassword']);
+Route::post('/getcode', [UserController::class, 'getcode']);
+Route::post('/reset', [UserController::class, 'reset']);

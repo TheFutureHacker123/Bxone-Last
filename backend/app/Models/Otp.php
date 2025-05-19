@@ -30,6 +30,8 @@ class Otp extends Model
         'otp',
         'expires_at',
         'time_stamp',
+        'vendor_id', // New field for vendor relationship
+        'admin_id',  // New field for admin relationship
     ];
 
     // Casts
@@ -42,5 +44,15 @@ class Otp extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');
+    }
+
+    public function vendor()
+    {
+        return $this->belongsTo(Vendor::class, 'vendor_id', 'vendor_id');
+    }
+
+    public function admin()
+    {
+        return $this->belongsTo(Admin::class, 'admin_id', 'admin_id');
     }
 }
