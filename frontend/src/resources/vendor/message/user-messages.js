@@ -4,7 +4,7 @@ import { Container, Row, Col, Card, ListGroup, Button, Navbar, Nav, Dropdown, Mo
 import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from 'react-toastify';
 import Translation from "../../translations/vendor.json";
-import "../style/user-messages.css";
+// import "../style/user-messages.css";
 
 function UserMessages() {
   const [sidebarVisible, setSidebarVisible] = useState(true);

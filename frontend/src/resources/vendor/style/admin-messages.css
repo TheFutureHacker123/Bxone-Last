@@ -215,7 +215,7 @@ body {
   max-width: 600px; /* Adjust as needed */
 }
 
-.modal-body {
+.modal-body-custom {
   display: flex;
   flex-direction: column;
   align-items: center;
