@@ -9,6 +9,7 @@ use App\Models\Address;
 use App\Models\Notification;
 use App\Models\Review;
 use App\Models\Product;
+use App\Models\UserBankInfo; // Add this at the top with other models
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 
@@ -100,52 +101,83 @@ class UserController extends Controller
 
 
     public function addaddress(Request $request)
-{
-    // Validate the incoming request data
-    $validator = Validator::make($request->all(), [
-        'full_name' => 'required|string|max:100',
-        'phone' => 'required|string|max:20',
-        'country' => 'required|string|max:100',
-        'state' => 'required|string|max:100',
-        'city' => 'required|string|max:100',
-        'post' => 'required|string|max:20',
-        'user_id' => 'required|integer|exists:users,user_id', // Ensure user_id exists in the users table
-    ]);
+    {
+        // Validate the incoming request data
+        $validator = Validator::make($request->all(), [
+            'full_name' => 'required|string|max:100',
+            'phone' => 'required|string|max:20',
+            'country' => 'required|string|max:100',
+            'state' => 'required|string|max:100',
+            'city' => 'required|string|max:100',
+            'post' => 'required|string|max:20',
+            'user_id' => 'required|integer|exists:users,user_id', // Ensure user_id exists in the users table
+        ]);
 
-    if ($validator->fails()) {
-        return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+        }
+
+        // Check if the address already exists for the user
+        $existingAddress = Address::where([
+            ['full_name', $request->full_name],
+            ['phone', $request->phone],
+            ['country', $request->country],
+            ['state', $request->state],
+            ['city', $request->city],
+            ['post', $request->post],
+            ['user_id', $request->user_id],
+        ])->first();
+
+        if ($existingAddress) {
+            return response()->json(['success' => false, 'message' => 'Address already exists for this user.'], 409);
+        }
+
+        // Create the address record
+        $address = Address::create([
+            'full_name' => $request->full_name,
+            'phone' => $request->phone,
+            'country' => $request->country,
+            'state' => $request->state,
+            'city' => $request->city,
+            'post' => $request->post,
+            'user_id' => $request->user_id,
+        ]);
+
+        // Return a success response
+        return response()->json(['success' => true, 'message' => 'Address saved successfully!', 'address' => $address], 201);
     }
 
-    // Check if the address already exists for the user
-    $existingAddress = Address::where([
-        ['full_name', $request->full_name],
-        ['phone', $request->phone],
-        ['country', $request->country],
-        ['state', $request->state],
-        ['city', $request->city],
-        ['post', $request->post],
-        ['user_id', $request->user_id],
-    ])->first();
 
-    if ($existingAddress) {
-        return response()->json(['success' => false, 'message' => 'Address already exists for this user.'], 409);
+    public function addBankInfo(Request $request)
+    {
+        // Validate the incoming request data
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|integer|exists:users,user_id',
+            'bank_name' => 'required|string|max:255',
+            'account_number' => 'required|string|max:255',
+            'account_holder' => 'required|string|max:255',
+            'bank_branch' => 'nullable|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+        }
+
+        // Create the bank info record
+        $bankInfo = UserBankInfo::create([
+            'user_id' => $request->user_id,
+            'bank_name' => $request->bank_name,
+            'account_name' => $request->account_holder,
+            'account_number' => $request->account_number,
+            'branch' => $request->bank_branch,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Bank information saved!',
+            'bank_info' => $bankInfo
+        ], 201);
     }
-
-    // Create the address record
-    $address = Address::create([
-        'full_name' => $request->full_name,
-        'phone' => $request->phone,
-        'country' => $request->country,
-        'state' => $request->state,
-        'city' => $request->city,
-        'post' => $request->post,
-        'user_id' => $request->user_id,
-    ]);
-
-    // Return a success response
-    return response()->json(['success' => true, 'message' => 'Address saved successfully!', 'address' => $address], 201);
-}
-
 
     public function getNotifications(Request $request)
     {
@@ -189,5 +221,20 @@ class UserController extends Controller
         return response()->json([
             'message' => 'Notification deleted successfully.',
         ], 200);
+    }
+
+    public function userInfo(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|integer|exists:users,user_id',
+        ]);
+
+        $addresses = Address::where('user_id', $request->user_id)->get();
+        $bankInfo = UserBankInfo::where('user_id', $request->user_id)->first();
+
+        return response()->json([
+            'addresses' => $addresses,
+            'bank_info' => $bankInfo
+        ]);
     }
 }
