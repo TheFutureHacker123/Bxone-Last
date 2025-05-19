@@ -4,7 +4,7 @@ import { ToastContainer, toast } from "react-toastify";
 import Translation from "./translations/lang.json";
 import "react-toastify/dist/ReactToastify.css";
 import "./user/styles/home.css";
-import { Modal, Button } from "react-bootstrap";
+import { Modal, Button,Form } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FaEye } from "react-icons/fa";
 
@@ -396,14 +396,21 @@ function Home() {
                 </>
               ) : null}
               <div className="d-inline-block me-3">
-                <select
+                {/* <select
                   className="form-select form-select-sm border-0 bg-light"
                   style={{ width: "auto" }}
                 >
                   <option value="usd">USD $</option>
                   <option value="etb">ETB</option>
-                  {/* Add other currencies as needed */}
-                </select>
+                </select> */}
+
+                {/* <Form.Group controlId="font-color">
+          <Form.Control
+            type="color"
+            value={fontColor}
+            onChange={(e) => setFontColor(e.target.value)}
+          />
+        </Form.Group> */}
               </div>
               <div className="d-inline-block">
                 <select
