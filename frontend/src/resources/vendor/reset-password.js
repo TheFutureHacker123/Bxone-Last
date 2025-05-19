@@ -1,19 +1,27 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
 import { FaEnvelope, FaLock, FaCheckCircle } from "react-icons/fa";
 import Translation from "../translations/vendor.json";
-import "./style/reset-password.css";  // Make sure this points to your custom CSS file
+import { useNavigate } from "react-router-dom";
+import 'react-toastify/dist/ReactToastify.css';
 
-const ResetPassword = () => {
+import "./style/reset-password.css"; 
+function ResetPassword() {
   const [email, setEmail] = useState("");
+  const [otpcode, setOtpCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [otpTimer, setOtpTimer] = useState(0); // Countdown timer
+  const [otpExpired, setOtpExpired] = useState(true); // Initially OTP is expired
+  const [otpRequested, setOtpRequested] = useState(false); // Track if OTP has been requested
+  const navigate = useNavigate();
 
 
+  
   const defaultFontSize = 'medium';
   const defaultFontColor = '#000000';
-  const defaultLanguage = 'english'; // Default language
+  const defaultLanguage = 'english';
 
   const [fontSize, setFontSize] = useState(() => localStorage.getItem('fontSize') || defaultFontSize);
   const [fontColor, setFontColor] = useState(() => localStorage.getItem('fontColor') || defaultFontColor);
@@ -27,90 +35,198 @@ const ResetPassword = () => {
     localStorage.setItem('fontSize', fontSize);
     localStorage.setItem('fontColor', fontColor);
     localStorage.setItem('language', language);
-
-    // Update content based on selected language
     setContent(Translation[language]);
   }, [fontSize, fontColor, language]);
 
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!email || !newPassword || !confirmPassword) {
-      setError(content?.fill_all_fields || "Please fill out all fields.");
-    } else if (newPassword !== confirmPassword) {
-      setError(content?.passwords_do_not_match || "Passwords do not match.");
-    } else {
-      setError("");
-      setSuccessMessage(content?.password_reset_success || "Password has been reset successfully.");
-      // Add your reset password logic here (e.g., call API to reset the password)
-      console.log("Resetting password for", { email, newPassword });
+
+  useEffect(() => {
+    if (localStorage.getItem('user-info')) {
+      navigate("/");
     }
-  };
+  }, [navigate]);
+
+  useEffect(() => {
+    let timer;
+    if (otpTimer > 0) {
+      timer = setInterval(() => setOtpTimer(prev => prev - 1), 1000);
+    } else {
+      setOtpExpired(true);
+    }
+    return () => clearInterval(timer);
+  }, [otpTimer]);
+
+  async function reset(e) {
+    e.preventDefault();
+    if (!email || !otpcode) {
+      toast.error("Email and OTP can't be blank");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:8000/api/vendor/reset", {
+        method: 'POST',
+        body: JSON.stringify({ email, otp: otpcode }),
+        headers: {
+          "Content-Type": 'application/json',
+          "Accept": 'application/json'
+        }
+      });
+
+      const result = await response.json();
+
+      if (result.message === "Correct email and OTP") {
+        toast.success("OTP Verified. Please set a new password.");
+        setShowPasswordModal(true);
+      } else {
+        toast.error("Invalid Email or OTP!");
+      }
+    } catch (error) {
+      toast.error("An error occurred. Please try again later.");
+    }
+  }
+
+  async function handlePasswordUpdate(e) {
+    e.preventDefault();
+    if (!newPassword || !confirmPassword) {
+      toast.error("Password fields can't be empty");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:8000/api/vendor/updatepassword", {
+        method: 'POST',
+        body: JSON.stringify({ email, password: newPassword, "password_confirmation": confirmPassword }),
+        headers: {
+          "Content-Type": 'application/json',
+          "Accept": 'application/json'
+        }
+      });
+
+      const result = await response.json();
+      if (result.message === "Password updated successfully") {
+        toast.success("Password updated successfully");
+        setShowPasswordModal(false);
+        setTimeout(() => navigate("/vendor/login"), 1500);
+      } else {
+        toast.error("Failed to update password");
+      }
+    } catch (error) {
+      toast.error("An error occurred while updating password");
+    }
+  }
+
+  async function getcode(e) {
+    e.preventDefault();
+    if (!email) {
+      toast.error("Email can't be blank");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:8000/api/vendor/getcode", {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+        headers: {
+          "Content-Type": 'application/json',
+          "Accept": 'application/json'
+        }
+      });
+
+      const result = await response.json();
+      console.warn("status",result);
+      if (result.message === 'OTP sent successfully') {
+        toast.success("Check your email for the code!");
+        setOtpTimer(60); // Start countdown timer
+        setOtpExpired(false); // Set OTP as valid
+        setOtpRequested(true); // Mark OTP as requested
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      toast.error("An error occurred. Please try again later.");
+    }
+  }
 
   return (
-    <div className="vendor-reset-password-wrapper">
-      <div className="vendor-reset-password-container">
-        <h2 className="text-center mb-4 vendor-reset-password-header">{content?.reset_password || "Reset Password"}</h2>
-
-        {error && <div className="alert alert-danger vendor-error-message">{error}</div>}
-        {successMessage && <div className="alert alert-success vendor-success-message">{successMessage}</div>}
-
-        <form onSubmit={handleSubmit} className="vendor-reset-password-form">
-          <div className="form-group mb-3 vendor-form-group">
-            <label htmlFor="email" className="form-label vendor-form-label">
-              <FaEnvelope className="me-2" /> {content?.email || "Email"}
-            </label>
+    <div className="login-container">
+      <div className="login-form">
+        <h2 className="text-center">Reset Password</h2>
+        <form onSubmit={reset}>
+          <div className="mb-3">
+            <label htmlFor="email" className="custom-form-label text-start d-block">Email address</label>
             <input
               type="email"
-              id="email"
-              className="form-control vendor-form-control"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder={content?.enter_your_email || "Enter your email"}
+              className="custom-form-control"
+              id="email"
+              placeholder="Enter your email"
+              required
             />
+            <div className="input-group mt-3">
+              <input
+                type="text"
+                value={otpcode}
+                onChange={(e) => setOtpCode(e.target.value)}
+                className="custom-form-control"
+                placeholder="Enter OTP"
+                required
+              />
+              <button onClick={getcode} className="bttn btn-warning" disabled={!otpExpired}>Get Code</button>
+             
+            </div>
+            {!otpExpired && (
+  <div className="timer-container">
+    <span className="timer">{otpTimer}s</span>
+  </div>
+)}
+            {otpRequested && otpExpired && <span className="text-danger mt-2">OTP expired. Please resend.</span>}
           </div>
 
-          <div className="form-group mb-3 vendor-form-group">
-            <label htmlFor="newPassword" className="form-label vendor-form-label">
-              <FaLock className="me-2" /> {content?.new_password || "New Password"}
-            </label>
-            <input
-              type="password"
-              id="newPassword"
-              className="form-control vendor-form-control"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              placeholder={content?.enter_new_password || "Enter your new password"}
-            />
-          </div>
-
-          <div className="form-group mb-3 vendor-form-group">
-            <label htmlFor="confirmPassword" className="form-label vendor-form-label">
-              <FaCheckCircle className="me-2" /> {content?.confirm_new_password || "Confirm New Password"}
-            </label>
-            <input
-              type="password"
-              id="confirmPassword"
-              className="form-control vendor-form-control"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder={content?.confirm_your_new_password || "Confirm your new password"}
-            />
-          </div>
-
-          <button type="submit" className="btn btn-success vendor-btn-submit w-100">
-            {content?.reset_password || "Reset Password"}
-          </button>
+          <button type="submit" className="bttn btn-warning w-100">Reset Password</button>
         </form>
-
-        <div className="text-center mt-3">
-          <p>
-            {content?.remembered_your_password || "Remembered your password?"} <a href="/vendor/login" className="vendor-login-link" style={{ color: fontColor }}>{content?.login_here || "Login here"}</a>
-          </p>
-        </div>
+        <p className="text-center mt-3">
+          {content?.remembered_your_password || "Remembered your password?"} <a href="/vendor/login" className="vendor-login-link" style={{ color: fontColor }}>{content?.login_here || "Login here"}</a>
+        </p>
       </div>
+
+      {showPasswordModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h4>Set New Password</h4>
+            <form onSubmit={handlePasswordUpdate}>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="New Password"
+                className="custom-form-control mt-2"
+                required
+              />
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm Password"
+                className="custom-form-control mt-2"
+                required
+              />
+              <button type="submit" className="bttn btn-success w-100 mt-3">Update Password</button>
+              {/* <button type="button" onClick={getcode} className="btn btn-warning w-100 mt-2" disabled={otpExpired}>Resend OTP</button>
+              {!otpExpired && <span className="mt-2">OTP valid for: {otpTimer}s</span>} */}
+            </form>
+          </div>
+        </div>
+      )}
+
+      <ToastContainer />
     </div>
   );
-};
+}
 
 export default ResetPassword;

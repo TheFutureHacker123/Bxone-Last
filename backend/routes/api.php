@@ -163,3 +163,9 @@ Route::post('/send-email', [UserController::class, 'send']);
 Route::post('/updatepassword', [UserController::class, 'updatepassword']);
 Route::post('/getcode', [UserController::class, 'getcode']);
 Route::post('/reset', [UserController::class, 'reset']);
+
+
+
+Route::post('/vendor/updatepassword', [VendorController::class, 'updatepassword']);
+Route::post('/vendor/getcode', [VendorController::class, 'getcode']);
+Route::post('/vendor/reset', [VendorController::class, 'reset']);

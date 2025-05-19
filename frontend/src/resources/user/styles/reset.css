@@ -1,18 +1,15 @@
-
-
 :root {
     --font-size: medium; /* Default font size */
     --font-color: #000000; /* Default font color */
-  }
-  
-  body {
+}
+
+body {
     font-size: var(--font-size);
     color: var(--font-color);
-  
     font-family: Arial, sans-serif;
     background-color: #f4f4f4;
-  }
-  
+}
+
 .login-container {
     display: flex;
     justify-content: center;
@@ -50,7 +47,7 @@
 
 .custom-form-control {
     width: 100%;
-    padding: 7px;
+    padding: 10px;
     border: 1px solid #ced4da;
     border-radius: 0.25rem;
     font-size: 16px;
@@ -79,5 +76,59 @@
     top: 50%;
     transform: translateY(-50%);
     height: 100%; /* Match the height of the input */
+    border-radius: 0 0.25rem 0.25rem 0; /* Round only the right corners */
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 400px;
+    text-align: center; /* Center content in modal */
+}
+
+.modal-content h4 {
+    margin-bottom: 20px;
+}
+
+.modal-content span {
+    font-size: 14px;
+    color: #ff0000; /* Error color for the timer */
+    margin-top: 10px;
+    display: block;
+}
+
+.timer-container {
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    margin-top: 10px; /* Space above the timer */
+}
+
+.timer {
+    font-size: 18px; /* Adjust font size if needed */
+    color: #333; /* Change color for visibility */
+}
+
+.input-group .btn {
+    position: absolute;
+    right: 1px; /* Adjust horizontal position */
+    top: 41%; /* Center vertically */
+    transform: translateY(-50%); /* Align to the center */
+    height: 44px; /* Set a specific height if needed */
+    padding: 0 10px; /* Adjust padding for better fit */
     border-radius: 0 0.25rem 0.25rem 0; /* Round only the right corners */
 }

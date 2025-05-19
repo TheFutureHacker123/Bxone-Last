@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
 import 'react-toastify/dist/ReactToastify.css';
-import './styles/reset.css'; // Import custom CSS file
+import './styles/reset.css';
 
 function Reset() {
   const [email, setEmail] = useState("");
@@ -10,6 +10,9 @@ function Reset() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [otpTimer, setOtpTimer] = useState(0); // Countdown timer
+  const [otpExpired, setOtpExpired] = useState(true); // Initially OTP is expired
+  const [otpRequested, setOtpRequested] = useState(false); // Track if OTP has been requested
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,6 +20,16 @@ function Reset() {
       navigate("/");
     }
   }, [navigate]);
+
+  useEffect(() => {
+    let timer;
+    if (otpTimer > 0) {
+      timer = setInterval(() => setOtpTimer(prev => prev - 1), 1000);
+    } else {
+      setOtpExpired(true);
+    }
+    return () => clearInterval(timer);
+  }, [otpTimer]);
 
   async function reset(e) {
     e.preventDefault();
@@ -50,12 +63,10 @@ function Reset() {
 
   async function handlePasswordUpdate(e) {
     e.preventDefault();
-
     if (!newPassword || !confirmPassword) {
       toast.error("Password fields can't be empty");
       return;
     }
-
     if (newPassword !== confirmPassword) {
       toast.error("Passwords do not match");
       return;
@@ -64,7 +75,7 @@ function Reset() {
     try {
       const response = await fetch("http://localhost:8000/api/updatepassword", {
         method: 'POST',
-        body: JSON.stringify({ email, password: newPassword,"password_confirmation":confirmPassword }),
+        body: JSON.stringify({ email, password: newPassword, "password_confirmation": confirmPassword }),
         headers: {
           "Content-Type": 'application/json',
           "Accept": 'application/json'
@@ -72,13 +83,10 @@ function Reset() {
       });
 
       const result = await response.json();
-
       if (result.message === "Password updated successfully") {
         toast.success("Password updated successfully");
         setShowPasswordModal(false);
-        setTimeout(() => {
-          navigate("/login");
-        }, 1500);
+        setTimeout(() => navigate("/login"), 1500);
       } else {
         toast.error("Failed to update password");
       }
@@ -89,14 +97,12 @@ function Reset() {
 
   async function getcode(e) {
     e.preventDefault();
-
     if (!email) {
       toast.error("Email can't be blank");
       return;
     }
 
     try {
-
       const response = await fetch("http://localhost:8000/api/getcode", {
         method: 'POST',
         body: JSON.stringify({ email }),
@@ -107,9 +113,11 @@ function Reset() {
       });
 
       const result = await response.json();
-
       if (result.message === 'Otp sent successfully') {
         toast.success("Check your email for the code!");
+        setOtpTimer(60); // Start countdown timer
+        setOtpExpired(false); // Set OTP as valid
+        setOtpRequested(true); // Mark OTP as requested
       } else {
         toast.error(result.message);
       }
@@ -143,8 +151,15 @@ function Reset() {
                 placeholder="Enter OTP"
                 required
               />
-              <button onClick={getcode} className="btn btn-warning">Get Code</button>
+              <button onClick={getcode} className="btn btn-warning" disabled={!otpExpired}>Get Code</button>
+             
             </div>
+            {!otpExpired && (
+  <div className="timer-container">
+    <span className="timer">{otpTimer}s</span>
+  </div>
+)}
+            {otpRequested && otpExpired && <span className="text-danger mt-2">OTP expired. Please resend.</span>}
           </div>
 
           <button type="submit" className="btn btn-warning w-100">Reset Password</button>
@@ -154,7 +169,6 @@ function Reset() {
         </p>
       </div>
 
-      {/* Modal for setting new password */}
       {showPasswordModal && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -177,6 +191,8 @@ function Reset() {
                 required
               />
               <button type="submit" className="btn btn-success w-100 mt-3">Update Password</button>
+              {/* <button type="button" onClick={getcode} className="btn btn-warning w-100 mt-2" disabled={otpExpired}>Resend OTP</button>
+              {!otpExpired && <span className="mt-2">OTP valid for: {otpTimer}s</span>} */}
             </form>
           </div>
         </div>

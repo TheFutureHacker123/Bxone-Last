@@ -21,6 +21,11 @@ use App\Models\Orders;
 use App\Models\Notification;
 use App\Models\Review;
 use App\Models\User;
+use App\Models\Otp;
+
+use Illuminate\Support\Facades\Mail;
+use App\Mail\RawHtmlMail;
+
 
 class VendorController extends Controller
 {
@@ -177,43 +182,8 @@ class VendorController extends Controller
             'data' => $vendorCategories
         ]);
     }
-    public function updatepassword(Request $request)
-    {
-        // Validate the incoming request to ensure passwords are valid
-        $request->validate([
-            'vendor_id' => 'required|integer', // Ensure vendor_id is provided
-            'current_password' => 'required|string', // Ensure current password is provided
-            'new_password' => 'required|string', // Ensure new password matches password_confirmation
+   
 
-        ]);
-
-        // Find the vendor by vendor_id
-
-        if ($request->password_confirmation !== $request->new_password) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Password confirmation does not match.',
-            ], 400); // HTTP 400 for bad request
-        }
-
-
-        $vendor = Vendor::find($request->vendor_id);
-
-        if (!$vendor) {
-            return response()->json(['error' => 'Vendor not found'], 404);
-        }
-
-        // Check if the current password is correct
-        if (!Hash::check($request->current_password, $vendor->password)) {
-            return response()->json(['error' => 'Current password is incorrect'], 400);
-        }
-
-        // Hash the new password and update it
-        $vendor->password = bcrypt($request->new_password);
-        $vendor->save();
-
-        return response()->json(['message' => 'Password updated successfully'], 200);
-    }
 
     public function vendorinfo(Request $request)
     {
@@ -811,4 +781,95 @@ class VendorController extends Controller
 
         return response()->json($formattedOrders);
     }
+
+
+
+public function getcode(Request $request)
+{
+    // Validate the incoming request
+    $request->validate([
+        'email' => 'required|email',
+    ]);
+
+    // Generate a random 6-digit OTP code
+    $otpCode = rand(100000, 999999);
+
+    // Find the vendor by email
+    $vendor = Vendor::where('email', $request->input('email'))->first();
+
+    if (!$vendor) {
+        return response()->json(['message' => 'Vendor not found'], 404);
+    }
+
+    // Save the OTP to the database
+    Otp::create([
+        'vendor_id' => $vendor->vendor_id, // Assuming vendor_id is the primary key in vendors table
+        'otp' => $otpCode,
+        'expires_at' => now()->addMinutes(1), // Set expiration time (e.g., 1 minute)
+        'time_stamp' => now(),
+    ]);
+
+    // Prepare email data
+    $data = [
+        'to' => $vendor->email,
+        'subject' => 'Your OTP Code',
+        'message' => "Your OTP code is: {$otpCode}. It is valid for 1 minute.",
+    ];
+    // Send the OTP email
+    Mail::to($data['to'])->send(new RawHtmlMail($data['subject'], $data['message']));
+
+    // Return response
+    return response()->json(['message' => 'OTP sent successfully'], 200);
+}
+
+
+ public function updatepassword(Request $request)
+{
+    // Validate the incoming request
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required|string|min:8|confirmed', // Validate password and confirmation
+    ]);
+    // Find the user by email
+    $user = Vendor::where('email', $request->input('email'))->first();
+
+    if (!$user) {
+        return response()->json(['message' => 'Vendor not found'], 404);
+    }
+
+    // Update the user's password
+    $user->password = Hash::make($request->input('password'));
+    $user->save();
+
+    return response()->json(['message' => 'Password updated successfully']);
+}
+
+
+public function reset(Request $request)
+{
+    // Validate the incoming request
+    $request->validate([
+        'email' => 'required|email',
+        'otp' => 'required|string',
+    ]);
+
+    // Find the OTP entry by email and OTP
+    $otpEntry = Otp::where('otp', $request->input('otp'))
+        ->whereHas('vendor', function ($query) use ($request) {
+            $query->where('email', $request->input('email'));
+        })
+        ->first();
+
+    // Check if the OTP entry exists and is not expired
+    if ($otpEntry && $otpEntry->expires_at > now()) {
+        return response()->json(['message' => 'Correct email and OTP']);
+    }
+
+    return response()->json(['message' => 'Invalid or expired OTP'], 400);
+}
+
+
+
+
+
 }
