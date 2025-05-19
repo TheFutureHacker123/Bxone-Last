@@ -245,7 +245,7 @@ function Settings() {
           {content?.settings || "Settings"}
         </h2>
 
-        <div className="form-group">
+        <div className="button-container"> {/* Changed to a div with class */}
           <Button
             id="add-address-btn"
             className="custom-button"
@@ -254,9 +254,7 @@ function Settings() {
           >
             {content?.add_address || "Add Address"}
           </Button>
-        </div>
 
-        <div className="form-group">
           <Button
             id="add-bank-btn"
             className="custom-button"
