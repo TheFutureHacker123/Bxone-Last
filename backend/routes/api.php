@@ -35,7 +35,9 @@ Route::middleware('auth:api')->group(function () {
 
 Route::post('register', [UserController::class, 'register']); //done
 Route::post('login', [UserController::class, 'login']); //done
-Route::post('/addaddress', [UserController::class, 'addaddress']);
+Route::post('/addaddress', [UserController::class, 'addAddress']);
+Route::post('/addbankinfo', [UserController::class, 'addBankInfo']);
+Route::post('/userinfo', [UserController::class, 'userInfo']);
 
 Route::post('vendor/register', [VendorController::class, 'register']); //done
 Route::post('/vendor/login', [VendorController::class, 'login']); //done

@@ -268,48 +268,48 @@ class ProductController extends Controller
     }
 
     public function processOrder(Request $request)
-    {
-        $request->validate([
-            'user_id' => 'required|integer',
-            'cartItems' => 'required|array|min:1',
-            'cartItems.*.cart_id' => 'required|integer',
-            'cartItems.*.product_id' => 'required|integer',
-            'cartItems.*.vendor_id' => 'required|integer', // Assuming you have vendor_id in cart items
-            'cartItems.*.total_added' => 'required|integer|min:1',
-            'totalAmount' => 'required|numeric|min:0', // You can use this for the total of all cart items
-            'shippingAddress' => 'nullable|string',
-        ]);
+{
+    $request->validate([
+        'user_id' => 'required|integer',
+        'cartItems' => 'required|array|min:1',
+        'cartItems.*.cart_id' => 'required|integer',
+        'cartItems.*.product_id' => 'required|integer',
+        'cartItems.*.vendor_id' => 'required|integer', // Assuming you have vendor_id in cart items
+        'cartItems.*.total_added' => 'required|integer|min:1',
+        'totalAmount' => 'required|numeric|min:0', // You can use this for the total of all cart items
+        'shippingAddress' => 'nullable|array',
+    ]);
 
-        try {
-            DB::beginTransaction();
+    try {
+        DB::beginTransaction();
 
-            foreach ($request->cartItems as $cartItem) {
-                $order = new Orders();
-                $order->user_id = $request->user_id;
-                $order->product_id = $cartItem['product_id'];
-                $order->vendor_id = $cartItem['vendor_id'];
-                $order->order_status = 'pending'; // Initial order status
-                // Assuming you don't have payment method yet, you can set a default
-                $order->payment_method = 'pending';
-                $order->total_paid = $cartItem['product_price'] * $cartItem['total_added'];
-                $order->orderd_quantity = $cartItem['total_added'];
-                // You might need to fetch the address_id based on the selectedAddress
-                // For now, we'll leave it as null or handle it differently
-                $order->address_id = null;
-                $order->save();
-            }
+        foreach ($request->cartItems as $cartItem) {
+            $order = new Orders();
+            $order->user_id = $request->user_id;
+            $order->product_id = $cartItem['product_id'];
+            $order->vendor_id = $cartItem['vendor_id'];
+            $order->order_status = 'pending'; // Initial order status
+            // Assuming you don't have payment method yet, you can set a default
+            $order->payment_method = 'pending';
+            $order->total_paid = $cartItem['product_price'] * $cartItem['total_added'];
+            $order->orderd_quantity = $cartItem['total_added'];
+            // You might need to fetch the address_id based on the selectedAddress
+            // For now, we'll leave it as null or handle it differently
+            $order->address_id = null;
+            $order->save();
 
-            // Clear the user's cart
-            Cart::where('user_id', $request->user_id)->delete();
-
-            DB::commit();
-
-            return response()->json(['success' => true, 'message' => 'Order(s) placed successfully!']);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['success' => false, 'message' => 'Failed to process order(s).', 'error' => $e->getMessage()], 500);
+            // Delete the specific cart item that was just ordered
+            Cart::where('cart_id', $cartItem['cart_id'])->where('user_id', $request->user_id)->delete();
         }
+
+        DB::commit();
+
+        return response()->json(['success' => true, 'message' => 'Order(s) placed successfully!']);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json(['success' => false, 'message' => 'Failed to process order(s).', 'error' => $e->getMessage()], 500);
     }
+}
     public function shippeditems(Request $request)
     {
         // Retrieve the user_id from the request

@@ -24,6 +24,11 @@ const ethiopianRegions = {
 function Settings() {
   const [showPopup, setShowPopup] = useState(false);
   const [region, setRegion] = useState("");
+  const [showBankPopup, setShowBankPopup] = useState(false);
+  const [bankName, setBankName] = useState("");
+  const [accountNumber, setAccountNumber] = useState("");
+  const [accountHolder, setAccountHolder] = useState("");
+  const [bankBranch, setBankBranch] = useState("");
 
   const handleClose = () => setShowPopup(false);
   const handleShow = () => setShowPopup(true);
@@ -185,6 +190,54 @@ function Settings() {
     }
   };
 
+  const saveBankInfo = async () => {
+    const userInfo = JSON.parse(localStorage.getItem("user-info"));
+    const userId = userInfo ? userInfo.user_id : null;
+
+    if (!bankName || !accountNumber || !accountHolder) {
+      toast.error(content?.all_fields_required || "All fields are required.");
+      return;
+    }
+    if (!userId) {
+      toast.error(content?.user_id_missing || "User information is missing.");
+      return;
+    }
+
+    const bankData = {
+      user_id: userId,
+      bank_name: bankName,
+      account_number: accountNumber,
+      account_holder: accountHolder,
+      bank_branch: bankBranch,
+    };
+
+    try {
+      const response = await fetch("http://localhost:8000/api/addbankinfo", {
+        method: "POST",
+        body: JSON.stringify(bankData),
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to save bank info.");
+      }
+
+      toast.success(data.message || "Bank information saved!");
+      setShowBankPopup(false);
+      setBankName("");
+      setAccountNumber("");
+      setAccountHolder("");
+      setBankBranch("");
+    } catch (error) {
+      toast.error(error.message || "Failed to save bank info.");
+    }
+  };
+
   return (
     <Container className="settings-container mt-3">
       <Form>
@@ -200,6 +253,17 @@ function Settings() {
             onClick={handleShow}
           >
             {content?.add_address || "Add Address"}
+          </Button>
+        </div>
+
+        <div className="form-group">
+          <Button
+            id="add-bank-btn"
+            className="custom-button"
+            style={{ fontSize: "var(--font-size)", color: "var(--font-color)" }}
+            onClick={() => setShowBankPopup(true)}
+          >
+            {content?.add_bank_info || "Add Bank Information"}
           </Button>
         </div>
 
@@ -395,6 +459,84 @@ function Settings() {
             className="custom-button"
           >
             {content?.save_address || "Save Address"}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Popup for Adding Bank Info */}
+      <Modal show={showBankPopup} onHide={() => setShowBankPopup(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>{content?.add_bank_info || "Add Bank Information"}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <form>
+            <div className="mb-3">
+              <label htmlFor="bankName" className="form-label">
+                {content?.bank_name || "Bank Name"}
+              </label>
+              <input
+                type="text"
+                className="custom-form-control"
+                id="bankName"
+                value={bankName}
+                onChange={e => setBankName(e.target.value)}
+                required
+              />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="accountNumber" className="form-label">
+                {content?.account_number || "Account Number"}
+              </label>
+              <input
+                type="text"
+                className="custom-form-control"
+                id="accountNumber"
+                value={accountNumber}
+                onChange={e => setAccountNumber(e.target.value)}
+                required
+              />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="accountHolder" className="form-label">
+                {content?.account_holder || "Account Holder"}
+              </label>
+              <input
+                type="text"
+                className="custom-form-control"
+                id="accountHolder"
+                value={accountHolder}
+                onChange={e => setAccountHolder(e.target.value)}
+                required
+              />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="bankBranch" className="form-label">
+                {content?.bank_branch || "Bank Branch"}
+              </label>
+              <input
+                type="text"
+                className="custom-form-control"
+                id="bankBranch"
+                value={bankBranch}
+                onChange={e => setBankBranch(e.target.value)}
+              />
+            </div>
+          </form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            className="custom-button"
+            onClick={() => setShowBankPopup(false)}
+          >
+            {content?.close || "Close"}
+          </Button>
+          <Button
+            variant="primary"
+            onClick={saveBankInfo}
+            className="custom-button"
+          >
+            {content?.save_bank_info || "Save Bank Info"}
           </Button>
         </Modal.Footer>
       </Modal>
