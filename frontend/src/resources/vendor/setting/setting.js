@@ -216,7 +216,7 @@ function VendorSetting() {
           </div>
           {openDropdown === "messages" && (
             <ul className="dropdown-menu custom-dropdown-menu">
-              <li>
+              {/* <li>
                 <Link
                   to="/vendor/user-messages"
                   className="dropdown-item-vendor"
@@ -226,7 +226,7 @@ function VendorSetting() {
                 >
                   {content?.user_message || "User Message"}
                 </Link>
-              </li>
+              </li> */}
               <li>
                 <Link
                   to="/vendor/admin-messages"

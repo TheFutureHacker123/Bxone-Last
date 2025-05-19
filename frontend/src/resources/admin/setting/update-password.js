@@ -142,7 +142,8 @@ function UpdatePassword() {
       if (result.message === "Password updated successfully") {
         toast.success("Password updated successfully");
         setShowPasswordModal(false);
-        setTimeout(() => navigate("/admin/"), 1500);
+        localStorage.clear();
+        setTimeout(() => navigate("/admin/login"), 1500);
       } else {
         toast.error("Failed to update password");
       }

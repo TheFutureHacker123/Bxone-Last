@@ -283,8 +283,8 @@ function SAdminListVendor() {
                         style={{
                           padding: '0.5rem 1rem',
                           borderRadius: '20px',
-                          backgroundColor: user.status === 'Verified' ? '#d4edda' : '#f8d7da',
-                          color: user.status === 'Verified' ? '#155724' : '#721c24',
+                          backgroundColor: user.status === 'Active' ? '#d4edda' : '#f8d7da',
+                          color: user.status === 'Active' ? '#155724' : '#721c24',
                           marginRight: '1rem'
                         }}
                       >

@@ -1,23 +1,27 @@
 import React, { useState, useEffect } from "react";
 import { FaBars, FaChartLine, FaBox, FaShoppingCart, FaComments, FaUser, } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer, toast } from 'react-toastify';
 import Translation from "../../translations/vendor.json";
-import "react-toastify/dist/ReactToastify.css";
+import 'react-toastify/dist/ReactToastify.css';
 import "../style/manage-profile.css";
 
 function ManageProfile() {
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [openDropdown, setOpenDropdown] = useState(null);
-  const navigate = useNavigate();
-  const [currentPassword, setCurrentPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [otpcode, setOtpCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [otpTimer, setOtpTimer] = useState(0);
+  const [otpExpired, setOtpExpired] = useState(true);
+  const [otpRequested, setOtpRequested] = useState(false);
+  const navigate = useNavigate();
 
   const defaultFontSize = 'medium';
   const defaultFontColor = '#000000';
-  const defaultLanguage = 'english'; // Default language
+  const defaultLanguage = 'english';
 
   const [fontSize, setFontSize] = useState(() => localStorage.getItem('fontSize') || defaultFontSize);
   const [fontColor, setFontColor] = useState(() => localStorage.getItem('fontColor') || defaultFontColor);
@@ -31,11 +35,18 @@ function ManageProfile() {
     localStorage.setItem('fontSize', fontSize);
     localStorage.setItem('fontColor', fontColor);
     localStorage.setItem('language', language);
-
-    // Update content based on selected language
     setContent(Translation[language]);
   }, [fontSize, fontColor, language]);
 
+  useEffect(() => {
+    let timer;
+    if (otpTimer > 0) {
+      timer = setInterval(() => setOtpTimer(prev => prev - 1), 1000);
+    } else {
+      setOtpExpired(true);
+    }
+    return () => clearInterval(timer);
+  }, [otpTimer]);
 
   const toggleSidebar = () => {
     setSidebarVisible(!sidebarVisible);
@@ -45,83 +56,116 @@ function ManageProfile() {
     setOpenDropdown(openDropdown === menu ? null : menu);
   };
 
-  const handleUpdatePassword = async (e) => {
+  const getcode = async (e) => {
     e.preventDefault();
-
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      toast.error("All fields are required.");
+    if (!email) {
+      toast.error("Email can't be blank");
       return;
     }
 
+    try {
+      const response = await fetch("http://localhost:8000/api/vendor/getcode", {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+        headers: {
+          "Content-Type": 'application/json',
+          "Accept": 'application/json'
+        }
+      });
+
+      const result = await response.json();
+      if (result.message === 'OTP sent successfully') {
+        toast.success("Check your email for the code!");
+        setOtpTimer(60);
+        setOtpExpired(false);
+        setOtpRequested(true);
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      toast.error("An error occurred. Please try again later.");
+    }
+  };
+
+  const reset = async (e) => {
+    e.preventDefault();
+    if (!email || !otpcode) {
+      toast.error("Email and OTP can't be blank");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:8000/api/vendor/reset", {
+        method: 'POST',
+        body: JSON.stringify({ email, otp: otpcode }),
+        headers: {
+          "Content-Type": 'application/json',
+          "Accept": 'application/json'
+        }
+      });
+
+      const result = await response.json();
+
+      if (result.message === "Correct email and OTP") {
+        toast.success("OTP Verified. Please set a new password.");
+        setShowPasswordModal(true);
+      } else {
+        toast.error("Invalid Email or OTP!");
+      }
+    } catch (error) {
+      toast.error("An error occurred. Please try again later.");
+    }
+  };
+
+  const handlePasswordUpdate = async (e) => {
+    e.preventDefault();
+    if (!newPassword || !confirmPassword) {
+      toast.error("Password fields can't be empty");
+      return;
+    }
     if (newPassword !== confirmPassword) {
-      toast.error("New password and confirmation do not match.");
-      return;
-    }
-
-    if (newPassword === currentPassword) {
-      toast.error("New password cannot be the same as the current password.");
-      return;
-    }
-
-    // Get vendor_id from localStorage
-    const userInfo = JSON.parse(localStorage.getItem("vendor-info"));
-    const vendor_id = userInfo?.vendor_id;
-
-    if (!vendor_id) {
-      toast.error("Vendor ID not found. Please login again.");
+      toast.error("Passwords do not match");
       return;
     }
 
     try {
       const response = await fetch("http://localhost:8000/api/vendor/updatepassword", {
-        method: "POST",
+        method: 'POST',
+        body: JSON.stringify({ email, password: newPassword, "password_confirmation": confirmPassword }),
         headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          vendor_id,
-          current_password: currentPassword,
-          new_password: newPassword,
-          password_confirmation: confirmPassword,
-        }),
+          "Content-Type": 'application/json',
+          "Accept": 'application/json'
+        }
       });
 
       const result = await response.json();
-
-      if (response.ok) {
-        toast.success("Password updated successfully.");
-        setCurrentPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
+      if (result.message === "Password updated successfully") {
+        toast.success("Password updated successfully");
+        setShowPasswordModal(false);
+        localStorage.clear();
+        setTimeout(() => navigate("/vendor/login"), 1500);
       } else {
-        toast.error(result.message || result.error || "Failed to update password.");
+        toast.error("Failed to update password");
       }
     } catch (error) {
-      toast.error("Something went wrong. Try again later.");
+      toast.error("An error occurred while updating password");
     }
   };
 
-  function logout() {
-      localStorage.clear();
-      toast.success(content?.logout_success || "Logout Successful!", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-      setTimeout(() => {
-        navigate("/vendor/login");
-      }, 1000);
-    }
-
-
+  const logout = () => {
+    localStorage.clear();
+    toast.success(content?.logout || "Logout Successful!", {
+      position: "top-right",
+      autoClose: 3000,
+    });
+    setTimeout(() => {
+      navigate("/vendor/login");
+    }, 1000);
+  };
 
   return (
-    <div className="dashboard-wrapper">
-      <button className="hamburger-btn" onClick={toggleSidebar}>
+    <div className="admin-dashboard-wrapper">
+      <button className="admin-hamburger-btn" onClick={toggleSidebar}>
         <FaBars style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }} />
       </button>
 
@@ -204,11 +248,11 @@ function ManageProfile() {
                 </div>
                 {openDropdown === "messages" && (
                   <ul className="dropdown-menu custom-dropdown-menu">
-                    <li>
+                    {/* <li>
                       <Link to="/vendor/user-messages" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
                         {content?.user_message || "User Message"}
                       </Link>
-                    </li>
+                    </li> */}
                     <li>
                       <Link to="/vendor/admin-messages" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
                         {content?.admin_message || "Admin Message"}
@@ -257,66 +301,95 @@ function ManageProfile() {
               </div>
             </div>
 
-      {/* Main Content */}
-      <div className={`main-content ${sidebarVisible ? "with-sidebar" : "full-width"}`}>
-  <div className="custom-header text-center">
-    <h1 className="h4 mb-0">{content?.update_your_password || "Update Your Password"}</h1>
-  </div>
+      <div className={`admin-main-content ${sidebarVisible ? "with-sidebar" : "full-width"}`}>
+        <div className="admin-custom-header text-center">
+          <h1 className="h4 mb-0">{content?.update_password || "Update Password"}</h1>
+        </div>
 
-  <div className="p-0">
-    <h2 className="mb-3">{content?.change_password || "Change Password"}</h2>
-    <p>{content?.enter_current_password || "Please enter your current password and choose a new one."}</p>
+        <div className="outer-container" style={{ display: 'flex', justifyContent: 'center' }}>
+          <div className="update-password-container" style={{ width: '1000px' }}>
+            <h2>{content?.update_password || "Update Password"}</h2>
 
-    <form className="update-password-form mt-4" onSubmit={handleUpdatePassword}>
-      <div className="form-group mb-3 text-start">
-        <label htmlFor="currentPassword" className="form-label">
-          {content?.current_password || "Current Password"}
-        </label>
-        <input
-          type="password"
-          id="currentPassword"
-          className="form-control"
-          placeholder={content?.enter_current_password_placeholder || "Enter current password"}
-          value={currentPassword}
-          onChange={(e) => setCurrentPassword(e.target.value)}
-        />
-      </div>
+            <form onSubmit={reset}>
+              <div className="form-group">
+                <label>{content?.email || "Email"}</label>
+                <input
+                  type="email"
+                  placeholder={content?.email || "Enter your email"}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
 
-      <div className="form-group mb-3 text-start">
-        <label htmlFor="newPassword" className="form-label">
-          {content?.new_password || "New Password"}
-        </label>
-        <input
-          type="password"
-          id="newPassword"
-          className="form-control"
-          placeholder={content?.enter_new_password_placeholder || "Enter new password"}
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-        />
-      </div>
-
-      <div className="form-group mb-4 text-start">
-        <label htmlFor="confirmPassword" className="form-label">
-          {content?.confirm_new_password || "Confirm New Password"}
-        </label>
-        <input
-          type="password"
-          id="confirmPassword"
-          className="form-control"
-          placeholder={content?.confirm_new_password_placeholder || "Confirm new password"}
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-        />
-      </div>
-
-      <button type="submit" className="btn btn-primary">
-        {content?.update_password || "Update Password"}
-      </button>
-    </form>
-  </div>
+             <div className="form-group" style={{ position: 'relative' }}>
+  <label style={{ marginRight: '10px' }}>{content?.otp_code || "OTP Code"}</label>
+  <input
+    type="text"
+    placeholder={content?.otp_code || "Enter OTP"}
+    value={otpcode}
+    onChange={(e) => setOtpCode(e.target.value)}
+    required
+    style={{ width: '100%', paddingRight: '80px' }} // Adjust input width
+  />
+  <button
+    onClick={getcode}
+    disabled={!otpExpired}
+    style={{
+      position: 'absolute',
+      right: '0px', // Position the button slightly from the right edge
+      top: '50%',
+      transform: 'translateY(-18%)',
+      width: '30%', // Button width
+      padding: '10px 0', // Adjust padding
+      zIndex: 1, // Ensure button is above the input
+    }}
+  >
+    Get Code
+  </button>
 </div>
 
+              {!otpExpired && <span>{otpTimer}s</span>}
+              {otpRequested && otpExpired && <span className="text-danger">OTP expired. Please resend.</span>}
+
+              <button type="submit">{content?.reset_password || "Reset Password"}</button>
+            </form>
+
+            {showPasswordModal && (
+              <div className="modal-overlay">
+                <div className="modal-content">
+                  <h4>Set New Password</h4>
+                  <form onSubmit={handlePasswordUpdate}>
+                    <div className="form-group">
+                      <label>{content?.new_password || "New Password"}</label>
+                      <input
+                        type="password"
+                        placeholder={content?.new_password || "Enter new password"}
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        required
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>{content?.confirm_new_password || "Confirm New Password"}</label>
+                      <input
+                        type="password"
+                        placeholder={content?.confirm_new_password || "Confirm new password"}
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        required
+                      />
+                    </div>
+
+                    <button type="submit">{content?.update_password || "Update Password"}</button>
+                  </form>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
       <ToastContainer />
     </div>
   );

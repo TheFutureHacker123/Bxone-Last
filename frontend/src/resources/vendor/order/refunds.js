@@ -213,11 +213,11 @@ function Refunds() {
                 </div>
                 {openDropdown === "messages" && (
                   <ul className="dropdown-menu custom-dropdown-menu">
-                    <li>
+                    {/* <li>
                       <Link to="/vendor/user-messages" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
                         {content?.user_message || "User Message"}
                       </Link>
-                    </li>
+                    </li> */}
                     <li>
                       <Link to="/vendor/admin-messages" className="dropdown-item-vendor" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
                         {content?.admin_message || "Admin Message"}
