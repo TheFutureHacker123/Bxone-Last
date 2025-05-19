@@ -506,12 +506,15 @@ class VendorController extends Controller
 
         // Save the order with the new status
         if ($order->save()) {
+
             return response()->json(['message' => 'Order status updated successfully'], 200);
         }
 
         // Return error if save failed
         return response()->json(['message' => 'Failed to update order statussss'], 500);
     }
+
+    
 
     public function categoryandsubcategory($category_id)
     {
