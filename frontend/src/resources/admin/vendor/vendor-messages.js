@@ -162,11 +162,11 @@ function VendorMessages() {
                   {content?.list_users || "List Users"}
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link to="/admin/user-messages" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
                   {content?.user_messages || "User Messages"}
                 </Link>
-              </li>
+              </li> */}
             </ul>
           )}
         </div>

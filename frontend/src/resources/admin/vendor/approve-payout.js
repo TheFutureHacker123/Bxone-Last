@@ -105,7 +105,7 @@ function ApprovePayouts() {
               </ListGroup.Item>
               <ListGroup.Item action className="bg-dark text-white border-0 d-flex align-items-center">
                 <FaComment className="me-2" />
-                <Link to="/admin/user-messages" style={{ textDecoration: 'none', color: 'white' }}>User Messages</Link>
+                {/* <Link to="/admin/user-messages" style={{ textDecoration: 'none', color: 'white' }}>User Messages</Link> */}
               </ListGroup.Item>
             </div>
 
