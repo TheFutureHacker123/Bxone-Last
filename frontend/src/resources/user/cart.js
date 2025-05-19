@@ -307,13 +307,23 @@ function Cart() {
           <tbody>
             {cartitems.map((item) => (
               <tr key={item.cart_id}>
-                <td>
+                {/* <td>
                   <input
                     type="checkbox"
                     checked={selectedItems.includes(item.cart_id)}
                     onChange={() => handleSelectItem(item.cart_id)}
                   />
-                </td>
+                </td> */}
+
+                <td className="custom-checkbox-cell">
+  <input
+    type="checkbox"
+    className="custom-checkbox"
+    checked={selectedItems.includes(item.cart_id)}
+    onChange={() => handleSelectItem(item.cart_id)}
+  />
+</td>
+
                 <td>
                   <div className="product-info">
                     <img
