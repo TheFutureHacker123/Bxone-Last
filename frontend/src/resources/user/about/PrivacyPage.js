@@ -97,7 +97,7 @@ function PrivacyPage() {
       title: 'Introduction',
       content: (
         <>
-          <p style={paragraphStyle}>Last updated: <span style={{ color: '#fbbe28', fontWeight: 'bold' }}>[Date]</span></p>
+          <p style={paragraphStyle}>Last updated: <span style={{ color: '#fbbe28', fontWeight: 'bold' }}>20/05/2025</span></p>
           <p style={paragraphStyle}>
             Your privacy is important to <span style={{ color: '#fbbe28', fontWeight: 'bold' }}>Habesha Mart</span>. This Privacy Policy explains how we collect, use, and disclose your personal information when you use our platform.
           </p>
@@ -152,7 +152,7 @@ function PrivacyPage() {
       title: '5. Your Rights',
       content: (
         <p style={paragraphStyle}>
-          You may have certain rights regarding your personal information, including the right to access, correct, or delete your data. Please contact us at <span style={{ color: '#fbbe28', fontWeight: 'bold' }}>[Your Contact Email Address]</span> if you wish to exercise these rights.
+          You may have certain rights regarding your personal information, including the right to access, correct, or delete your data. Please contact us at <span style={{ color: '#fbbe28', fontWeight: 'bold' }}>habeshamart@gmail.com</span> if you wish to exercise these rights.
         </p>
       ),
     },
@@ -168,7 +168,7 @@ function PrivacyPage() {
       title: 'Contact Us',
       content: (
         <p style={{ ...paragraphStyle, color: '#555', fontFamily: "'Open Sans', sans-serif" }}>
-          If you have any questions about this Privacy Policy, please contact us at <span style={{ color: '#fbbe28', fontWeight: 'bold' }}>[Your Contact Email Address]</span>.
+          If you have any questions about this Privacy Policy, please contact us at <span style={{ color: '#fbbe28', fontWeight: 'bold' }}>habeshamart@gmail.com</span>.
         </p>
       ),
     },

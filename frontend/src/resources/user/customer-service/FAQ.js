@@ -126,7 +126,7 @@ function FAQ() {
       <div style={questionBoxStyle}>
         <h3 style={questionStyle}>{icons[4]} How can I contact customer support?</h3>
         <p style={answerStyle}>
-          You can contact our customer support team via email at <a href="mailto:support@habeshamart.com" style={{color:'#e65100', fontWeight:'bold'}}>support@habeshamart.com</a> or by phone at <span style={{color:'#e65100', fontWeight:'bold'}}>+251-XX-XXX-XXXX</span>.
+          You can contact our customer support team via email at <a href="mailto:support@habeshamart.com" style={{color:'#e65100', fontWeight:'bold'}}>support@habeshamart.com</a> or by phone at <span style={{color:'#e65100', fontWeight:'bold'}}>+251-90-000-0000</span>.
         </p>
       </div>
     </div>

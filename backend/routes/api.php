@@ -172,8 +172,6 @@ Route::post('/confirm-order/{order}', [PaymentController::class, 'confirmOrder']
 Route::post('/approve-payment/{payment}', [PaymentController::class, 'approvePayment'])->name('approve.payment');
 Route::post('/payout-vendor/{payment}', [PaymentController::class, 'payoutVendor'])->name('payout.vendor');
 Route::get('/payment/success', [PaymentController::class, 'paymentSuccess'])->name('payment.success');
-Route::post('/create-stripe-payment-intent', [PaymentController::class, 'createStripePaymentIntent']);
-
 
 Route::post('/fetchChat', [MessageController::class, 'fetchChat']);
 
