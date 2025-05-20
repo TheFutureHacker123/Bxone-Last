@@ -4,7 +4,7 @@ import { ToastContainer, toast } from "react-toastify";
 import Translation from "./translations/lang.json";
 import "react-toastify/dist/ReactToastify.css";
 import "./user/styles/home.css";
-import { Modal, Button,Form } from "react-bootstrap";
+import { Modal, Button, Form } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FaEye } from "react-icons/fa";
 
@@ -68,32 +68,30 @@ function Home() {
     }
   }, []);
 
-
   const userInfo = localStorage.getItem("user-info");
-let userName = "User"; // fallback
+  let userName = "User"; // fallback
 
-if (userInfo) {
-  try {
-    const userObj = JSON.parse(userInfo);
-    if (userObj.name) userName = userObj.name;
-  } catch (error) {
-    console.error("Error parsing user-info from localStorage:", error);
+  if (userInfo) {
+    try {
+      const userObj = JSON.parse(userInfo);
+      if (userObj.name) userName = userObj.name;
+    } catch (error) {
+      console.error("Error parsing user-info from localStorage:", error);
+    }
   }
-}
 
   useEffect(() => {
-
     const fetchData = async () => {
       setLoading(true);
       setError(null);
+
       try {
-        // Start all fetches in parallel
         const [
           topProductsResponse,
           featuredVendorsResponse,
           bestSellingVendorsResponse,
           categoriesResponse,
-          newArrivalsResponse, // NEW: fetch new arrivals
+          newArrivalsResponse,
         ] = await Promise.all([
           fetch("http://localhost:8000/api/topproduct", {
             method: "POST",
@@ -105,46 +103,40 @@ if (userInfo) {
           fetch("http://localhost:8000/api/featured-vendors"),
           fetch("http://localhost:8000/api/best-selling-vendors"),
           fetch("http://localhost:8000/api/vendor/get-categories"),
-          fetch("http://localhost:8000/api/new-arrivals"), // NEW: endpoint for new arrivals
+          fetch("http://localhost:8000/api/new-arrivals"),
         ]);
 
-        if (!topProductsResponse.ok)
-          throw new Error(`HTTP error! status: ${topProductsResponse.status}`);
-        if (!featuredVendorsResponse.ok)
-          throw new Error(
-            `HTTP error! status: ${featuredVendorsResponse.status}`
-          );
-        if (!bestSellingVendorsResponse.ok)
-          throw new Error(
-            `HTTP error! status: ${bestSellingVendorsResponse.status}`
-          );
-        if (!categoriesResponse.ok)
-          throw new Error(`HTTP error! status: ${categoriesResponse.status}`);
-        if (!newArrivalsResponse.ok)
-          throw new Error(`HTTP error! status: ${newArrivalsResponse.status}`);
+        const responses = [
+          topProductsResponse,
+          featuredVendorsResponse,
+          bestSellingVendorsResponse,
+          categoriesResponse,
+          newArrivalsResponse,
+        ];
 
-        // Parse all JSON in parallel
+        // Check for HTTP errors
+        responses.forEach((response, index) => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+        });
+
         const [
           topProductsData,
           featuredVendorsData,
           bestSellingVendorsData,
           categoriesData,
-          newArrivalsData, // NEW
-        ] = await Promise.all([
-          topProductsResponse.json(),
-          featuredVendorsResponse.json(),
-          bestSellingVendorsResponse.json(),
-          categoriesResponse.json(),
-          newArrivalsResponse.json(), // NEW
-        ]);
+          newArrivalsData,
+        ] = await Promise.all(responses.map((response) => response.json()));
 
-        const products = Array.isArray(topProductsData) ? topProductsData : [];
-        setSearchResult(products);
-        setProductsToDisplay(products);
+        setSearchResult(Array.isArray(topProductsData) ? topProductsData : []);
+        setProductsToDisplay(
+          Array.isArray(topProductsData) ? topProductsData : []
+        );
         setFeaturedVendors(featuredVendorsData.featured_vendors);
         setBestSellingVendors(bestSellingVendorsData.best_selling_vendors);
         setCategories(categoriesData);
-        setNewArrivals(Array.isArray(newArrivalsData) ? newArrivalsData : []); // NEW
+        setNewArrivals(Array.isArray(newArrivalsData) ? newArrivalsData : []);
       } catch (err) {
         setError(err.message);
         console.error("Error fetching data:", err);
@@ -154,7 +146,7 @@ if (userInfo) {
         setFeaturedVendors([]);
         setBestSellingVendors([]);
         setCategories([]);
-        setNewArrivals([]); // NEW
+        setNewArrivals([]);
       } finally {
         setLoading(false);
       }
@@ -277,7 +269,7 @@ if (userInfo) {
   async function search(e) {
     e.preventDefault();
     let items = { searchproduct };
-    console.warn("Fuck",items);
+    console.warn("Fuck", items);
     try {
       let response = await fetch("http://localhost:8000/api/search", {
         method: "POST",
@@ -374,7 +366,8 @@ if (userInfo) {
                   to="/vendor/login"
                   className="text-dark text-decoration-none me-3"
                 >
-                  <i className="bi bi-shop me-1"></i> {content?.login_as_vendor || "Vendor Log In"}
+                  <i className="bi bi-shop me-1"></i>{" "}
+                  {content?.login_as_vendor || "Vendor Log In"}
                 </Link>
               )}
             </div>
@@ -387,7 +380,9 @@ if (userInfo) {
                   <Link
                     to="/notification"
                     className="text-decoration-none"
-                    style={{ color: fontColor === '#000000' ? '#212529' : fontColor }}
+                    style={{
+                      color: fontColor === "#000000" ? "#212529" : fontColor,
+                    }}
                   >
                     <i className="bi bi-bell fs-5"></i>
                   </Link>
@@ -399,14 +394,24 @@ if (userInfo) {
                     <Link
                       to="/wishlist"
                       className="text-decoration-none"
-                      style={{ color: fontColor === '#000000' ? '#212529' : fontColor }}
+                      style={{
+                        color: fontColor === "#000000" ? "#212529" : fontColor,
+                      }}
                     >
-                        {content?.wishlist || "Wishlist"}  <i className="bi bi-heart ms-1 fs-sm"></i>
+                      {content?.wishlist || "Wishlist"}{" "}
+                      <i className="bi bi-heart ms-1 fs-sm"></i>
                     </Link>
                   </div>
                   <div className="d-inline-block me-3">
-                    <Link to="/cart" className="text-decoration-none" style={{ color: fontColor === '#000000' ? '#212529' : fontColor }}>
-                      {content?.carts || "Cart"} <i className="bi bi-bag ms-1 fs-sm"></i>
+                    <Link
+                      to="/cart"
+                      className="text-decoration-none"
+                      style={{
+                        color: fontColor === "#000000" ? "#212529" : fontColor,
+                      }}
+                    >
+                      {content?.carts || "Cart"}{" "}
+                      <i className="bi bi-bag ms-1 fs-sm"></i>
                     </Link>
                   </div>
                 </>
@@ -446,189 +451,124 @@ if (userInfo) {
           </div>
         </div>
         <nav
-        className="navbar navbar-expand-lg navbar-dark bg-dark sticky-top"
-        style={{ marginTop: "5px" }}
+          className="navbar navbar-expand-lg navbar-dark bg-dark sticky-top"
+          style={{ marginTop: "5px" }}
         >
-        <div className="container-fluid">
-          <Link className="navbar-brand text-warning" to="/">
-            Habesha Mart
-          </Link>
-          <button className="navbar-toggler" type="button" onClick={toggleNav}>
-            <span className="navbar-toggler-icon"></span>
-          </button>
-          <div
-            className={`${isNavOpen ? "" : "collapse"} navbar-collapse`}
-            id="navbarNav"
-          >
-            
-
-
-<ul className="navbar-nav mx-auto">
-  <li className="nav-item">
-    <div className="enhanced-search-bar">
-      <select className="enhanced-select">
-        <option>{content?.all_category || "All Categories"}</option>
-        {categories.map((cat) => (
-          <option key={cat.category_category_id} value={cat.category_id}>
-            {cat.category_name}
-          </option>
-        ))}
-      </select>
-      <input
-        type="text"
-        value={searchproduct}
-        onChange={(e) => setSearchProduct(e.target.value)}
-        className="enhanced-input"
-        placeholder={content?.search_products || "Search products..."}
-      />
-      <button className="enhanced-search-button" onClick={search}>
-        {content?.search || "Search"}
-      </button>
-    </div>
-  </li>
-</ul>
-
-
-            
-
-            
-            {/* <ul className="navbar-nav">
-              {localStorage.getItem("user-info") ? (
-                <>
-                  <li className="nav-item dropdown">
-                    <a
-                      className="nav-link dropdown-toggle"
-                      role="button"
-                      data-bs-toggle="dropdown"
-                      aria-expanded="false"
-                    >
-                      <i className="bi bi-person-circle fs-5"></i>
-                    </a>
-                    <ul className="dropdown-menu dropdown-menu-end">
-                      <li>
-                        <Link className="dropdown-item" to="/profile">
-                          Profile
-                        </Link>
-                      </li>
-                      <li>
-                        <Link className="dropdown-item" to="/ordereditems">
-                          Orders
-                        </Link>
-                      </li>
-                      <li>
-                        <Link className="dropdown-item" to="/settings">
-                          Settings
-                        </Link>
-                      </li>
-                      <li>
-                        <hr className="dropdown-divider" />
-                      </li>
-                      <li>
-                        <Link className="dropdown-item" to="#" onClick={logout}>
-                          Logout
-                        </Link>
-                      </li>
-                    </ul>
-                  </li>
-                </>
-              ) : (
+          <div className="container-fluid">
+            <Link className="navbar-brand text-warning" to="/">
+              Habesha Mart
+            </Link>
+            <button
+              className="navbar-toggler"
+              type="button"
+              onClick={toggleNav}
+            >
+              <span className="navbar-toggler-icon"></span>
+            </button>
+            <div
+              className={`${isNavOpen ? "" : "collapse"} navbar-collapse`}
+              id="navbarNav"
+            >
+              <ul className="navbar-nav mx-auto">
                 <li className="nav-item">
-                  <Link className="nav-link" to="/login">
-                    {content?.login_register || "Log In / Register"}  
-                  </Link>
+                  <div className="enhanced-search-bar">
+                    <select className="enhanced-select">
+                      <option>
+                        {content?.all_category || "All Categories"}
+                      </option>
+                      {categories.map((cat) => (
+                        <option
+                          key={cat.category_category_id}
+                          value={cat.category_id}
+                        >
+                          {cat.category_name}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="text"
+                      value={searchproduct}
+                      onChange={(e) => setSearchProduct(e.target.value)}
+                      className="enhanced-input"
+                      placeholder={
+                        content?.search_products || "Search products..."
+                      }
+                    />
+                    <button className="enhanced-search-button" onClick={search}>
+                      {content?.search || "Search"}
+                    </button>
+                  </div>
                 </li>
-              )}
-            </ul> */}
+              </ul>
 
+              <ul className="navbar-nav">
+                {localStorage.getItem("user-info") ? (
+                  <>
+                    <li className="nav-item dropdown custom-profile">
+                      <li className="nav-item custom-profile text-center text-lg-start w-100 w-lg-auto">
+                        <a
+                          className="nav-link dropdown-toggle d-flex align-items-center justify-content-center justify-content-lg-start"
+                          role="button"
+                          data-bs-toggle="dropdown"
+                          aria-expanded="false"
+                        >
+                          <i className="bi bi-person-circle fs-4 me-2"></i>
+                          <span className="profile-name">Hi, {userName}</span>
+                        </a>
+                      </li>
 
-
-
-<ul className="navbar-nav">
-  {localStorage.getItem("user-info") ? (
-    <>
-      <li className="nav-item dropdown custom-profile">
-        <a
-          className="nav-link dropdown-toggle d-flex align-items-center"
-          role="button"
-          data-bs-toggle="dropdown"
-          aria-expanded="false"
-        >
-          <i className="bi bi-person-circle fs-4 me-2"></i>
-  <span className="profile-name">Hi, {userName}</span>
-        </a>
-        <ul className="dropdown-menu dropdown-menu-end shadow-sm rounded">
-          <li>
-            <Link className="dropdown-item" to="/profile">
-              Profile
-            </Link>
-          </li>
-          <li>
-            <Link className="dropdown-item" to="/ordereditems">
-              Orders
-            </Link>
-          </li>
-          <li>
-            <Link className="dropdown-item" to="/settings">
-              Settings
-            </Link>
-          </li>
-          <li>
-            <hr className="dropdown-divider" />
-          </li>
-          <li>
-            <Link className="dropdown-item text-danger" to="#" onClick={logout}>
-              Logout
-            </Link>
-          </li>
-        </ul>
-      </li>
-    </>
-  ) : (
-    <li className="nav-item">
-      <Link className="nav-link" to="/login">
-        {content?.login_register || "Log In / Register"}
-      </Link>
-    </li>
-  )}
-</ul>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                      <ul className="dropdown-menu dropdown-menu-end shadow-sm rounded">
+                        <li>
+                          <Link className="dropdown-item" to="/profile">
+                            Profile
+                          </Link>
+                        </li>
+                        <li>
+                          <Link className="dropdown-item" to="/ordereditems">
+                            Orders
+                          </Link>
+                        </li>
+                        <li>
+                          <Link className="dropdown-item" to="/settings">
+                            Settings
+                          </Link>
+                        </li>
+                        <li>
+                          <hr className="dropdown-divider" />
+                        </li>
+                        <li>
+                          <Link
+                            className="dropdown-item text-danger"
+                            to="#"
+                            onClick={logout}
+                          >
+                            Logout
+                          </Link>
+                        </li>
+                      </ul>
+                    </li>
+                  </>
+                ) : (
+                  <li className="nav-item">
+                    <Link className="nav-link" to="/login">
+                      {content?.login_register || "Log In / Register"}
+                    </Link>
+                  </li>
+                )}
+              </ul>
+            </div>
           </div>
-        </div>
-      </nav>
+        </nav>
       </div>
 
       {/* Navigation Bar */}
       <nav
         className="navbar navbar-expand-lg navbar-dark bg-dark sticky-top"
         style={{ marginTop: "50px" }}
-        >
+      >
         <div className="container-fluid">
           <Link className="navbar-brand text-warning" to="/">
-            Habesha Mart
+            Habesha Marst
           </Link>
           <button className="navbar-toggler" type="button" onClick={toggleNav}>
             <span className="navbar-toggler-icon"></span>
@@ -683,36 +623,36 @@ if (userInfo) {
               </li>
             </ul> */}
 
+            <ul className="navbar-nav mx-auto">
+              <li className="nav-item">
+                <div className="enhanced-search-bar">
+                  <select className="enhanced-select">
+                    <option>{content?.all_category || "All Categories"}</option>
+                    {categories.map((cat) => (
+                      <option
+                        key={cat.category_category_id}
+                        value={cat.category_id}
+                      >
+                        {cat.category_name}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="text"
+                    value={searchproduct}
+                    onChange={(e) => setSearchProduct(e.target.value)}
+                    className="enhanced-input"
+                    placeholder={
+                      content?.search_products || "Search products..."
+                    }
+                  />
+                  <button className="enhanced-search-button" onClick={search}>
+                    {content?.search || "Search"}
+                  </button>
+                </div>
+              </li>
+            </ul>
 
-<ul className="navbar-nav mx-auto">
-  <li className="nav-item">
-    <div className="enhanced-search-bar">
-      <select className="enhanced-select">
-        <option>{content?.all_category || "All Categories"}</option>
-        {categories.map((cat) => (
-          <option key={cat.category_category_id} value={cat.category_id}>
-            {cat.category_name}
-          </option>
-        ))}
-      </select>
-      <input
-        type="text"
-        value={searchproduct}
-        onChange={(e) => setSearchProduct(e.target.value)}
-        className="enhanced-input"
-        placeholder={content?.search_products || "Search products..."}
-      />
-      <button className="enhanced-search-button" onClick={search}>
-        {content?.search || "Search"}
-      </button>
-    </div>
-  </li>
-</ul>
-
-
-            
-
-            
             <ul className="navbar-nav">
               {localStorage.getItem("user-info") ? (
                 <>
@@ -755,7 +695,7 @@ if (userInfo) {
               ) : (
                 <li className="nav-item">
                   <Link className="nav-link" to="/login">
-                    {content?.login_register || "Log In / Register"}  
+                    {content?.login_register || "Log In / Register"}
                   </Link>
                 </li>
               )}
@@ -793,7 +733,9 @@ if (userInfo) {
                     <Link
                       to={`/productdetails/${product.product_id}`}
                       className="btn btn-primary btn-sm"
-                      style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}
+                      style={{
+                        color: fontColor === "#000000" ? "#FFFFFF" : fontColor,
+                      }}
                     >
                       {content?.view_product || "View Product"}
                     </Link>
@@ -939,7 +881,13 @@ if (userInfo) {
                             {vendor.personalInfo.personal_name}
                           </p>
                         )}
-                      <span className="card-text small " style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                      <span
+                        className="card-text small "
+                        style={{
+                          color:
+                            fontColor === "#000000" ? "#FFFFFF" : fontColor,
+                        }}
+                      >
                         {content?.total_orders || "Orders"}:{" "}
                         {vendor.total_orders}
                       </span>
@@ -959,58 +907,60 @@ if (userInfo) {
 
         {/* Category and Sort Dropdowns */}
         {Array.isArray(productsToDisplay) && productsToDisplay.length > 0 && (
-  <div className="d-flex flex-wrap justify-content-center align-items-center mb-3 fade-in-section">
-    <div className="me-3 mb-2">
-      <label htmlFor="categorySelect" className="me-2">
-        {content?.category || "Category"}:
-      </label>
-      <select
-        id="categorySelect"
-        value={selectedCategory}
-        onChange={handleCategoryChange}
-        className="form-select form-select-sm"
-      >
-        <option value="">{content?.all || "All"}</option>
-        {categories.map((cat) => (
-          <option key={cat.category_category_id} value={cat.category_id}>
-            {cat.category_name}
-          </option>
-        ))}
-      </select>
-    </div>
-    <div className="mb-2">
-      <label htmlFor="sortSelect" className="me-2">
-        {content?.sort_by || "Sort By"}:
-      </label>
-      <select
-        id="sortSelect"
-        value={sortOption}
-        onChange={handleSortChange}
-        className="form-select form-select-sm"
-      >
-        <option value="default">{content?.default || "Default"}</option>
-        <option value="priceLowToHigh">
-          {content?.price_low_to_high || "Price: Low to High"}
-        </option>
-        <option value="priceHighToLow">
-          {content?.price_high_to_low || "Price: High to Low"}
-        </option>
-      </select>
-    </div>
-  </div>
-)}
-
+          <div className="d-flex flex-wrap justify-content-center align-items-center mb-3 fade-in-section">
+            <div className="me-3 mb-2">
+              <label htmlFor="categorySelect" className="me-2">
+                {content?.category || "Category"}:
+              </label>
+              <select
+                id="categorySelect"
+                value={selectedCategory}
+                onChange={handleCategoryChange}
+                className="form-select form-select-sm"
+              >
+                <option value="">{content?.all || "All"}</option>
+                {categories.map((cat) => (
+                  <option
+                    key={cat.category_category_id}
+                    value={cat.category_id}
+                  >
+                    {cat.category_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="mb-2">
+              <label htmlFor="sortSelect" className="me-2">
+                {content?.sort_by || "Sort By"}:
+              </label>
+              <select
+                id="sortSelect"
+                value={sortOption}
+                onChange={handleSortChange}
+                className="form-select form-select-sm"
+              >
+                <option value="default">{content?.default || "Default"}</option>
+                <option value="priceLowToHigh">
+                  {content?.price_low_to_high || "Price: Low to High"}
+                </option>
+                <option value="priceHighToLow">
+                  {content?.price_high_to_low || "Price: High to Low"}
+                </option>
+              </select>
+            </div>
+          </div>
+        )}
 
         {/* Product Overview */}
-       {Array.isArray(productsToDisplay) && productsToDisplay.length > 0 ? (
-  <h2 className="section-heading fade-in-section">
-    {content?.product_overview || "Product Overview"}
-  </h2>
-) : (
-  <h2 className="section-heading fade-in-section">
-    There is no <strong>{searchproduct}</strong> product
-  </h2>
-)}
+        {Array.isArray(productsToDisplay) && productsToDisplay.length > 0 ? (
+          <h2 className="section-heading fade-in-section">
+            {content?.product_overview || "Product Overview"}
+          </h2>
+        ) : (
+          <h2 className="section-heading fade-in-section">
+            There is no <strong>{searchproduct}</strong> product
+          </h2>
+        )}
 
         <div className="row g-4 justify-content-center fade-in-section">
           {Array.isArray(productsToDisplay) &&
@@ -1049,7 +999,6 @@ if (userInfo) {
                         {loggedInUser && (
                           <div
                             className="action-icon"
-                            
                             title={
                               content?.add_to_wishlist || "Add to Wishlist"
                             }
@@ -1253,8 +1202,13 @@ if (userInfo) {
         <div className="container-fluid">
           <div className="row g-4">
             {/* Customer Service Column */}
-            <div className="col-md-3" >
-              <h5 className="mb-3" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+            <div className="col-md-3">
+              <h5
+                className="mb-3"
+                style={{
+                  color: fontColor === "#000000" ? "#FFFFFF" : fontColor,
+                }}
+              >
                 {content?.customer_service || "Customer Service"}
               </h5>
               <ul className="list-unstyled">
@@ -1262,15 +1216,22 @@ if (userInfo) {
                   <Link
                     to="/contact"
                     className="text-decoration-none"
-                    style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}
+                    style={{
+                      color: fontColor === "#000000" ? "#FFFFFF" : fontColor,
+                    }}
                   >
                     <i className="bi bi-envelope me-2"></i>
                     {content?.contact_us || "Contact Us"}
                   </Link>
                 </li>
                 <li className="mb-2">
-                  <Link to="/faq" className="text-decoration-none"
-                  style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                  <Link
+                    to="/faq"
+                    className="text-decoration-none"
+                    style={{
+                      color: fontColor === "#000000" ? "#FFFFFF" : fontColor,
+                    }}
+                  >
                     <i className="bi bi-question-circle me-2"></i>
                     {content?.faq || "FAQ"}
                   </Link>
@@ -1279,7 +1240,9 @@ if (userInfo) {
                   <Link
                     to="/shipping-policy"
                     className="text-decoration-none"
-                    style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}
+                    style={{
+                      color: fontColor === "#000000" ? "#FFFFFF" : fontColor,
+                    }}
                   >
                     <i className="bi bi-truck me-2"></i>
                     {content?.shipping_policy || "Shipping Policy"}
@@ -1289,7 +1252,9 @@ if (userInfo) {
                   <Link
                     to="/returns-policy"
                     className="text-decoration-none"
-                    style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}
+                    style={{
+                      color: fontColor === "#000000" ? "#FFFFFF" : fontColor,
+                    }}
                   >
                     <i className="bi bi-arrow-left-right me-2"></i>
                     {content?.returns_policy || "Returns Policy"}
@@ -1300,12 +1265,23 @@ if (userInfo) {
 
             {/* About Us Column */}
             <div className="col-md-3">
-              <h5 className="mb-3" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>{content?.about_us_title || "About Us"}</h5>
+              <h5
+                className="mb-3"
+                style={{
+                  color: fontColor === "#000000" ? "#FFFFFF" : fontColor,
+                }}
+              >
+                {content?.about_us_title || "About Us"}
+              </h5>
               <ul className="list-unstyled">
                 <li className="mb-2">
-                  <Link to="/about" 
+                  <Link
+                    to="/about"
                     className="text-decoration-none"
-                    style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                    style={{
+                      color: fontColor === "#000000" ? "#FFFFFF" : fontColor,
+                    }}
+                  >
                     <i className="bi bi-info-circle me-2"></i>
                     {content?.our_story || "Our Story"}
                   </Link>
@@ -1313,18 +1289,23 @@ if (userInfo) {
                 <li className="mb-2">
                   <Link
                     to="/careers"
-                    
                     className="text-decoration-none"
-                    style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}
+                    style={{
+                      color: fontColor === "#000000" ? "#FFFFFF" : fontColor,
+                    }}
                   >
                     <i className="bi bi-briefcase me-2"></i>
                     {content?.careers || "Careers"}
                   </Link>
                 </li>
                 <li className="mb-2">
-                  <Link to="/terms" 
+                  <Link
+                    to="/terms"
                     className="text-decoration-none"
-                    style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                    style={{
+                      color: fontColor === "#000000" ? "#FFFFFF" : fontColor,
+                    }}
+                  >
                     <i className="bi bi-file-text me-2"></i>
                     {content?.terms_of_service || "Terms of Service"}
                   </Link>
@@ -1332,9 +1313,10 @@ if (userInfo) {
                 <li className="mb-2">
                   <Link
                     to="/privacy"
-                    
                     className="text-decoration-none"
-                    style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}
+                    style={{
+                      color: fontColor === "#000000" ? "#FFFFFF" : fontColor,
+                    }}
                   >
                     <i className="bi bi-shield-lock me-2"></i>
                     {content?.privacy_policy || "Privacy Policy"}
@@ -1344,21 +1326,59 @@ if (userInfo) {
             </div>
 
             {/* Follow Us Column */}
-            <div className="col-md-3" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
-              <h5 className="mb-3" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>{content?.follow_us || "Follow Us"}</h5>
+            <div
+              className="col-md-3"
+              style={{ color: fontColor === "#000000" ? "#FFFFFF" : fontColor }}
+            >
+              <h5
+                className="mb-3"
+                style={{
+                  color: fontColor === "#000000" ? "#FFFFFF" : fontColor,
+                }}
+              >
+                {content?.follow_us || "Follow Us"}
+              </h5>
               <div className="d-flex gap-3">
-                <Link to="#" className=" fs-4 " aria-label="Facebook" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                <Link
+                  to="#"
+                  className=" fs-4 "
+                  aria-label="Facebook"
+                  style={{
+                    color: fontColor === "#000000" ? "#FFFFFF" : fontColor,
+                  }}
+                >
                   <i className="bi bi-facebook"></i>
                 </Link>
-                
-                <Link to="#" className="fs-4" aria-label="Twitter" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+
+                <Link
+                  to="#"
+                  className="fs-4"
+                  aria-label="Twitter"
+                  style={{
+                    color: fontColor === "#000000" ? "#FFFFFF" : fontColor,
+                  }}
+                >
                   <i className="bi bi-twitter"></i>
                 </Link>
 
-                <Link to="#" className="fs-4" aria-label="Instagram" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                <Link
+                  to="#"
+                  className="fs-4"
+                  aria-label="Instagram"
+                  style={{
+                    color: fontColor === "#000000" ? "#FFFFFF" : fontColor,
+                  }}
+                >
                   <i className="bi bi-instagram"></i>
                 </Link>
-                <Link to="#" className="fs-4" aria-label="LinkedIn" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                <Link
+                  to="#"
+                  className="fs-4"
+                  aria-label="LinkedIn"
+                  style={{
+                    color: fontColor === "#000000" ? "#FFFFFF" : fontColor,
+                  }}
+                >
                   <i className="bi bi-linkedin"></i>
                 </Link>
               </div>
@@ -1366,9 +1386,21 @@ if (userInfo) {
 
             {/* Newsletter Subscription Column (updated) */}
             <div className="col-md-3">
-              <h5 className="mb-3" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>{content?.newsletter || "Newsletter"}</h5>
+              <h5
+                className="mb-3"
+                style={{
+                  color: fontColor === "#000000" ? "#FFFFFF" : fontColor,
+                }}
+              >
+                {content?.newsletter || "Newsletter"}
+              </h5>
               <div>
-                <span className="small mb-4" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                <span
+                  className="small mb-4"
+                  style={{
+                    color: fontColor === "#000000" ? "#FFFFFF" : fontColor,
+                  }}
+                >
                   {content?.newsletter_signup_text ||
                     "Sign up for our latest news and offers."}
                 </span>
@@ -1405,7 +1437,12 @@ if (userInfo) {
                 )}
                 {/* Payment Methods moved here */}
                 <div className="mt-4">
-                  <h6 className="mb-2" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+                  <h6
+                    className="mb-2"
+                    style={{
+                      color: fontColor === "#000000" ? "#FFFFFF" : fontColor,
+                    }}
+                  >
                     {content?.payment_methods || "Payment Methods"}
                   </h6>
                   <div className="d-flex flex-wrap gap-3 align-items-center">

@@ -34,6 +34,8 @@ class ProductController extends Controller
     {
         // Fetch 12 random products
         $products = Product::inRandomOrder()
+            ->where('product_status', 'Active')
+            ->where('total_product', '>', 1)
             ->select(
                 'product_id',
                 'product_name',
