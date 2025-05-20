@@ -9,10 +9,11 @@ use Chapa\Chapa\Facades\Chapa as Chapa;
 use Illuminate\Support\Facades\Log;
 
 
+
 class PaymentController extends Controller
 {
-    
-   public function initiatePayment(Request $request)
+
+    public function initiatePayment(Request $request)
     {
         // 1. Validate the incoming request
         $request->validate([
@@ -21,32 +22,12 @@ class PaymentController extends Controller
 
         $order = Orders::findOrFail($request->input('order_id'));
 
-        // 2. Check if a payment record exists for this order
+        // 2. Fetch the payment record for this order
         $payment = Payment::where('order_id', $order->order_id)->first();
 
-        Log::info('Existing payment for order ID ' . $order->order_id . ': ' . json_encode($payment));
-
-        if ($payment && $payment->chapa_reference) {
-            Log::info('Redirecting user to existing Chapa checkout URL for order ID: ' . $order->order_id);
-            return response()->json(['checkout_url' => $payment->chapa_reference]);
-        }
 
         if (!$payment) {
-            Log::info('Creating a new payment record for order ID: ' . $order->order_id);
-            // Fetch the order again to ensure we have the latest total_amount
-            $freshOrder = Orders::findOrFail($request->input('order_id'));
-            $payment = Payment::create([
-                'order_id' => $freshOrder->order_id,
-                'total_amount' => $freshOrder->total_paid, // Initially set total_amount
-                'payment_status' => 'held', // Initial status as 'held'
-            ]);
-        } else {
-            Log::warning('Payment record exists for order ID ' . $order->order_id . ' but needs Chapa reference. Updating total amount.');
-            // Fetch the order again to ensure we have the latest total_amount
-            $freshOrder = Orders::findOrFail($request->input('order_id'));
-            $payment->total_amount = $freshOrder->total_paid;
-            $payment->payment_status = 'held';
-            $payment->save();
+            return response()->json(['error' => 'No payment record found for this order.'], 404);
         }
 
         // Load the address relationship for the order
@@ -55,24 +36,29 @@ class PaymentController extends Controller
 
         // 3. Initialize Chapa payment and get the checkout URL
         $chapaInitURL = 'https://api.chapa.co/v1/transaction/initialize';
+
         $callbackURL = route('payment.callback');
+
+
+
+
         $postData = [
-            'amount' => $payment->total_amount, // Use $payment->total_amount
+            'amount' => $payment->total_amount, // Use the total_amount from the payment record
             'currency' => 'ETB',
             'email' => $order->user->email ?? null,
             'first_name' => $order->address->full_name ?? null,
             'last_name' => '',
             'phone_number' => $customerPhone,
             'tx_ref' => 'order-' . $order->order_id . '-' . time(),
-            'return_url' => 'http://localhost:3000/order-confirmation',
+            'return_url' => 'http://localhost:3000/order-confirmation?order_id=' . $order->order_id,
+
             'callback_url' => $callbackURL,
             'customization' => [
                 'title' => 'Order ' . $order->order_id, // Shortened title
                 'description' => 'Payment for your order on Enew',
             ],
         ];
-        Log::info('Phone number being sent to Chapa: ' . $customerPhone);
-        Log::info('Chapa Initiate Payment Data:', $postData);
+
 
         $chapaSecretKey = env('CHAPA_SECRET_KEY');
         $headers = [
@@ -97,56 +83,55 @@ class PaymentController extends Controller
                 Log::error("Chapa payment initiation failed for order ID: " . $order->order_id . ", Response: " . json_encode($body));
                 return response()->json(['error' => 'Failed to initiate payment with Chapa.'], 500);
             }
-
         } catch (\Exception $e) {
             Log::error("Error initiating Chapa payment for order ID: " . $order->order_id . ", Error: " . $e->getMessage());
             return response()->json(['error' => 'Error communicating with Chapa.'], 500);
         }
     }
 
- public function handleCallback(Request $request)
-{
-    Log::info('Chapa Callback Headers: ' . json_encode($request->headers->all()));
-    Log::info('Chapa Callback Data: ' . json_encode($request->all()));
+    public function handleCallback(Request $request)
+    {
+        Log::info('Chapa Callback Headers: ' . json_encode($request->headers->all()));
+        Log::info('Chapa Callback Data: ' . json_encode($request->all()));
 
-    $transactionReference = $request->input('trx_ref');
+        $transactionReference = $request->input('trx_ref');
 
-    if (!$transactionReference) {
-        $transactionReference = $request->input('tx_ref'); // Fallback to tx_ref
         if (!$transactionReference) {
-            Log::warning('Callback received without transaction reference (trx_ref or tx_ref).');
-            return response()->json(['status' => 'error', 'message' => 'Transaction reference not found in callback.'], 400);
-        }
-    }
-
-    Log::info('Payment callback received for tx_ref/trx_ref: ' . $transactionReference);
-
-    try {
-        $paymentData = Chapa::verifyTransaction($transactionReference);
-        Log::info('Chapa verification response: ' . json_encode($paymentData));
-
-        if ($paymentData['status'] === 'success') {
-            $orderId = explode('-', $transactionReference)[1] ?? null;
-            $payment = Payment::where('order_id', $orderId)->first();
-
-            if ($payment) {
-                dd($payment->toArray());
-                $payment->update(['payment_status' => 'admin_approved', 'chapa_reference' => $transactionReference]);
-                Log::info('Payment updated successfully for order ID: ' . $payment->order_id . ', tx_ref/trx_ref: ' . $transactionReference);
-                return response()->json(['status' => 'success', 'message' => 'Payment successful and record updated.']);
-            } else {
-                Log::error('Payment record not found for tx_ref/trx_ref: ' . $transactionReference);
-                return response()->json(['status' => 'error', 'message' => 'Payment record not found for this transaction.'], 404);
+            $transactionReference = $request->input('tx_ref'); // Fallback to tx_ref
+            if (!$transactionReference) {
+                Log::warning('Callback received without transaction reference (trx_ref or tx_ref).');
+                return response()->json(['status' => 'error', 'message' => 'Transaction reference not found in callback.'], 400);
             }
-        } else {
-            Log::warning('Chapa verification failed for tx_ref/trx_ref: ' . $transactionReference . ', message: ' . $paymentData['message']);
-            return response()->json(['status' => 'error', 'message' => 'Payment verification failed: ' . $paymentData['message']], 400);
         }
-    } catch (\Exception $e) {
-        Log::error('Error verifying Chapa transaction (' . $transactionReference . '): ' . $e->getMessage());
-        return response()->json(['status' => 'error', 'message' => 'Payment verification failed due to an error.'], 500);
+
+        Log::info('Payment callback received for tx_ref/trx_ref: ' . $transactionReference);
+
+        try {
+            $paymentData = Chapa::verifyTransaction($transactionReference);
+            Log::info('Chapa verification response: ' . json_encode($paymentData));
+
+            if ($paymentData['status'] === 'success') {
+                $orderId = explode('-', $transactionReference)[1] ?? null;
+                $payment = Payment::where('order_id', $orderId)->first();
+
+                if ($payment) {
+                    dd($payment->toArray());
+                    $payment->update(['payment_status' => 'admin_approved', 'chapa_reference' => $transactionReference]);
+                    Log::info('Payment updated successfully for order ID: ' . $payment->order_id . ', tx_ref/trx_ref: ' . $transactionReference);
+                    return response()->json(['status' => 'success', 'message' => 'Payment successful and record updated.']);
+                } else {
+                    Log::error('Payment record not found for tx_ref/trx_ref: ' . $transactionReference);
+                    return response()->json(['status' => 'error', 'message' => 'Payment record not found for this transaction.'], 404);
+                }
+            } else {
+                Log::warning('Chapa verification failed for tx_ref/trx_ref: ' . $transactionReference . ', message: ' . $paymentData['message']);
+                return response()->json(['status' => 'error', 'message' => 'Payment verification failed: ' . $paymentData['message']], 400);
+            }
+        } catch (\Exception $e) {
+            Log::error('Error verifying Chapa transaction (' . $transactionReference . '): ' . $e->getMessage());
+            return response()->json(['status' => 'error', 'message' => 'Payment verification failed due to an error.'], 500);
+        }
     }
-}
 
     public function confirmOrder(Orders $order)
     {
@@ -207,4 +192,84 @@ class PaymentController extends Controller
         // Handle successful payment logic here
         return response()->json(['message' => 'Payment successful!']);
     }
+
+
+
+
+    // app/Http/Controllers/PaymentController.php
+
+
+
+
+    public function updatePaymentStatus(Request $request)
+    {
+        // Validate the input
+        $validated = $request->validate([
+            'order_id' => 'required|exists:orders,order_id',
+            'payment_status' => 'required|string',
+            'chapa_reference' => 'nullable|string',
+            'total_amount' => 'nullable|numeric',
+            'vendor_payout_amount' => 'nullable|numeric',
+            'service_fee_amount' => 'nullable|numeric',
+        ]);
+
+        // Find the order
+        $order = Orders::where('order_id', $validated['order_id'])->first();
+
+        if (!$order) {
+            return response()->json(['error' => 'Order not found.'], 404);
+        }
+
+        // Find the corresponding payment record
+        $payment = Payment::where('order_id', $order->order_id)->first();
+
+        if (!$payment) {
+            return response()->json(['error' => 'Payment record not found.'], 404);
+        }
+
+        // Update the payment record
+        $payment->update([
+            'payment_status' => $validated['payment_status'],
+            'chapa_reference' => $validated['chapa_reference'] ?? $payment->chapa_reference,
+            'total_amount' => $validated['total_amount'] ?? $payment->total_amount,
+            'vendor_payout_amount' => $validated['vendor_payout_amount'] ?? $payment->vendor_payout_amount,
+            'service_fee_amount' => $validated['service_fee_amount'] ?? $payment->service_fee_amount,
+        ]);
+
+        return response()->json([
+            'message' => 'Payment updated successfully.',
+            'payment' => $payment
+        ], 200);
+    }
+
+    public function getPaymentDetails(Request $request)
+{
+    $request->validate([
+        'order_id' => 'required|exists:orders,order_id',
+    ]);
+
+    $payment = Payment::where('order_id', $request->order_id)->first();
+
+    if (!$payment) {
+        return response()->json(['error' => 'Payment not found'], 404);
+    }
+
+    return response()->json(['payment' => $payment]);
+}
+
+
+public function updateOrderStatus(Request $request)
+{
+    $request->validate([
+        'order_id' => 'required|exists:orders,order_id',
+        'order_status' => 'required|in:Pending,Completed,Cancelled,Shipped,Refunded',
+    ]);
+
+    $order = Orders::where('order_id', $request->order_id)->first();
+    $order->order_status = $request->order_status;
+    $order->save();
+
+    return response()->json(['message' => 'Order status updated successfully.']);
+}
+
 }

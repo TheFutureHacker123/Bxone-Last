@@ -126,10 +126,10 @@ Route::post('/processOrder', [ProductController::class, 'processOrder']);
 
 Route::post('/applyCoupon', [ProductController::class, 'applyCoupon']);
 
-Route::post('/vendor/analytics', [VendorController::class, 'analytics']);//done
-Route::post('/admin/analytics', [AdminController::class, 'analytics']);//done
-Route::post('/admin/changeproductstatus', [AdminController::class, 'changeproductstatus']);//done
-Route::post('/vendor/orderlistforadmin/', [VendorController::class, 'orderlistforadmin']);//done
+Route::post('/vendor/analytics', [VendorController::class, 'analytics']); //done
+Route::post('/admin/analytics', [AdminController::class, 'analytics']); //done
+Route::post('/admin/changeproductstatus', [AdminController::class, 'changeproductstatus']); //done
+Route::post('/vendor/orderlistforadmin/', [VendorController::class, 'orderlistforadmin']); //done
 
 
 Route::post('/wishlist/add', [WishlistController::class, 'addToWishlist']);
@@ -176,3 +176,11 @@ Route::get('/payment/success', [PaymentController::class, 'paymentSuccess'])->na
 Route::post('/fetchChat', [MessageController::class, 'fetchChat']);
 
 Route::post('/addChat', [MessageController::class, 'addChat']);
+
+
+Route::post('/update-payment-status', [PaymentController::class, 'updatePaymentStatus']);
+
+
+Route::get('/payment-details', [PaymentController::class, 'getPaymentDetails']);
+
+Route::post('/update-order-status', [PaymentController::class, 'updateOrderStatus']);

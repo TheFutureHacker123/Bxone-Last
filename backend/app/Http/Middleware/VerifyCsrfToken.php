@@ -12,6 +12,7 @@ class VerifyCsrfToken extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        //
+        'api/initiate-payment',
+        'api/processOrder', // Add this too, since it's also a POST from frontend
     ];
 }
