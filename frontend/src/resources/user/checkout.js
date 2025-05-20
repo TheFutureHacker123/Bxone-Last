@@ -9,13 +9,12 @@ import "react-toastify/dist/ReactToastify.css";
 
 function CheckOut() {
   const [showAddressModal, setShowAddressModal] = useState(false);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
-  const [bankInfo, setBankInfo] = useState(null);
   const [cartItems, setCartItems] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
+  const [loggedInUserId, setLoggedInUserId] = useState(null);
 
   const defaultFontSize = "medium";
   const defaultFontColor = "#000000";
@@ -41,7 +40,7 @@ function CheckOut() {
     localStorage.setItem("language", language);
 
     setContent(Translation[language]);
-  }, [fontSize, fontColor, language]); // Fetch user addresses and bank info
+  }, [fontSize, fontColor, language]);
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -51,6 +50,7 @@ function CheckOut() {
         return;
       }
       const parsedUser = JSON.parse(storedUser);
+      setLoggedInUserId(parsedUser.user_id);
       try {
         const response = await fetch("http://localhost:8000/api/userinfo", {
           method: "POST",
@@ -63,7 +63,6 @@ function CheckOut() {
         const result = await response.json();
         setAddresses(result.addresses || []);
         setSelectedAddress((result.addresses && result.addresses[0]) || null);
-        setBankInfo(result.bank_info || null);
       } catch (error) {
         toast.error("Failed to fetch user information.");
       }
@@ -74,11 +73,6 @@ function CheckOut() {
   const handleAddressChange = (address) => {
     setSelectedAddress(address);
     setShowAddressModal(false);
-  };
-
-  const handlePaymentSubmit = (event) => {
-    event.preventDefault(); // Handle payment submission logic here
-    setShowPaymentModal(false);
   };
 
   useEffect(() => {
@@ -102,6 +96,11 @@ function CheckOut() {
   };
 
   const handleCompletePurchase = async () => {
+    if (!selectedAddress) {
+      toast.error("Please select a shipping address to proceed.");
+      return;
+    }
+
     const storedUser = localStorage.getItem("user-info");
     if (!storedUser) {
       navigate("/login");
@@ -111,32 +110,68 @@ function CheckOut() {
     console.log("Items being sent to processOrder:", cartItems);
 
     try {
-      const response = await fetch("http://localhost:8000/api/processOrder", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          user_id: parsedUser.user_id,
-          cartItems: cartItems,
-          totalAmount: parseFloat(calculateTotal()) + 5,
-          shippingAddress: selectedAddress,
-        }),
-      });
+      const processOrderResponse = await fetch(
+        "http://localhost:8000/api/processOrder",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            user_id: parsedUser.user_id,
+            cartItems: cartItems,
+            shippingAddress: selectedAddress,
+          }),
+        }
+      );
 
-      const result = await response.json();
+      const processOrderResult = await processOrderResponse.json();
 
-      if (result.success) {
-        toast.success(result.message || "Order placed successfully!");
-        navigate("/order-confirmation");
+      if (processOrderResult.success && processOrderResult.order_id) {
+        toast.success(
+          processOrderResult.message ||
+            "Order placed successfully! Redirecting to payment."
+        );
+        const orderId = processOrderResult.order_id;
+
+        try {
+          const initiatePaymentResponse = await fetch(
+            "http://localhost:8000/api/initiate-payment",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+              },
+              body: JSON.stringify({
+                order_id: orderId,
+              }),
+            }
+          );
+
+          const initiatePaymentResult = await initiatePaymentResponse.json();
+
+          if (initiatePaymentResult.checkout_url) {
+            window.location.href = initiatePaymentResult.checkout_url;
+          } else if (initiatePaymentResult.error) {
+            toast.error(initiatePaymentResult.error);
+          } else {
+            toast.error("Failed to initiate payment.");
+          }
+        } catch (error) {
+          toast.error("Error initiating payment.");
+          console.error("Error initiating payment:", error);
+        }
       } else {
         toast.error(
-          result.message || "Failed to place order. Please try again."
+          processOrderResult.message ||
+            "Failed to place order. Please try again."
         );
       }
     } catch (error) {
       toast.error("An error occurred while placing the order.");
+      console.error("Error processing order:", error);
     }
   };
 
@@ -166,7 +201,7 @@ function CheckOut() {
                 </p>
               </>
             ) : (
-              <p>{content?.no_address_found || "No address found."}</p>
+              <p>{content?.no_address_selected || "No address selected."}</p>
             )}
             <div className="change-address">
               <button
@@ -177,46 +212,7 @@ function CheckOut() {
               </button>
             </div>
           </div>
-          <h2>Payment Information</h2>
-          <div className="saved-info">
-            {bankInfo ? (
-              <>
-                <p>
-                  <strong>{content?.bank_name || "Bank Name"}:</strong>{" "}
-                  {bankInfo.bank_name}
-                </p>
-                <p>
-                  <strong>{content?.account_name || "Account Name"}:</strong>{" "}
-                  {bankInfo.account_name}
-                </p>
-                <p>
-                  <strong>
-                    {content?.account_number || "Account Number"}:
-                  </strong>{" "}
-                  {bankInfo.account_number}
-                </p>
-                {bankInfo.branch && (
-                  <p>
-                    <strong>{content?.branch || "Branch"}:</strong>{" "}
-                    {bankInfo.branch}
-                  </p>
-                )}
-              </>
-            ) : (
-              <p>
-                {content?.no_payment_info || "No payment information saved."}
-              </p>
-            )}
-            <div className="change-address">
-              <button
-                className="btn btn-link text-warning"
-                onClick={() => setShowPaymentModal(true)}
-              >
-                {content?.add_payment_info || "Add Payment Information"}
-              </button>
-            </div>
-          </div>
-          {/* Processing Products */}
+
           <h2>{content?.processing_products || "Processing Products"}</h2>
           <div className="product-list">
             {cartItems.length > 0 ? (
@@ -244,9 +240,7 @@ function CheckOut() {
                       </td>
                       <td>{item.total_added}</td>
                       <td>${item.product_price.toFixed(2)}</td>
-                      <td>
-                        ${(item.product_price * item.total_added).toFixed(2)}
-                      </td>
+                      <td>${(item.product_price * item.total_added).toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -255,10 +249,11 @@ function CheckOut() {
               <p>{content?.cart_empty || "Your cart is empty."}</p>
             )}
           </div>
+
           <button
             type="button"
             className="mt-5 checkout-button btn btn-warning"
-            disabled={cartItems.length === 0}
+            disabled={cartItems.length === 0 || !selectedAddress}
             onClick={handleCompletePurchase}
           >
             {content?.complete_purchase || "Complete Purchase"}
@@ -280,7 +275,8 @@ function CheckOut() {
                 {calculateTotal()}
               </p>
               <p>
-                <strong>{content?.shipping || "Shipping"}:</strong> $5.00 (Fixed)
+                <strong>{content?.shipping || "Shipping"}:</strong> $5.00
+                (Fixed)
               </p>
               <hr />
               <p className="h5">
@@ -293,7 +289,7 @@ function CheckOut() {
           )}
         </div>
       </div>
-      {/* Address Change Modal */}
+
       <Modal show={showAddressModal} onHide={() => setShowAddressModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>
@@ -305,7 +301,9 @@ function CheckOut() {
             {addresses.map((address, index) => (
               <li
                 key={index}
-                className="list-group-item"
+                className={`list-group-item ${
+                  selectedAddress?.id === address.id ? "active" : ""
+                }`}
                 onClick={() => handleAddressChange(address)}
                 style={{ cursor: "pointer" }}
               >
@@ -319,54 +317,7 @@ function CheckOut() {
         </Modal.Body>
         <Modal.Footer />
       </Modal>
-      {/* Payment Information Modal */}
-      <Modal show={showPaymentModal} onHide={() => setShowPaymentModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>
-            {content?.add_payment_info || "Add Payment Information"}
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <form onSubmit={handlePaymentSubmit}>
-            <div className="mb-3">
-              <label htmlFor="cardNumber" className="form-label">
-                {content?.card_number || "Card Number"}
-              </label>
-              <input
-                type="text"
-                className="custom-form-control"
-                id="cardNumber"
-                required
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="expiry" className="form-label">
-                {content?.expiry_date || "Expiry Date"} (MM/YY)
-              </label>
-              <input
-                type="text"
-                className="custom-form-control"
-                id="expiry"
-                required
-              />
-            </div>
-            <div className="mb-3">
-              <label htmlFor="cvc" className="form-label">
-                CVC
-              </label>
-              <input
-                type="text"
-                className="custom-form-control"
-                id="cvc"
-                required
-              />
-            </div>
-            <button type="submit" className="checkout-button btn btn-warning">
-              {content?.save_payment_info || "Save Payment Information"}
-            </button>
-          </form>
-        </Modal.Body>
-      </Modal>
+
       <ToastContainer />
     </div>
   );
