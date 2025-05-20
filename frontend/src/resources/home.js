@@ -372,7 +372,8 @@ function Home() {
                 <div className="d-inline-block me-3">
                   <Link
                     to="/notification"
-                    className="text-dark text-decoration-none"
+                    className="text-decoration-none"
+                    style={{ color: fontColor === '#000000' ? '#212529' : fontColor }}
                   >
                     <i className="bi bi-bell fs-5"></i>
                   </Link>
@@ -383,13 +384,14 @@ function Home() {
                   <div className="d-inline-block me-3">
                     <Link
                       to="/wishlist"
-                      className="text-dark text-decoration-none"
+                      className="text-decoration-none"
+                      style={{ color: fontColor === '#000000' ? '#212529' : fontColor }}
                     >
                         {content?.wishlist || "Wishlist"}  <i className="bi bi-heart ms-1 fs-sm"></i>
                     </Link>
                   </div>
                   <div className="d-inline-block me-3">
-                    <Link to="/cart" className="text-dark text-decoration-none">
+                    <Link to="/cart" className="text-decoration-none" style={{ color: fontColor === '#000000' ? '#212529' : fontColor }}>
                       {content?.carts || "Cart"} <i className="bi bi-bag ms-1 fs-sm"></i>
                     </Link>
                   </div>
@@ -572,6 +574,7 @@ function Home() {
                     <Link
                       to={`/productdetails/${product.product_id}`}
                       className="btn btn-primary btn-sm"
+                      style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}
                     >
                       {content?.view_product || "View Product"}
                     </Link>
@@ -717,10 +720,10 @@ function Home() {
                             {vendor.personalInfo.personal_name}
                           </p>
                         )}
-                      <p className="card-text small text-muted">
+                      <span className="card-text small " style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
                         {content?.total_orders || "Orders"}:{" "}
                         {vendor.total_orders}
-                      </p>
+                      </span>
                       <Link
                         to={`/vendor/${vendor.vendor_id}`}
                         className="btn btn-outline-success btn-sm"
@@ -736,50 +739,60 @@ function Home() {
         )}
 
         {/* Category and Sort Dropdowns */}
-        <div className="d-flex flex-wrap justify-content-center align-items-center mb-3 fade-in-section">
-          <div className="me-3 mb-2">
-            <label htmlFor="categorySelect" className="me-2">
-              {content?.category || "Category"}:
-            </label>
-            <select
-              id="categorySelect"
-              value={selectedCategory}
-              onChange={handleCategoryChange}
-              className="form-select form-select-sm"
-            >
-              <option value="">{content?.all || "All"}</option>
-              {categories.map((cat) => (
-                <option key={cat.category_category_id} value={cat.category_id}>
-                  {cat.category_name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="mb-2">
-            <label htmlFor="sortSelect" className="me-2">
-              {content?.sort_by || "Sort By"}:
-            </label>
-            <select
-              id="sortSelect"
-              value={sortOption}
-              onChange={handleSortChange}
-              className="form-select form-select-sm"
-            >
-              <option value="default">{content?.default || "Default"}</option>
-              <option value="priceLowToHigh">
-                {content?.price_low_to_high || "Price: Low to High"}
-              </option>
-              <option value="priceHighToLow">
-                {content?.price_high_to_low || "Price: High to Low"}
-              </option>
-            </select>
-          </div>
-        </div>
+        {Array.isArray(productsToDisplay) && productsToDisplay.length > 0 && (
+  <div className="d-flex flex-wrap justify-content-center align-items-center mb-3 fade-in-section">
+    <div className="me-3 mb-2">
+      <label htmlFor="categorySelect" className="me-2">
+        {content?.category || "Category"}:
+      </label>
+      <select
+        id="categorySelect"
+        value={selectedCategory}
+        onChange={handleCategoryChange}
+        className="form-select form-select-sm"
+      >
+        <option value="">{content?.all || "All"}</option>
+        {categories.map((cat) => (
+          <option key={cat.category_category_id} value={cat.category_id}>
+            {cat.category_name}
+          </option>
+        ))}
+      </select>
+    </div>
+    <div className="mb-2">
+      <label htmlFor="sortSelect" className="me-2">
+        {content?.sort_by || "Sort By"}:
+      </label>
+      <select
+        id="sortSelect"
+        value={sortOption}
+        onChange={handleSortChange}
+        className="form-select form-select-sm"
+      >
+        <option value="default">{content?.default || "Default"}</option>
+        <option value="priceLowToHigh">
+          {content?.price_low_to_high || "Price: Low to High"}
+        </option>
+        <option value="priceHighToLow">
+          {content?.price_high_to_low || "Price: High to Low"}
+        </option>
+      </select>
+    </div>
+  </div>
+)}
+
 
         {/* Product Overview */}
-        <h2 className="section-heading fade-in-section">
-          {content?.product_overview || "Product Overview"}
-        </h2>
+       {Array.isArray(productsToDisplay) && productsToDisplay.length > 0 ? (
+  <h2 className="section-heading fade-in-section">
+    {content?.product_overview || "Product Overview"}
+  </h2>
+) : (
+  <h2 className="section-heading fade-in-section">
+    There is no <strong>{searchproduct}</strong> product
+  </h2>
+)}
+
         <div className="row g-4 justify-content-center fade-in-section">
           {Array.isArray(productsToDisplay) &&
             productsToDisplay.map((product) => (
@@ -817,6 +830,7 @@ function Home() {
                         {loggedInUser && (
                           <div
                             className="action-icon"
+                            
                             title={
                               content?.add_to_wishlist || "Add to Wishlist"
                             }
@@ -1020,22 +1034,24 @@ function Home() {
         <div className="container-fluid">
           <div className="row g-4">
             {/* Customer Service Column */}
-            <div className="col-md-3">
-              <h5 className="mb-3">
+            <div className="col-md-3" >
+              <h5 className="mb-3" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
                 {content?.customer_service || "Customer Service"}
               </h5>
               <ul className="list-unstyled">
                 <li className="mb-2">
                   <Link
                     to="/contact"
-                    className="text-light text-decoration-none"
+                    className="text-decoration-none"
+                    style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}
                   >
                     <i className="bi bi-envelope me-2"></i>
                     {content?.contact_us || "Contact Us"}
                   </Link>
                 </li>
                 <li className="mb-2">
-                  <Link to="/faq" className="text-light text-decoration-none">
+                  <Link to="/faq" className="text-decoration-none"
+                  style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
                     <i className="bi bi-question-circle me-2"></i>
                     {content?.faq || "FAQ"}
                   </Link>
@@ -1043,7 +1059,8 @@ function Home() {
                 <li className="mb-2">
                   <Link
                     to="/shipping-policy"
-                    className="text-light text-decoration-none"
+                    className="text-decoration-none"
+                    style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}
                   >
                     <i className="bi bi-truck me-2"></i>
                     {content?.shipping_policy || "Shipping Policy"}
@@ -1052,7 +1069,8 @@ function Home() {
                 <li className="mb-2">
                   <Link
                     to="/returns-policy"
-                    className="text-light text-decoration-none"
+                    className="text-decoration-none"
+                    style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}
                   >
                     <i className="bi bi-arrow-left-right me-2"></i>
                     {content?.returns_policy || "Returns Policy"}
@@ -1063,10 +1081,12 @@ function Home() {
 
             {/* About Us Column */}
             <div className="col-md-3">
-              <h5 className="mb-3">{content?.about_us_title || "About Us"}</h5>
+              <h5 className="mb-3" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>{content?.about_us_title || "About Us"}</h5>
               <ul className="list-unstyled">
                 <li className="mb-2">
-                  <Link to="/about" className="text-light text-decoration-none">
+                  <Link to="/about" 
+                    className="text-decoration-none"
+                    style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
                     <i className="bi bi-info-circle me-2"></i>
                     {content?.our_story || "Our Story"}
                   </Link>
@@ -1074,14 +1094,18 @@ function Home() {
                 <li className="mb-2">
                   <Link
                     to="/careers"
-                    className="text-light text-decoration-none"
+                    
+                    className="text-decoration-none"
+                    style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}
                   >
                     <i className="bi bi-briefcase me-2"></i>
                     {content?.careers || "Careers"}
                   </Link>
                 </li>
                 <li className="mb-2">
-                  <Link to="/terms" className="text-light text-decoration-none">
+                  <Link to="/terms" 
+                    className="text-decoration-none"
+                    style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
                     <i className="bi bi-file-text me-2"></i>
                     {content?.terms_of_service || "Terms of Service"}
                   </Link>
@@ -1089,7 +1113,9 @@ function Home() {
                 <li className="mb-2">
                   <Link
                     to="/privacy"
-                    className="text-light text-decoration-none"
+                    
+                    className="text-decoration-none"
+                    style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}
                   >
                     <i className="bi bi-shield-lock me-2"></i>
                     {content?.privacy_policy || "Privacy Policy"}
@@ -1099,19 +1125,21 @@ function Home() {
             </div>
 
             {/* Follow Us Column */}
-            <div className="col-md-3">
-              <h5 className="mb-3">{content?.follow_us || "Follow Us"}</h5>
+            <div className="col-md-3" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
+              <h5 className="mb-3" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>{content?.follow_us || "Follow Us"}</h5>
               <div className="d-flex gap-3">
-                <Link to="#" className="text-light fs-4" aria-label="Facebook">
+                <Link to="#" className=" fs-4 " aria-label="Facebook" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
                   <i className="bi bi-facebook"></i>
                 </Link>
-                <Link to="#" className="text-light fs-4" aria-label="Twitter">
+                
+                <Link to="#" className="fs-4" aria-label="Twitter" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
                   <i className="bi bi-twitter"></i>
                 </Link>
-                <Link to="#" className="text-light fs-4" aria-label="Instagram">
+
+                <Link to="#" className="fs-4" aria-label="Instagram" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
                   <i className="bi bi-instagram"></i>
                 </Link>
-                <Link to="#" className="text-light fs-4" aria-label="LinkedIn">
+                <Link to="#" className="fs-4" aria-label="LinkedIn" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
                   <i className="bi bi-linkedin"></i>
                 </Link>
               </div>
@@ -1119,12 +1147,12 @@ function Home() {
 
             {/* Newsletter Subscription Column (updated) */}
             <div className="col-md-3">
-              <h5 className="mb-3">{content?.newsletter || "Newsletter"}</h5>
+              <h5 className="mb-3" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>{content?.newsletter || "Newsletter"}</h5>
               <div>
-                <p className="small mb-2">
+                <span className="small mb-4" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
                   {content?.newsletter_signup_text ||
                     "Sign up for our latest news and offers."}
-                </p>
+                </span>
                 <form className="form-container" onSubmit={handleSubscription}>
                   <div className="subscription-component">
                     <div>
@@ -1158,7 +1186,7 @@ function Home() {
                 )}
                 {/* Payment Methods moved here */}
                 <div className="mt-4">
-                  <h6 className="mb-2">
+                  <h6 className="mb-2" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
                     {content?.payment_methods || "Payment Methods"}
                   </h6>
                   <div className="d-flex flex-wrap gap-3 align-items-center">
