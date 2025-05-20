@@ -68,7 +68,21 @@ function Home() {
     }
   }, []);
 
+
+  const userInfo = localStorage.getItem("user-info");
+let userName = "User"; // fallback
+
+if (userInfo) {
+  try {
+    const userObj = JSON.parse(userInfo);
+    if (userObj.name) userName = userObj.name;
+  } catch (error) {
+    console.error("Error parsing user-info from localStorage:", error);
+  }
+}
+
   useEffect(() => {
+
     const fetchData = async () => {
       setLoading(true);
       setError(null);
@@ -431,13 +445,10 @@ function Home() {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Navigation Bar */}
-      <nav
+        <nav
         className="navbar navbar-expand-lg navbar-dark bg-dark sticky-top"
-        style={{ marginTop: "50px" }}
-      >
+        style={{ marginTop: "5px" }}
+        >
         <div className="container-fluid">
           <Link className="navbar-brand text-warning" to="/">
             Habesha Mart
@@ -449,7 +460,184 @@ function Home() {
             className={`${isNavOpen ? "" : "collapse"} navbar-collapse`}
             id="navbarNav"
           >
-            <ul className="navbar-nav mx-auto">
+            
+
+
+<ul className="navbar-nav mx-auto">
+  <li className="nav-item">
+    <div className="enhanced-search-bar">
+      <select className="enhanced-select">
+        <option>{content?.all_category || "All Categories"}</option>
+        {categories.map((cat) => (
+          <option key={cat.category_category_id} value={cat.category_id}>
+            {cat.category_name}
+          </option>
+        ))}
+      </select>
+      <input
+        type="text"
+        value={searchproduct}
+        onChange={(e) => setSearchProduct(e.target.value)}
+        className="enhanced-input"
+        placeholder={content?.search_products || "Search products..."}
+      />
+      <button className="enhanced-search-button" onClick={search}>
+        {content?.search || "Search"}
+      </button>
+    </div>
+  </li>
+</ul>
+
+
+            
+
+            
+            {/* <ul className="navbar-nav">
+              {localStorage.getItem("user-info") ? (
+                <>
+                  <li className="nav-item dropdown">
+                    <a
+                      className="nav-link dropdown-toggle"
+                      role="button"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                    >
+                      <i className="bi bi-person-circle fs-5"></i>
+                    </a>
+                    <ul className="dropdown-menu dropdown-menu-end">
+                      <li>
+                        <Link className="dropdown-item" to="/profile">
+                          Profile
+                        </Link>
+                      </li>
+                      <li>
+                        <Link className="dropdown-item" to="/ordereditems">
+                          Orders
+                        </Link>
+                      </li>
+                      <li>
+                        <Link className="dropdown-item" to="/settings">
+                          Settings
+                        </Link>
+                      </li>
+                      <li>
+                        <hr className="dropdown-divider" />
+                      </li>
+                      <li>
+                        <Link className="dropdown-item" to="#" onClick={logout}>
+                          Logout
+                        </Link>
+                      </li>
+                    </ul>
+                  </li>
+                </>
+              ) : (
+                <li className="nav-item">
+                  <Link className="nav-link" to="/login">
+                    {content?.login_register || "Log In / Register"}  
+                  </Link>
+                </li>
+              )}
+            </ul> */}
+
+
+
+
+<ul className="navbar-nav">
+  {localStorage.getItem("user-info") ? (
+    <>
+      <li className="nav-item dropdown custom-profile">
+        <a
+          className="nav-link dropdown-toggle d-flex align-items-center"
+          role="button"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+        >
+          <i className="bi bi-person-circle fs-4 me-2"></i>
+  <span className="profile-name">Hi, {userName}</span>
+        </a>
+        <ul className="dropdown-menu dropdown-menu-end shadow-sm rounded">
+          <li>
+            <Link className="dropdown-item" to="/profile">
+              Profile
+            </Link>
+          </li>
+          <li>
+            <Link className="dropdown-item" to="/ordereditems">
+              Orders
+            </Link>
+          </li>
+          <li>
+            <Link className="dropdown-item" to="/settings">
+              Settings
+            </Link>
+          </li>
+          <li>
+            <hr className="dropdown-divider" />
+          </li>
+          <li>
+            <Link className="dropdown-item text-danger" to="#" onClick={logout}>
+              Logout
+            </Link>
+          </li>
+        </ul>
+      </li>
+    </>
+  ) : (
+    <li className="nav-item">
+      <Link className="nav-link" to="/login">
+        {content?.login_register || "Log In / Register"}
+      </Link>
+    </li>
+  )}
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          </div>
+        </div>
+      </nav>
+      </div>
+
+      {/* Navigation Bar */}
+      <nav
+        className="navbar navbar-expand-lg navbar-dark bg-dark sticky-top"
+        style={{ marginTop: "50px" }}
+        >
+        <div className="container-fluid">
+          <Link className="navbar-brand text-warning" to="/">
+            Habesha Mart
+          </Link>
+          <button className="navbar-toggler" type="button" onClick={toggleNav}>
+            <span className="navbar-toggler-icon"></span>
+          </button>
+          <div
+            className={`${isNavOpen ? "" : "collapse"} navbar-collapse`}
+            id="navbarNav"
+          >
+            {/* <ul className="navbar-nav mx-auto">
               <li className="nav-item">
                 <div
                   className="search-bar d-flex align-items-center mt-2"
@@ -460,7 +648,7 @@ function Home() {
                     style={{
                       maxWidth: "100px",
                       paddingLeft: "8px",
-                    }} /* Adjusted paddingLeft */
+                    }} 
                   >
                     <option>{content?.all_category || "All Categories"}</option>
                     {categories.map((cat) => (
@@ -482,7 +670,7 @@ function Home() {
                     }
                     style={{
                       paddingLeft: "8px",
-                    }} /* Ensure consistent padding */
+                    }} 
                   />
                   <button
                     className="btn btn-warning"
@@ -493,7 +681,38 @@ function Home() {
                   </button>
                 </div>
               </li>
-            </ul>
+            </ul> */}
+
+
+<ul className="navbar-nav mx-auto">
+  <li className="nav-item">
+    <div className="enhanced-search-bar">
+      <select className="enhanced-select">
+        <option>{content?.all_category || "All Categories"}</option>
+        {categories.map((cat) => (
+          <option key={cat.category_category_id} value={cat.category_id}>
+            {cat.category_name}
+          </option>
+        ))}
+      </select>
+      <input
+        type="text"
+        value={searchproduct}
+        onChange={(e) => setSearchProduct(e.target.value)}
+        className="enhanced-input"
+        placeholder={content?.search_products || "Search products..."}
+      />
+      <button className="enhanced-search-button" onClick={search}>
+        {content?.search || "Search"}
+      </button>
+    </div>
+  </li>
+</ul>
+
+
+            
+
+            
             <ul className="navbar-nav">
               {localStorage.getItem("user-info") ? (
                 <>
