@@ -11,7 +11,7 @@ return new class extends Migration {
             $table->increments('vendor_id'); // auto-increment primary key
             $table->string('email', 100);
             $table->string('password', 100);
-            $table->enum('status', ['UnVerified','Pending', 'Verified', 'Rejected ','Suspended'])->default('UnVerified');
+            $table->enum('status', ['UnVerified','Pending',"Active", 'Verified', 'Rejected ','Suspended'])->default('UnVerified');
             $table->timestamps(); // Adding created_at and updated_at timestamps
             $table->string('vendor_role_id', 10)->default('Vendor');
         });

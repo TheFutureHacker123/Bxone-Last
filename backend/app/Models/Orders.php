@@ -21,16 +21,18 @@ class Orders extends Model
         'payment_method',
         'total_paid',
         'orderd_quantity',
-        'address_id', // Added address_id here
+        'address_id',
     ];
 
     protected $casts = [
         'total_paid' => 'float',
-        'status' => 'string',
+        'order_status' => 'string',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
 
+
+    public $timestamps = true; //new
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');
@@ -44,5 +46,10 @@ class Orders extends Model
     public function address()
     {
         return $this->belongsTo(Address::class, 'address_id', 'address_id');
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class, 'order_id', 'order_id');
     }
 }

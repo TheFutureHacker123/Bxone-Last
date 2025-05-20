@@ -29,8 +29,8 @@ class PersonalInfo extends Model
         'verified_by'
     ];
 
-    public $timestamps = false;
-
+    // public $timestamps = false;
+public $timestamps = true;
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',

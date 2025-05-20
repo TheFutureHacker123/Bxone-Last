@@ -139,11 +139,11 @@ function ListVendor() {
                   {content?.list_users || "List Users"}
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link to="/admin/user-messages" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
                   {content?.user_messages || "User Messages"}
                 </Link>
-              </li>
+              </li> */}
             </ul>
           )}
         </div>
@@ -349,9 +349,9 @@ function ListVendor() {
               value={userStatus}
               onChange={(e) => setUserStatus(e.target.value)}
             >
-              <option value="Pending">{content?.pending || "Pending"}</option>
+              {/* <option value="Pending">{content?.pending || "Pending"}</option> */}
               <option value="Verified">{content?.verified || "Verified"}</option>
-              <option value="Rejected">{content?.rejected || "Rejected"}</option>
+              {/* <option value="Rejected">{content?.rejected || "Rejected"}</option> */}
               <option value="Suspended">{content?.suspended || "Suspended"}</option>
             </Form.Control>
           </Form.Group>

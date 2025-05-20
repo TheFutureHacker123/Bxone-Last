@@ -6,13 +6,13 @@ import LoginAdmin from "./resources/admin/login"
 import Reset from "./resources/user/reset"
 import Register from "./resources/user/register"
 
+import NotFound from "./resources/notfoundpage";
 import Wishlist from "./resources/user/Wishlist";
 
 import AboutPage from "./resources/user/about/AboutPage";
 import PrivacyPage from "./resources/user/about/PrivacyPage";
 import TermsPage from "./resources/user/about/TermsPage";
 import CareersPage from "./resources/user/about/CareersPage";
-
 import Cart from "./resources/user/cart"
 import ChatVendor from "./resources/user/chat-to-vendor"
 import ChatAdmin from "./resources/user/chat-to-admin"
@@ -41,7 +41,7 @@ import SAdminListAdmins from "./resources/superadmin/admin/list-admins"
 import ProtectPathSAdmin from "./resources/superadmin/protectpath"
 import SadminManageOrders from "./resources/superadmin/vendor/manage-orders"
 import SadminManageProducts from "./resources/superadmin/vendor/manage-products"
-
+import SadminVendorMessages from "./resources/superadmin/vendor/vendor-messages"
 
 import VendorDashboard from "./resources/vendor/dashboard"
 import LoginVendor from "./resources/vendor/login"
@@ -108,11 +108,13 @@ function App() {
       <BrowserRouter>
         <Routes>
 
+          <Route path="*" element={<NotFound />} />
+
           <Route path="/superadmin/dashboard" element={<ProtectPathSAdmin Cmp={SAdminDashboard} />} />
           <Route path="/superadmin/add-category" element={<AddCategory />} />
           <Route path="/superadmin/add-subcategory" element={<AddSubCategory />} />
           
-          <Route path="/superadmin/login" element={<LoginAdmin />} />
+          {/* <Route path="/superadmin/login" element={<LoginAdmin />} /> */}
           <Route path="/superadmin" element={<ProtectPathSAdmin Cmp={SAdminDashboard} />} />
 
           <Route path="/superadmin/list-users" element={<ProtectPathSAdmin Cmp={SAdminListUsers} />} />
@@ -122,7 +124,7 @@ function App() {
           <Route path="/superadmin/manage-orders" element={<ProtectPathSAdmin Cmp={SadminManageOrders} />} />
           <Route path="/superadmin/list-admins" element={<ProtectPathSAdmin Cmp={SAdminListAdmins} />} />
           <Route path="/superadmin/manage-profile" element={<ProtectPathSAdmin Cmp={SAdminManageProfile} />} />
-
+          <Route path="/superadmin/vendor-messages" element={<ProtectPathSAdmin Cmp={SadminVendorMessages} />} />
 
           <Route path="/admin/dashboard" element={<ProtectPathAdmin Cmp={AdminDashboard} />} />
           <Route path="/admin" element={<ProtectPathAdmin Cmp={AdminDashboard} />} />

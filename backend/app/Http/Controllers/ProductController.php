@@ -24,6 +24,8 @@ class ProductController extends Controller
         $searchQuery = $request->input('searchproduct');
 
         $products = Product::where('product_name', 'like', '%' . $searchQuery . '%')
+            ->where('product_status', 'Active')
+            ->where('total_product', '>', 1)
             ->select('product_id', 'product_name', 'total_product', 'product_price', 'product_img1', 'product_img2', 'product_img3', 'product_img4', 'product_img5', 'product_desc', 'vendor_id', 'category_id', 'sub_category_id') // Select only the desired fields
             ->get();
 
@@ -35,6 +37,8 @@ class ProductController extends Controller
     {
         // Fetch 12 random products
         $products = Product::inRandomOrder()
+            ->where('product_status', 'Active')
+            ->where('total_product', '>', 1)
             ->select(
                 'product_id',
                 'product_name',
@@ -181,7 +185,9 @@ class ProductController extends Controller
         // Get cart items with product details
         $cartItems = Cart::where('user_id', $user_id)
             ->join('product', 'cart.product_id', '=', 'product.product_id')
-            ->select(
+            ->where('product.product_status', 'Active') 
+        ->where('product.total_product', '>', 1)
+        ->select(
                 'product.product_name',
                 'product.product_id', // Add product_id here
                 'product.vendor_id',  // Add vendor_id here

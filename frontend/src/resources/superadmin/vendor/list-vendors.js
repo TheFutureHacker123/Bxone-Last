@@ -135,7 +135,7 @@ function SAdminListVendor() {
           {openDropdown === "user_management" && (
             <ul className="dropdown-menu admin-custom-dropdown-menu">
               <li><Link to="/superadmin/list-users" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>{content?.list_users || "List Users"}</Link></li>
-              <li><Link to="/superadmin/user-messages" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>{content?.user_messages || "User Messages"}</Link></li>
+              {/* <li><Link to="/superadmin/user-messages" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>{content?.user_messages || "User Messages"}</Link></li> */}
             </ul>
           )}
         </div>
@@ -283,8 +283,8 @@ function SAdminListVendor() {
                         style={{
                           padding: '0.5rem 1rem',
                           borderRadius: '20px',
-                          backgroundColor: user.status === 'Verified' ? '#d4edda' : '#f8d7da',
-                          color: user.status === 'Verified' ? '#155724' : '#721c24',
+                          backgroundColor: user.status === 'Active' ? '#d4edda' : '#f8d7da',
+                          color: user.status === 'Active' ? '#155724' : '#721c24',
                           marginRight: '1rem'
                         }}
                       >

@@ -663,3 +663,137 @@ footer p {
 .dropdown-toggle::after {
   display: none !important; /* Hides the default down arrow */
 }
+
+
+
+
+
+
+.enhanced-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff;
+  padding: 10px 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+}
+
+.enhanced-select {
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+  outline: none;
+  transition: border 0.2s;
+}
+
+.enhanced-select:focus {
+  border-color: #ffc107;
+  background-color: #fff;
+}
+
+.enhanced-input {
+  flex-grow: 1;
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+  outline: none;
+  transition: border 0.2s;
+}
+
+.enhanced-input:focus {
+  border-color: #ffc107;
+  background-color: #fff;
+}
+
+.enhanced-search-button {
+  background: linear-gradient(to right, #ffc107, #ffca2c);
+  border: none;
+  padding: 8px 18px;
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.enhanced-search-button:hover {
+  background: linear-gradient(to right, #e0a800, #ffbc00);
+}
+
+
+
+
+
+
+
+
+
+.custom-profile > a.nav-link {
+  padding: 8px 14px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+  color: #ffffff;
+  font-weight: 500;
+  user-select: none;
+  text-decoration: none;
+}
+
+.custom-profile > a.nav-link:hover,
+.custom-profile.show > a.nav-link {
+  background-color: #ffc107;
+  color: #222;
+  text-decoration: none;
+}
+
+.custom-profile .profile-name {
+  font-size: 14px;
+  font-weight: 600;
+  user-select: none;
+}
+
+.custom-profile .dropdown-menu {
+  min-width: 180px;
+  border: none;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+  border-radius: 10px;
+  padding: 0; /* Remove padding to prevent overflow */
+  background-color: #fff;
+  overflow: hidden; /* Prevent background bleed */
+}
+
+.custom-profile .dropdown-item {
+  font-size: 14px;
+  padding: 10px 16px; /* Reduce horizontal padding */
+  color: #555;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  cursor: pointer;
+  border-radius: 0; /* Prevent rounding causing bleed */
+}
+
+.custom-profile .dropdown-item:hover {
+  background-color: #ffc107;
+  color: #222;
+}
+
+.custom-profile .dropdown-item.text-danger:hover {
+  background-color: #e55353;
+  color: #fff;
+}
+
+.custom-profile .dropdown-divider {
+  margin: 6px 0;
+  border-top: 1px solid #eee;
+}
+
+.custom-profile .dropdown-item:last-child {
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+

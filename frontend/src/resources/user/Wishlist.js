@@ -47,22 +47,23 @@ function Wishlist() {
   const removeFromWishlist = async (productId) => {
     try {
       const storedUser = localStorage.getItem("user-info");
+      console.warn("Removing product with ID:", productId, "for user:", JSON.parse(storedUser).user_id);
       const response = await fetch("http://localhost:8000/api/wishlist/remove", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: "Bearer " + JSON.parse(storedUser).token,
-        },
-        body: JSON.stringify({ product_id: productId }),
+         method: 'POST',
+        body: JSON.stringify({ product_id: productId , user_id: JSON.parse(storedUser).user_id }),
+                headers: {
+                    "Content-Type": 'application/json',
+                    "Accept": 'application/json'
+                }
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to remove from wishlist");
-      }
-
+      let result = await response.json();
+      if (result.success) {
+       toast.success(result.message);
       setWishlistItems(wishlistItems.filter(item => item.product_id !== productId));
-      toast.success("Product removed from wishlist");
+      }else {
+        toast.error(result.message);
+      }
     } catch (error) {
       toast.error("Error removing from wishlist: " + error.message);
     }
@@ -174,6 +175,44 @@ function Wishlist() {
     return <div className="text-center py-5">Loading your wishlist...</div>;
   }
 
+
+  const addToCart = async (productid) => {
+      const storedUser = localStorage.getItem("user-info");
+      if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        let items = { product_id: productid, user_id: parsedUser.user_id };
+  
+        try {
+          let response = await fetch("http://localhost:8000/api/addtocart", {
+            method: "POST",
+            body: JSON.stringify(items),
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+          });
+  
+          let result = await response.json();
+  
+          if (result.success) {
+            toast.success("Product added to cart!", {
+              position: "top-right",
+              autoClose: 3000,
+            });
+          } else {
+            toast.error(result.message, {
+              position: "top-right",
+              autoClose: 3000,
+            });
+          }
+        } catch (error) {
+          toast.error("An error occurred. Please try again later.");
+        }
+      } else {
+        navigate("/login");
+      }
+    };
+
   return (
     <div style={pageStyle}>
       <Link to="/" style={backArrowStyle}>
@@ -218,7 +257,7 @@ function Wishlist() {
                   >
                     Remove
                   </button>
-                  <button style={addToCartBtnStyle}>
+                  <button style={addToCartBtnStyle} onClick={() => addToCart(product.product_id)}>
                     Add to Cart
                   </button>
                 </div>

@@ -7,6 +7,7 @@ use App\Http\Controllers\VendorController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\PaymentController;
@@ -172,3 +173,8 @@ Route::post('/approve-payment/{payment}', [PaymentController::class, 'approvePay
 Route::post('/payout-vendor/{payment}', [PaymentController::class, 'payoutVendor'])->name('payout.vendor');
 Route::get('/payment/success', [PaymentController::class, 'paymentSuccess'])->name('payment.success');
 Route::post('/create-stripe-payment-intent', [PaymentController::class, 'createStripePaymentIntent']);
+
+
+Route::post('/fetchChat', [MessageController::class, 'fetchChat']);
+
+Route::post('/addChat', [MessageController::class, 'addChat']);

@@ -11,7 +11,7 @@ function ProtectPathSAdmin(props) {
       const adminInfo = localStorage.getItem("admin-info");
 
       if (!adminInfo) {
-        navigate("/superadmin/login");
+        navigate("/admin/login");
         return;
       }
 
@@ -26,7 +26,7 @@ function ProtectPathSAdmin(props) {
       }
     } catch (err) {
       console.error("Invalid admin-info in localStorage", err);
-      navigate("/superadmin/login");
+      navigate("/admin/login");
     }
   }, []);
 

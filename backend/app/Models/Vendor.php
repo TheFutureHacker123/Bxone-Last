@@ -15,8 +15,8 @@ class Vendor extends Authenticatable
 
     protected $primaryKey = 'vendor_id';
     protected $table = 'vendors';
-    public $timestamps = false;
-
+    // public $timestamps = false;
+public $timestamps = true;
     protected $fillable = [
         'vendor_id',
         'email',

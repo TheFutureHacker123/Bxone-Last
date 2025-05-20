@@ -9,27 +9,19 @@ class Notification extends Model
 {
     use HasFactory;
 
-    // Table name
     protected $table = 'notifications';
-
-    // Primary key
     protected $primaryKey = 'notification_id';
-
-    // Primary key is incrementing
     public $incrementing = true;
 
-    // Key type
-    protected $keyType = 'int';
-
-    // Mass assignable fields
     protected $fillable = [
         'notification_text',
         'user_id',
         'vendor_id',
         'admin_id',
+        'order_id', // Add this line
     ];
 
-    // Relationships
+    public $timestamps = true; //new
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'user_id');
@@ -43,5 +35,10 @@ class Notification extends Model
     public function admin()
     {
         return $this->belongsTo(Admin::class, 'admin_id', 'admin_id');
+    }
+
+    public function order()
+    {
+        return $this->belongsTo(Orders::class, 'order_id', 'order_id');
     }
 }

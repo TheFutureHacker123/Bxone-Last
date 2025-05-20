@@ -34,20 +34,31 @@ class WishlistController extends Controller
         return response()->json(['success' => true, 'message' => 'Product added to wishlist']);
     }
 
-    public function removeFromWishlist(Request $request)
-    {
-        $request->validate([
-            'product_id' => 'required|exists:products,product_id'
-        ]);
+public function removeFromWishlist(Request $request)
+{
+    $request->validate([
+        'product_id' => 'required',
+        'user_id' => 'required'
+    ]);
 
-        $user = Auth::user();
-
-        Wishlist::where('user_id', $user->id)
-            ->where('product_id', $request->product_id)
-            ->delete();
-
-        return response()->json(['success' => true, 'message' => 'Product removed from wishlist']);
+    $wishlist = Wishlist::where('user_id', $request->user_id)
+        ->where('product_id', $request->product_id)
+        ->first();
+    if (!$wishlist) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Wishlist item not found'
+        ], 404);
     }
+
+    $wishlist->delete();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Product removed from wishlist'
+    ]);
+}
+
 
     public function getWishlist(Request $request)
     {

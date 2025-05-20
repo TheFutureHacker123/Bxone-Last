@@ -142,7 +142,8 @@ function UpdatePassword() {
       if (result.message === "Password updated successfully") {
         toast.success("Password updated successfully");
         setShowPasswordModal(false);
-        setTimeout(() => navigate("/admin/"), 1500);
+        localStorage.clear();
+        setTimeout(() => navigate("/admin/login"), 1500);
       } else {
         toast.error("Failed to update password");
       }
@@ -197,11 +198,11 @@ function UpdatePassword() {
                         {content?.list_users || "List Users"}
                       </Link>
                     </li>
-                    <li>
+                    {/* <li>
                       <Link to="/admin/user-messages" className="dropdown-item-admin" style={{ color: fontColor === '#000000' ? '#FFFFFF' : fontColor }}>
                         {content?.user_messages || "User Messages"}
                       </Link>
-                    </li>
+                    </li> */}
                   </ul>
                 )}
               </div>
