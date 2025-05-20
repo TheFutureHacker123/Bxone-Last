@@ -545,24 +545,24 @@ if (loading) {
                           aria-expanded="false"
                         >
                           <i className="bi bi-person-circle fs-4 me-2"></i>
-                          <span className="profile-name">Hi, {userName}</span>
+                          <span className="profile-name">{content?.hi || "Hi"}, {userName}</span>
                         </a>
                       </li>
 
                       <ul className="dropdown-menu dropdown-menu-end shadow-sm rounded">
                         <li>
                           <Link className="dropdown-item" to="/profile">
-                            Profile
+                             {content?.profile || "Profile"}
                           </Link>
                         </li>
                         <li>
                           <Link className="dropdown-item" to="/ordereditems">
-                            Orders
+                            {content?.ordereditems || "Orders"}
                           </Link>
                         </li>
                         <li>
                           <Link className="dropdown-item" to="/settings">
-                            Settings
+                            {content?.settings || "Settings"}
                           </Link>
                         </li>
                         <li>
@@ -574,7 +574,7 @@ if (loading) {
                             to="#"
                             onClick={logout}
                           >
-                            Logout
+                            {content?.logout || "Logout"}
                           </Link>
                         </li>
                       </ul>
