@@ -101,19 +101,19 @@ function RefundItems() {
             </ul>
             <ul className="navbar-nav">
               <li className="nav-item">
-                <a className="nav-link" href="/">{content?.home || 'Home'}</a>
+                <a className="nav-link text-decoration-none" href="/">{content?.home || 'Home'}</a>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href="/cart">{content?.cart || 'Cart'}</a>
+                <a className="nav-link text-decoration-none" href="/cart">{content?.cart || 'Cart'}</a>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href="/ordereditems">{content?.ordereditems || 'Ordered'}</a>
+                <a className="nav-link text-decoration-none" href="/ordereditems">{content?.ordereditems || 'Ordered'}</a>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href="/shippeditems">{content?.shippeditems || 'Shipped'}</a>
+                <a className="nav-link text-decoration-none" href="/shippeditems">{content?.shippeditems || 'Shipped'}</a>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href="/completeditems">{content?.completeditems || 'Completed'}</a>
+                <a className="nav-link text-decoration-none" href="/completeditems">{content?.completeditems || 'Completed'}</a>
               </li>
             </ul>
           </div>

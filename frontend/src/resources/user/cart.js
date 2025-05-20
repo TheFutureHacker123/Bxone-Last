@@ -257,27 +257,27 @@ function Cart() {
             </ul>
             <ul className="navbar-nav">
               <li className="nav-item">
-                <a className="nav-link" href="/">
+                <a className="nav-link text-decoration-none" href="/">
                   {content?.home || "Home"}
                 </a>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href="/ordereditems">
+                <a className="nav-link text-decoration-none" href="/ordereditems">
                   {content?.ordereditems || "Ordered"}
                 </a>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href="/shippeditems">
+                <a className="nav-link text-decoration-none" href="/shippeditems">
                   {content?.shippeditems || "Shipped"}
                 </a>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href="/refunditems">
+                <a className="nav-link text-decoration-none" href="/refunditems">
                   {content?.refunditems || "Refunded"}
                 </a>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href="/completeditems">
+                <a className="nav-link text-decoration-none" href="/completeditems">
                   {content?.completeditems || "Completed"}
                 </a>
               </li>

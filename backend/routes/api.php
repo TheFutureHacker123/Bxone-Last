@@ -152,6 +152,9 @@ Route::post('/getcode', [UserController::class, 'getcode']);
 Route::post('/reset', [UserController::class, 'reset']);
 
 
+Route::post('/sendotp', [UserController::class, 'sendotp']);
+
+Route::post('/vendor/sendotp', [VendorController::class, 'sendotp']);
 
 Route::post('/vendor/updatepassword', [VendorController::class, 'updatepassword']);
 Route::post('/vendor/getcode', [VendorController::class, 'getcode']);

@@ -46,7 +46,14 @@ class UserController extends Controller
         ]);
 
         try {
-            $user = User::create([
+
+            $otpEntry = Otp::where('otp', $request->input('otp'))
+             ->first();
+
+    // Check if the OTP entry exists and is not expired
+       if ($otpEntry && $otpEntry->expires_at > now()) {
+        $otpEntry->delete();
+        $user = User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
@@ -57,6 +64,14 @@ class UserController extends Controller
                 'message' => 'Registration successful',
                 'user' => $user->makeHidden(['password', 'remember_token']),
             ], 201);
+
+    }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid or expired OTP',
+            ], 400);
+           
 
         } catch (\Exception $e) {
             return response()->json([
@@ -339,6 +354,51 @@ public function reset(Request $request)
 
     return response()->json(['message' => 'Invalid or expired OTP'], 400);
 }
+
+
+
+
+ public function sendotp(Request $request)
+{
+    // Validate the incoming request
+    $request->validate([
+        'email' => 'required|email',
+    ]);
+    // Generate a random 6-digit OTP code
+    $otpCode = rand(100000, 999999);
+
+    // Find the user by email
+    $user = User::where('email', $request->input('email'))->first();
+
+    if ($user) {
+        return response()->json(['status' => false, 'message' => 'User already registered']);
+    }
+
+    // Save the OTP to the database
+    Otp::create([ // Assuming user_id is the primary key in users table
+        'otp' => $otpCode,
+        'expires_at' => now()->addMinutes(1), // Set expiration time (e.g., 10 minutes)
+        'time_stamp' => now(),
+    ]);
+
+    // Prepare email data
+   $data = [
+       'to' => $request->email,
+       'subject' => 'Your OTP Code',
+       'message' => "Your OTP code is: {$otpCode}. It is valid for 1 minutes.",
+   ];
+
+    // Send the OTP email
+    Mail::to($data['to'])->send(new RawHtmlMail($data['subject'], $data['message']));
+
+    // Return response
+    return response()->json(['status' => true, 'message' => 'Otp sent successfully']);
+}
+
+
+
+
+
 
 
 

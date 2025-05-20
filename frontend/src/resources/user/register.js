@@ -16,6 +16,15 @@ function Register() {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const [otp, setOtp] = useState("");
+const [showOtpPopup, setShowOtpPopup] = useState(false);
+
+
+
+// Timer states
+const [countdown, setCountdown] = useState(60);
+const [timerActive, setTimerActive] = useState(false);
+
   const [passReqMet, setPassReqMet] = useState({
     length: false,
     lowercase: false,
@@ -38,6 +47,30 @@ function Register() {
     () => localStorage.getItem("language") || defaultLanguage
   );
   const [content, setContent] = useState(Translation[language]);
+
+  useEffect(() => {
+  let timer;
+
+  if (showOtpPopup) {
+    setCountdown(60); // Reset to 60 seconds
+    setTimerActive(true);
+
+    timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setTimerActive(false);
+          setShowOtpPopup(false); // Close the popup on timeout
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }
+
+  return () => clearInterval(timer);
+}, [showOtpPopup]);
+
 
   useEffect(() => {
     document.documentElement.style.setProperty("--font-size", fontSize);
@@ -156,41 +189,57 @@ function Register() {
   };
 
   const signUp = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!validateForm()) {
-      return;
+  if (!validateForm()) return;
+
+  setIsSubmitting(true);
+
+  try {
+    console.warn("Sending OTP to email:", formData.email);
+    const response = await fetch("http://localhost:8000/api/sendotp", {
+      method: "POST",
+      body: JSON.stringify({ email: formData.email }),
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+    });
+
+    const result = await response.json();
+
+    if (result.status === true) {
+      toast.success("OTP sent successfully!");
+      
+      setShowOtpPopup(true);
+      
+    } else {
+      toast.error(result.message || "Failed to send OTP");
     }
+  } catch (error) {
+    toast.error(error.message || "OTP sending failed");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
-    setIsSubmitting(true);
 
-    try {
-      const response = await fetch("http://localhost:8000/api/register", {
-        method: "POST",
-        body: JSON.stringify(formData),
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-      });
+const handleFinalRegistration = async () => {
+  setIsSubmitting(true);
+  try {
+    console.warn("Sending registration data:", { ...formData, otp });
+    const registerResponse = await fetch("http://localhost:8000/api/register", {
+      method: "POST",
+      body: JSON.stringify({ ...formData, otp }),
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+    });
 
-      const result = await response.json();
+    const result = await registerResponse.json();
 
-      if (!response.ok) {
-        // Handle Laravel validation errors
-        if (result.errors) {
-          const backendErrors = {};
-          Object.keys(result.errors).forEach((key) => {
-            backendErrors[key] = result.errors[key][0];
-          });
-          setErrors(backendErrors);
-          return;
-        }
-
-        throw new Error(result.message || "Registration failed");
-      }
-
-      if (result.success) {
+    if (result.success) {
         toast.success("Registration Successful!", {
           position: "top-right",
           autoClose: 3000,
@@ -216,22 +265,13 @@ function Register() {
           }
         );
       }
-    } catch (error) {
-      toast.error(
-        error.message || "An error occurred. Please try again later.",
-        {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        }
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  } catch (error) {
+    toast.error("Error during registration.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   return (
     <div className="signup-container">
@@ -359,6 +399,33 @@ function Register() {
         </p>
       </div>
       <ToastContainer />
+
+     {showOtpPopup && (
+  <div className="otp-popup">
+    <div className="otp-box">
+      <h4>Enter OTP sent to your email</h4>
+      <input
+        type="text"
+        className="custom-input"
+        value={otp}
+        onChange={(e) => setOtp(e.target.value)}
+        placeholder="Enter OTP"
+      />
+      <div className="text-danger mt-2">
+        Time remaining: {countdown}s
+      </div>
+      <button
+        className="btn btn-success mt-2"
+        onClick={handleFinalRegistration}
+        disabled={isSubmitting || countdown === 0}
+      >
+        {isSubmitting ? "Verifying..." : "Verify & Register"}
+      </button>
+    </div>
+  </div>
+)}
+
+
     </div>
   );
 }

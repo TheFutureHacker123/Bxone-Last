@@ -30,41 +30,101 @@ use App\Mail\RawHtmlMail;
 class VendorController extends Controller
 {
 
-    public function register(Request $req)
-    {
-        $validated = $req->validate([
-            'email' => 'required|email|unique:vendors,email',
-            'password' => [
-                'required',
-                'string',
-                'min:8', // Minimum length of 8 characters
-                'regex:/[A-Z]/', // At least one uppercase letter
-                'regex:/[a-z]/', // At least one lowercase letter
-                'regex:/[\W_]/', // At least one special character (non-word character)
-                'confirmed', // Ensure password matches password_confirmation
-            ],
-        ]);
+    // public function register(Request $req)
+    // {
+    //     $validated = $req->validate([
+    //         'email' => 'required|email|unique:vendors,email',
+    //         'password' => [
+    //             'required',
+    //             'string',
+    //             'min:8', // Minimum length of 8 characters
+    //             'regex:/[A-Z]/', // At least one uppercase letter
+    //             'regex:/[a-z]/', // At least one lowercase letter
+    //             'regex:/[\W_]/', // At least one special character (non-word character)
+    //             'confirmed', // Ensure password matches password_confirmation
+    //         ],
+    //     ]);
 
-        if ($validated) {
-            $vendor = new Vendor;
-            $vendor->email = $req->input('email');
+    //     if ($validated) {
+    //         $vendor = new Vendor;
+    //         $vendor->email = $req->input('email');
 
-            $vendor->password = Hash::make($req->input('password'));
-            if ($vendor->save()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Account created successfully!',
-                    'user' => $vendor
-                ], 201); // HTTP 201 means "Created"
-            } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Failed to create account. Please try again.'
-                ], 500); // HTTP 500 for server error
-            }
-        }
+    //         $vendor->password = Hash::make($req->input('password'));
+    //         $otpEntry = Otp::where('otp', $req->input('otp'))
+    //             ->first();
+    //         if ($otpEntry) {
+    //             if($vendor->save()){
+    //                 return response()->json([
+    //                 'success' => true,
+    //                 'message' => 'Account created successfully!',
+    //                 'user' => $vendor
+    //             ], 201); // HTTP 201 means "Created"
+    //             }
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Error occurred while creating the account'
+    //             ], 500); // HTTP 500 for server error
+    //         } else {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Invalid or expired OTP'
+    //             ], 500); // HTTP 500 for server error
+    //         }
+    //     }
+    // }
+
+
+
+public function register(Request $req)
+{
+    // Validate the incoming request data
+    $validated = $req->validate([
+        'email' => 'required|email|unique:vendors,email',
+        'password' => [
+            'required',
+            'string',
+            'min:8',                 // Minimum 8 characters
+            'regex:/[A-Z]/',         // At least one uppercase letter
+            'regex:/[a-z]/',         // At least one lowercase letter
+            'regex:/[\W_]/',         // At least one special character
+            'confirmed',             // Must match password_confirmation
+        ],
+        'otp' => 'required|string',  // OTP is required
+    ]);
+
+    // Check OTP validity
+    $otpEntry = Otp::where('otp', $req->input('otp'))->first();
+
+    if ($otpEntry && $otpEntry->expires_at > now()) {
+        
+         $vendor = new Vendor();
+    $vendor->email = $req->input('email');
+    $vendor->password = Hash::make($req->input('password'));
+
+    // Save vendor and return response
+    if ($vendor->save()) {
+        // Optionally, delete the used OTP to prevent reuse
+        $otpEntry->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Account created successfully!',
+            'user' => $vendor,
+        ], 201); // 201 Created
+       } else {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error occurred while creating the account',
+        ], 500); // 500 Internal Server Error
+      }
+    }else {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid or expired OTP',
+        ], 400); // 400 Bad Request
     }
 
+}
     public function login(Request $req)
     {
         // Validate the inputs to ensure email and password are provided
@@ -874,6 +934,46 @@ public function reset(Request $request)
 
     return response()->json(['message' => 'Invalid or expired OTP'], 400);
 }
+
+
+
+ public function sendotp(Request $request)
+{
+    // Validate the incoming request
+    $request->validate([
+        'email' => 'required|email',
+    ]);
+    // Generate a random 6-digit OTP code
+    $otpCode = rand(100000, 999999);
+
+    // Find the user by email
+    $user = Vendor::where('email', $request->input('email'))->first();
+
+    if ($user) {
+        return response()->json(['status' => false, 'message' => 'User already registered']);
+    }
+
+    // Save the OTP to the database
+    Otp::create([ // Assuming user_id is the primary key in users table
+        'otp' => $otpCode,
+        'expires_at' => now()->addMinutes(1), // Set expiration time (e.g., 10 minutes)
+        'time_stamp' => now(),
+    ]);
+
+    // Prepare email data
+   $data = [
+       'to' => $request->email,
+       'subject' => 'Your OTP Code',
+       'message' => "Your OTP code is: {$otpCode}. It is valid for 1 minutes.",
+   ];
+
+    // Send the OTP email
+    Mail::to($data['to'])->send(new RawHtmlMail($data['subject'], $data['message']));
+
+    // Return response
+    return response()->json(['status' => true, 'message' => 'Otp sent successfully']);
+}
+
 
 
 
