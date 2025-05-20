@@ -145,11 +145,7 @@ const LoginVendor = () => {
                     } else if (result.storeData.status === "Active") {
                         navigate("/vendor/");
                     } else if (result.storeData.status === "Rejected") {
-                        // if (!result.storeData.has_completed_info) {
-                        //     navigate("/vendor/vendor-info/");
-                        // } else {
-                        //     navigate("/vendor/");
-                        // }
+                
                          navigate("/vendor/vendor-info/");
                     } else if (result.storeData.status === "Suspended") {
                         navigate("/vendor/suspend/");
