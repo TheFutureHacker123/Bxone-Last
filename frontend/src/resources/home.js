@@ -990,7 +990,7 @@ if (loading) {
           </h2>
         ) : (
           <h2 className="section-heading fade-in-section">
-            There is no <strong>{searchproduct}</strong> product
+           {content?.there_is_no || 'There is no '} <strong>{searchproduct}</strong> {content?.product || 'product'}
           </h2>
         )}
 
