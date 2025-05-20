@@ -7,13 +7,12 @@ use App\Models\Payment;
 use Illuminate\Http\Request;
 use Chapa\Chapa\Facades\Chapa as Chapa;
 use Illuminate\Support\Facades\Log;
-use Stripe\StripeClient;
 
 
 class PaymentController extends Controller
 {
     
-    public function initiatePayment(Request $request)
+   public function initiatePayment(Request $request)
     {
         // 1. Validate the incoming request
         $request->validate([
@@ -21,44 +20,44 @@ class PaymentController extends Controller
         ]);
 
         $order = Orders::findOrFail($request->input('order_id'));
-        $totalAmount = $order->total_paid;
+
+        // 2. Check if a payment record exists for this order
+        $payment = Payment::where('order_id', $order->order_id)->first();
+
+        Log::info('Existing payment for order ID ' . $order->order_id . ': ' . json_encode($payment));
+
+        if ($payment && $payment->chapa_reference) {
+            Log::info('Redirecting user to existing Chapa checkout URL for order ID: ' . $order->order_id);
+            return response()->json(['checkout_url' => $payment->chapa_reference]);
+        }
+
+        if (!$payment) {
+            Log::info('Creating a new payment record for order ID: ' . $order->order_id);
+            // Fetch the order again to ensure we have the latest total_amount
+            $freshOrder = Orders::findOrFail($request->input('order_id'));
+            $payment = Payment::create([
+                'order_id' => $freshOrder->order_id,
+                'total_amount' => $freshOrder->total_paid, // Initially set total_amount
+                'payment_status' => 'held', // Initial status as 'held'
+            ]);
+        } else {
+            Log::warning('Payment record exists for order ID ' . $order->order_id . ' but needs Chapa reference. Updating total amount.');
+            // Fetch the order again to ensure we have the latest total_amount
+            $freshOrder = Orders::findOrFail($request->input('order_id'));
+            $payment->total_amount = $freshOrder->total_paid;
+            $payment->payment_status = 'held';
+            $payment->save();
+        }
 
         // Load the address relationship for the order
         $order->load('address');
-
         $customerPhone = $order->address ? $order->address->phone : null;
-
-        // 2. Check if a payment record already exists for this order
-        $existingPayment = Payment::where('order_id', $order->order_id)->first();
-
-        Log::info('Existing payment for order ID ' . $order->order_id . ': ' . json_encode($existingPayment));
-
-        if ($existingPayment) {
-            if ($existingPayment->chapa_reference) {
-                Log::info('Redirecting user to existing Chapa checkout URL for order ID: ' . $order->order_id);
-                return response()->json(['checkout_url' => $existingPayment->chapa_reference]);
-            } else {
-                Log::warning('Payment record exists for order ID ' . $order->order_id . ' but no Chapa reference found. Updating the existing record.');
-                Log::info('Total amount before update: ' . $totalAmount);
-                $existingPayment->total_amount = $totalAmount;
-                $existingPayment->payment_status = 'held';
-                $existingPayment->save();
-                $payment = $existingPayment;
-            }
-        } else {
-            Log::info('Creating a new payment record for order ID: ' . $order->order_id);
-            $payment = Payment::create([
-                'order_id' => $order->order_id,
-                'total_amount' => $totalAmount,
-                'payment_status' => 'held', // Initial status as 'held'
-            ]);
-        }
 
         // 3. Initialize Chapa payment and get the checkout URL
         $chapaInitURL = 'https://api.chapa.co/v1/transaction/initialize';
         $callbackURL = route('payment.callback');
-       $postData = [
-            'amount' => $payment->total_amount,
+        $postData = [
+            'amount' => $payment->total_amount, // Use $payment->total_amount
             'currency' => 'ETB',
             'email' => $order->user->email ?? null,
             'first_name' => $order->address->full_name ?? null,
@@ -73,7 +72,8 @@ class PaymentController extends Controller
             ],
         ];
         Log::info('Phone number being sent to Chapa: ' . $customerPhone);
-        
+        Log::info('Chapa Initiate Payment Data:', $postData);
+
         $chapaSecretKey = env('CHAPA_SECRET_KEY');
         $headers = [
             'Authorization' => 'Bearer ' . $chapaSecretKey,
@@ -206,42 +206,5 @@ class PaymentController extends Controller
     {
         // Handle successful payment logic here
         return response()->json(['message' => 'Payment successful!']);
-    }
-
-     public function createStripePaymentIntent(Request $request)
-    {
-        $stripe = new StripeClient(env('STRIPE_SECRET'));
-        $items = $request->input('items');
-        $orderId = $request->input('order_id');
-
-        $totalAmount = 0;
-        if (is_array($items)) {
-            foreach ($items as $item) {
-                $product = \App\Models\Product::find($item['id']);
-                if ($product) {
-                    $totalAmount += (int)($product->product_price * 100) * $item['quantity'];
-                } else {
-                    return response()->json(['error' => 'Product not found: ' . $item['id']], 400);
-                }
-            }
-        } else {
-            return response()->json(['error' => 'No items in the order.'], 400);
-        }
-
-        $totalAmount += 500; // Example shipping
-
-        try {
-            $paymentIntent = $stripe->paymentIntents->create([
-                'amount' => $totalAmount,
-                'currency' => 'etb',
-                // 'automatic_payment_methods' => ['enabled' => true], // Enable all available payment methods
-                'metadata' => ['order_id' => $orderId],
-            ]);
-
-            return response()->json(['clientSecret' => $paymentIntent->client_secret]);
-        } catch (\Stripe\Exception\ApiErrorException $e) {
-            Log::error('Stripe Payment Intent creation error: ' . $e->getMessage());
-            return response()->json(['error' => 'Failed to create Stripe Payment Intent.'], 500);
-        }
     }
 }

@@ -139,7 +139,7 @@ function CareersPage() {
             onMouseOver={e => Object.assign(e.target.style, linkHoverStyle)}
             onMouseOut={e => Object.assign(e.target.style, linkStyle)}
           >
-            [Your Careers Email Address]
+            martcareer@gmail.com
           </a>.
         </p>
         <p style={{ ...paragraphStyle, animationDelay: '0.6s' }}>

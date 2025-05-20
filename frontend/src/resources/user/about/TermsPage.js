@@ -130,7 +130,7 @@ function TermsPage() {
     <div style={containerStyle}>
       <div style={iconsBgStyle}></div>
       <h1 style={headingStyle}>{contractIcon} Terms of Service</h1>
-      <p style={lastUpdatedStyle}>Last updated: <span style={{ color: '#fbbe28', fontWeight: 'bold' }}>[Date]</span></p>
+      <p style={lastUpdatedStyle}>Last updated: <span style={{ color: '#fbbe28', fontWeight: 'bold' }}>20/05/2025</span></p>
       <div style={vendorBoxStyle}>
         <span role="img" aria-label="store" style={{ fontSize: '1.7em' }}>🏬</span>
         <span>
@@ -172,7 +172,7 @@ function TermsPage() {
       </p>
 
       <p style={{ ...paragraphStyle, color: '#777', background: '#fffde7', borderLeft: '3px solid #fbbe28' }}>
-        If you have any questions about these Terms, please contact us at <span style={{ color: '#fbbe28', fontWeight: 'bold' }}>[Your Contact Email Address]</span>.
+        If you have any questions about these Terms, please contact us at <span style={{ color: '#fbbe28', fontWeight: 'bold' }}>habeshamart@gmail.com</span>.
       </p>
     </div>
   );
