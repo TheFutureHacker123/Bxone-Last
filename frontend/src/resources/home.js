@@ -372,7 +372,7 @@ if (loading) {
     <div style={styles.loadingContainer}>
       <div className="spinner"></div>
 
-      <p style={styles.loadingText}>Please wait, loading...</p>
+      <p style={styles.loadingText}> {content?.loading || "Please wait, loading..."}</p>
     </div>
   );
 }

@@ -2,12 +2,32 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Translation from "../translations/lang.json";
 import "./styles/home.css"; // Reuse your existing styles
 
 function Wishlist() {
   const [wishlistItems, setWishlistItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+
+  
+    const defaultFontSize = "medium";
+    const defaultFontColor = "#000000";
+    const defaultLanguage = "english"; // Default language
+  
+    const [fontSize, setFontSize] = useState(
+      () => localStorage.getItem("fontSize") || defaultFontSize
+    );
+    const [fontColor, setFontColor] = useState(
+      () => localStorage.getItem("fontColor") || defaultFontColor
+    );
+    const [language, setLanguage] = useState(
+      () => localStorage.getItem("language") || defaultLanguage
+    );
+    const [content, setContent] = useState(Translation[language]);
+  
+
 
   useEffect(() => {
     const fetchWishlist = async () => {
@@ -202,7 +222,7 @@ if (loading) {
     <div style={styles.loadingContainer}>
       <div className="spinner"></div>
 
-      <p style={styles.loadingText}>Please wait, loading...</p>
+      <p style={styles.loadingText}>{content?.loading || "Please wait, loading..."}</p>
     </div>
   );
 }
@@ -253,15 +273,15 @@ if (loading) {
         <span style={arrowIconStyle}>&#8592;</span>
       </Link>
       <h2 className="mb-4" style={{ color: "#1976d2", fontWeight: 700 }}>
-        My Wishlist
+         {content?.my_wishlist || "My Wishlist"}
       </h2>
 
       {wishlistItems.length === 0 ? (
         <div className="text-center py-5">
-          <h4>Your wishlist is empty</h4>
-          <p>Start adding products to your wishlist!</p>
+          <h4>{content?.empty_wishlist || "Your wishlist is empty"}</h4>
+          <p>{content?.start_adding || "Start adding products to your wishlist!"}</p>
           <Link to="/" className="btn btn-primary">
-            Continue Shopping
+            {content?.continue_shopping || "Continue Shopping"}
           </Link>
         </div>
       ) : (
@@ -289,10 +309,10 @@ if (loading) {
                     style={removeBtnStyle}
                     onClick={() => removeFromWishlist(product.product_id)}
                   >
-                    Remove
+                      {content?.remove || "Remove"}
                   </button>
                   <button style={addToCartBtnStyle} onClick={() => addToCart(product.product_id)}>
-                    Add to Cart
+                    {content?.add_to_cart || "Add to Cart"}
                   </button>
                 </div>
               </div>
