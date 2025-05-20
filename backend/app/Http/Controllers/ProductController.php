@@ -7,9 +7,12 @@ use App\Models\Category;
 use App\Models\Orders;
 use App\Models\Cart;
 use App\Models\Review;
+use App\Models\OrderItem;
 use App\Models\Coupon;
+use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
@@ -170,33 +173,33 @@ class ProductController extends Controller
         }
     }
 
-   public function listcartitems(Request $request)
-{
-    // Retrieve the user_id from the request (assuming it's passed as part of the request)
-    $user_id = $request->input('user_id');
+    public function listcartitems(Request $request)
+    {
+        // Retrieve the user_id from the request (assuming it's passed as part of the request)
+        $user_id = $request->input('user_id');
 
-    // Get cart items with product details
-    $cartItems = Cart::where('user_id', $user_id)
-        ->join('product', 'cart.product_id', '=', 'product.product_id')
-        ->select(
-            'product.product_name',
-            'product.product_id', // Add product_id here
-            'product.vendor_id',  // Add vendor_id here
-            'product.product_price',
-            'cart.total_added',
-            'cart.cart_id',
-            'product.product_img1',
-            'product.total_product',
-        )
-        ->get();
+        // Get cart items with product details
+        $cartItems = Cart::where('user_id', $user_id)
+            ->join('product', 'cart.product_id', '=', 'product.product_id')
+            ->select(
+                'product.product_name',
+                'product.product_id', // Add product_id here
+                'product.vendor_id',  // Add vendor_id here
+                'product.product_price',
+                'cart.total_added',
+                'cart.cart_id',
+                'product.product_img1',
+                'product.total_product',
+            )
+            ->get();
 
-    // Return the cart items in the response
-    if ($cartItems->isEmpty()) {
-        return response()->json(['success' => false, 'message' => 'No products in cart.']);
+        // Return the cart items in the response
+        if ($cartItems->isEmpty()) {
+            return response()->json(['success' => false, 'message' => 'No products in cart.']);
+        }
+
+        return response()->json(['success' => true, 'cart_items' => $cartItems]);
     }
-
-    return response()->json(['success' => true, 'cart_items' => $cartItems]);
-}
 
     public function updateCartQuantity(Request $request)
     {
@@ -267,49 +270,81 @@ class ProductController extends Controller
         return response()->json(['success' => true, 'orderd_items' => $orders]);
     }
 
-    public function processOrder(Request $request)
-{
-    $request->validate([
-        'user_id' => 'required|integer',
-        'cartItems' => 'required|array|min:1',
-        'cartItems.*.cart_id' => 'required|integer',
-        'cartItems.*.product_id' => 'required|integer',
-        'cartItems.*.vendor_id' => 'required|integer', // Assuming you have vendor_id in cart items
-        'cartItems.*.total_added' => 'required|integer|min:1',
-        'totalAmount' => 'required|numeric|min:0', // You can use this for the total of all cart items
-        'shippingAddress' => 'nullable|array',
-    ]);
+     public function processOrder(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|integer',
+            'cartItems' => 'required|array|min:1',
+            'cartItems.*.cart_id' => 'required|integer',
+            'cartItems.*.product_id' => 'required|integer',
+            'cartItems.*.vendor_id' => 'required|integer',
+            'cartItems.*.product_name' => 'required|string',
+            'cartItems.*.product_price' => 'required|numeric|min:0',
+            'cartItems.*.total_added' => 'required|integer|min:1',
+            'shippingAddress' => 'nullable|array',
+        ]);
 
-    try {
-        DB::beginTransaction();
+        try {
+            DB::beginTransaction();
 
-        foreach ($request->cartItems as $cartItem) {
+            $totalProductPrice = 0;
             $order = new Orders();
             $order->user_id = $request->user_id;
-            $order->product_id = $cartItem['product_id'];
-            $order->vendor_id = $cartItem['vendor_id'];
-            $order->order_status = 'pending'; // Initial order status
-            // Assuming you don't have payment method yet, you can set a default
-            $order->payment_method = 'pending';
-            $order->total_paid = $cartItem['product_price'] * $cartItem['total_added'];
-            $order->orderd_quantity = $cartItem['total_added'];
-            // You might need to fetch the address_id based on the selectedAddress
-            // For now, we'll leave it as null or handle it differently
-            $order->address_id = null;
+            $order->order_status = 'pending';
+            $order->payment_method = 'chapa';
+            $order->orderd_quantity = 0;
+            $order->address_id = $request->shippingAddress ? $request->shippingAddress['address_id'] ?? null : null;
             $order->save();
 
-            // Delete the specific cart item that was just ordered
-            Cart::where('cart_id', $cartItem['cart_id'])->where('user_id', $request->user_id)->delete();
+            $cartItemIdsToDelete = [];
+
+            foreach ($request->cartItems as $cartItem) {
+                $totalProductPrice += $cartItem['product_price'] * $cartItem['total_added'];
+                $order->orderd_quantity += $cartItem['total_added'];
+
+                OrderItem::create([
+                    'order_id' => $order->order_id,
+                    'product_id' => $cartItem['product_id'],
+                    'product_name' => $cartItem['product_name'],
+                    'product_price' => $cartItem['product_price'],
+                    'quantity' => $cartItem['total_added'],
+                ]);
+
+                $cartItemIdsToDelete[] = $cartItem['cart_id'];
+            }
+
+           error_log('Total Product Price before saving order: ' . $totalProductPrice);
+            $order->total_paid = $totalProductPrice;
+            $order->save();
+
+            // Calculate fees
+            $serviceFeePercentage = 0.03;
+            $deliveryFee = 5;
+            $serviceFee = $totalProductPrice * $serviceFeePercentage;
+            $totalAmount = $totalProductPrice + $serviceFee + $deliveryFee;
+
+            // Create a payment record
+            $payment = new Payment();
+            $payment->order_id = $order->order_id;
+            $payment->total_amount = $totalAmount;
+            $payment->payment_status = 'held';
+            $payment->save();
+
+            // Delete only the processed cart items
+            Cart::whereIn('cart_id', $cartItemIdsToDelete)
+                ->where('user_id', $request->user_id)
+                ->delete();
+
+            DB::commit();
+
+            return response()->json(['success' => true, 'message' => 'Order placed successfully! Redirecting to payment.', 'order_id' => $order->order_id]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => 'Failed to process order.', 'error' => $e->getMessage()], 500);
         }
-
-        DB::commit();
-
-        return response()->json(['success' => true, 'message' => 'Order(s) placed successfully!']);
-    } catch (\Exception $e) {
-        DB::rollBack();
-        return response()->json(['success' => false, 'message' => 'Failed to process order(s).', 'error' => $e->getMessage()], 500);
     }
-}
+
     public function shippeditems(Request $request)
     {
         // Retrieve the user_id from the request
@@ -392,73 +427,73 @@ class ProductController extends Controller
     }
 
 
-    
- public function addCoupon(Request $request)
-{
-    // Check if coupon code already exists before validation
-    if (Coupon::where('coupon_code', strtoupper($request->coupon_code))->exists()) {
+
+    public function addCoupon(Request $request)
+    {
+        // Check if coupon code already exists before validation
+        if (Coupon::where('coupon_code', strtoupper($request->coupon_code))->exists()) {
+            return response()->json([
+                'message' => 'The coupon already exists.'
+            ], 409); // 409 Conflict
+        }
+
+        // Validate the incoming request data (after checking for duplicate)
+        $request->validate([
+            'product_id'      => 'required|exists:product,product_id',
+            'vendor_id'       => 'required|exists:vendors,vendor_id',
+            'product_name'    => 'required|string|max:255',
+            'coupon_code'     => 'required|string|max:255',
+            'discount_price'  => 'required|numeric|min:0',
+            'expiry_date'     => 'required|date|after:today',
+            'status'          => 'required|in:active,inactive',
+        ]);
+
+        // Check if vendor is approved
+        $vendor = \App\Models\Vendor::find($request->vendor_id);
+        if (!$vendor || !$vendor->is_approved) {
+            return response()->json([
+                'message' => 'Vendor not approved to add coupons.'
+            ], 403);
+        }
+
+        // Check product existence and price comparison
+        $product = Product::find($request->product_id);
+        if (!$product) {
+            return response()->json([
+                'message' => 'Product not found.'
+            ], 404);
+        }
+
+        if ($request->discount_price >= $product->product_price) {
+            return response()->json([
+                'message' => 'Discount price cannot be greater than or equal to product price.',
+            ], 422);
+        }
+
+        // Limit coupon count per vendor to 20
+        $couponCount = Coupon::where('vendor_id', $request->vendor_id)->count();
+        if ($couponCount >= 20) {
+            return response()->json([
+                'message' => 'You can’t add more than 20 coupons.'
+            ], 403);
+        }
+
+        // Create the coupon
+        $coupon = Coupon::create([
+            'product_id'      => $request->product_id,
+            'vendor_id'       => $request->vendor_id,
+            'product_name'    => $request->product_name,
+            'coupon_code'     => strtoupper($request->coupon_code),
+            'discount_price'  => $request->discount_price,
+            'expiry_date'     => $request->expiry_date,
+            'status'          => $request->status,
+        ]);
+
         return response()->json([
-            'message' => 'The coupon already exists.'
-        ], 409); // 409 Conflict
+            'message' => 'Coupon added successfully!',
+            'coupon' => $coupon
+        ], 201);
     }
-
-    // Validate the incoming request data (after checking for duplicate)
-    $request->validate([
-        'product_id'      => 'required|exists:product,product_id',
-        'vendor_id'       => 'required|exists:vendors,vendor_id',
-        'product_name'    => 'required|string|max:255',
-        'coupon_code'     => 'required|string|max:255',
-        'discount_price'  => 'required|numeric|min:0',
-        'expiry_date'     => 'required|date|after:today',
-        'status'          => 'required|in:active,inactive',
-    ]);
-
-    // Check if vendor is approved
-    $vendor = \App\Models\Vendor::find($request->vendor_id);
-    if (!$vendor || !$vendor->is_approved) {
-        return response()->json([
-            'message' => 'Vendor not approved to add coupons.'
-        ], 403);
-    }
-
-    // Check product existence and price comparison
-    $product = \App\Models\Product::find($request->product_id);
-    if (!$product) {
-        return response()->json([
-            'message' => 'Product not found.'
-        ], 404);
-    }
-
-    if ($request->discount_price >= $product->product_price) {
-        return response()->json([
-            'message' => 'Discount price cannot be greater than or equal to product price.',
-        ], 422);
-    }
-
-    // Limit coupon count per vendor to 20
-    $couponCount = Coupon::where('vendor_id', $request->vendor_id)->count();
-    if ($couponCount >= 20) {
-        return response()->json([
-            'message' => 'You can’t add more than 20 coupons.'
-        ], 403);
-    }
-
-    // Create the coupon
-    $coupon = Coupon::create([
-        'product_id'      => $request->product_id,
-        'vendor_id'       => $request->vendor_id,
-        'product_name'    => $request->product_name,
-        'coupon_code'     => strtoupper($request->coupon_code),
-        'discount_price'  => $request->discount_price,
-        'expiry_date'     => $request->expiry_date,
-        'status'          => $request->status,
-    ]);
-
-    return response()->json([
-        'message' => 'Coupon added successfully!',
-        'coupon' => $coupon
-    ], 201);
-}
 
 
 
@@ -513,67 +548,67 @@ class ProductController extends Controller
 
 
 
-   public function editCoupon(Request $request)
-{
-    // Validate the incoming request data
-    $request->validate([
-        'coupon_id'      => 'required|exists:coupons,coupon_id',
-        'product_id'     => 'required|exists:product,product_id',
-        'product_name'   => 'required|string|max:255',
-        'coupon_code'    => 'required|string|max:255',
-        'discount_price' => 'required|numeric|min:0',
-        'expiry_date'    => 'required|date|after_or_equal:today',
-        'status'         => 'required|in:active,inactive',
-        'vendor_id'      => 'required|exists:vendors,vendor_id'
-    ]);
+    public function editCoupon(Request $request)
+    {
+        // Validate the incoming request data
+        $request->validate([
+            'coupon_id'      => 'required|exists:coupons,coupon_id',
+            'product_id'     => 'required|exists:product,product_id',
+            'product_name'   => 'required|string|max:255',
+            'coupon_code'    => 'required|string|max:255',
+            'discount_price' => 'required|numeric|min:0',
+            'expiry_date'    => 'required|date|after_or_equal:today',
+            'status'         => 'required|in:active,inactive',
+            'vendor_id'      => 'required|exists:vendors,vendor_id'
+        ]);
 
-    $vendor_id = $request->vendor_id;
+        $vendor_id = $request->vendor_id;
 
-    // Get the related product
-    $product = Product::find($request->product_id);
+        // Get the related product
+        $product = Product::find($request->product_id);
 
-    if (!$product) {
+        if (!$product) {
+            return response()->json([
+                'message' => 'Product not found.',
+            ], 404);
+        }
+
+        // Check if discount price is less than product price
+        if ($request->discount_price >= $product->product_price) {
+            return response()->json([
+                'message' => 'Discount price cannot be greater than or equal to product price.',
+            ], 422);
+        }
+
+        // Find the coupon
+        $coupon = Coupon::find($request->coupon_id);
+
+        if (!$coupon) {
+            return response()->json([
+                'message' => 'Coupon not found.',
+            ], 404);
+        }
+
+        // Update coupon fields
+        $coupon->product_id = $request->product_id;
+        $coupon->product_name = $request->product_name;
+        $coupon->coupon_code = strtoupper($request->coupon_code); // Optional: force uppercase
+        $coupon->discount_price = $request->discount_price;
+        $coupon->expiry_date = $request->expiry_date;
+        $coupon->status = $request->status;
+
+        $coupon->save();
+
+        // Get all coupons for this vendor
+        $coupons = Coupon::with('product')
+            ->where('vendor_id', $vendor_id)
+            ->get();
+
         return response()->json([
-            'message' => 'Product not found.',
-        ], 404);
+            'message' => 'Coupons retrieved successfully.',
+            'coupon' => $coupons
+        ]);
     }
-
-    // Check if discount price is less than product price
-    if ($request->discount_price >= $product->product_price) {
-        return response()->json([
-            'message' => 'Discount price cannot be greater than or equal to product price.',
-        ], 422);
-    }
-
-    // Find the coupon
-    $coupon = Coupon::find($request->coupon_id);
-
-    if (!$coupon) {
-        return response()->json([
-            'message' => 'Coupon not found.',
-        ], 404);
-    }
-
-    // Update coupon fields
-    $coupon->product_id = $request->product_id;
-    $coupon->product_name = $request->product_name;
-    $coupon->coupon_code = strtoupper($request->coupon_code); // Optional: force uppercase
-    $coupon->discount_price = $request->discount_price;
-    $coupon->expiry_date = $request->expiry_date;
-    $coupon->status = $request->status;
-
-    $coupon->save();
-
-    // Get all coupons for this vendor
-    $coupons = Coupon::with('product')
-        ->where('vendor_id', $vendor_id)
-        ->get();
-
-    return response()->json([
-        'message' => 'Coupons retrieved successfully.',
-        'coupon' => $coupons
-    ]);
-}
 
 
 
@@ -610,8 +645,8 @@ class ProductController extends Controller
 
         // Retrieve the coupon based on coupon_code and product_id
         $coupon = Coupon::where('coupon_code', $request->coupon_code)
-                        ->where('product_id', $request->product_id)
-                        ->first();
+            ->where('product_id', $request->product_id)
+            ->first();
 
         // Check if the coupon exists and is active
         if ($coupon) {

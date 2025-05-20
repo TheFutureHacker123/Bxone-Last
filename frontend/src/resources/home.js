@@ -444,7 +444,7 @@ function Home() {
               <li className="nav-item">
                 <div
                   className="search-bar d-flex align-items-center mt-2"
-                  style={{ flexGrow: 1, padding: "10px" }}
+                  style={{ flexGrow: 1, padding: "10px" }} gap-4
                 >
                   <select
                     className="form-select form-select-sm me-2"

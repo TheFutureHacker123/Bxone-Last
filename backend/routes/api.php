@@ -9,6 +9,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\Api\SubscriptionController;
+use App\Http\Controllers\PaymentController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -130,30 +131,13 @@ Route::post('/admin/changeproductstatus', [AdminController::class, 'changeproduc
 Route::post('/vendor/orderlistforadmin/', [VendorController::class, 'orderlistforadmin']);//done
 
 
-
-// Route::middleware('auth:api')->group(function () {
-//     // Wishlist routes
-//     Route::post('/wishlist/add', [WishlistController::class, 'addToWishlist']);
-//     Route::post('/wishlist/remove', [WishlistController::class, 'removeFromWishlist']);
-//     Route::get('/wishlist', [WishlistController::class, 'getWishlist']);
-//     Route::get('/wishlist/check/{product_id}', [WishlistController::class, 'checkInWishlist']);
-// });
-
 Route::post('/wishlist/add', [WishlistController::class, 'addToWishlist']);
 Route::post('/wishlist/remove', [WishlistController::class, 'removeFromWishlist']);
 Route::get('/wishlist', [WishlistController::class, 'getWishlist']);
 Route::get('/wishlist/check/{product_id}', [WishlistController::class, 'checkInWishlist']);
 
 
-
 Route::post('/subscribe', [SubscriptionController::class, 'subscribe']);
-
-
-Route::post('pay', 'App\Http\Controllers\ChapaController@initialize')->name('pay');
- 
-// The callback url after a payment
-Route::get('callback/{reference}', 'App\Http\Controllers\ChapaController@callback')->name('callback');
-
 
 
 Route::get('/new-arrivals', [ProductController::class, 'newArrivals']);
@@ -177,3 +161,14 @@ Route::post('/vendor/reset', [VendorController::class, 'reset']);
 Route::post('/admin/updatepassword', [AdminController::class, 'updatepassword']);
 Route::post('/admin/getcode', [AdminController::class, 'getcode']);
 Route::post('/admin/reset', [AdminController::class, 'reset']);
+
+
+
+
+Route::post('/initiate-payment', [PaymentController::class, 'initiatePayment']);
+Route::get('/payment/callback', [PaymentController::class, 'handleCallback'])->name('payment.callback');
+Route::post('/confirm-order/{order}', [PaymentController::class, 'confirmOrder'])->name('confirm.order');
+Route::post('/approve-payment/{payment}', [PaymentController::class, 'approvePayment'])->name('approve.payment');
+Route::post('/payout-vendor/{payment}', [PaymentController::class, 'payoutVendor'])->name('payout.vendor');
+Route::get('/payment/success', [PaymentController::class, 'paymentSuccess'])->name('payment.success');
+Route::post('/create-stripe-payment-intent', [PaymentController::class, 'createStripePaymentIntent']);
