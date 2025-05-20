@@ -227,7 +227,7 @@ public function loginadmin(Request $request)
 {
     // Fetch only UnVerified vendors who have personalInfo
     $vendors = Vendor::with('personalInfo')
-        ->where('status', 'UnVerified')
+        ->where('status', 'Pending')
         ->whereHas('personalInfo') // Ensures only vendors with related personalInfo
         ->get();
 

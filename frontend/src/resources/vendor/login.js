@@ -142,20 +142,19 @@ const LoginVendor = () => {
                         navigate("/vendor/underreview/");
                     } else if (result.storeData.status === "Verified") {
                         navigate("/vendor/");
+                    } else if (result.storeData.status === "Active") {
+                        navigate("/vendor/");
                     } else if (result.storeData.status === "Rejected") {
-                        if (!result.storeData.has_completed_info) {
-                            navigate("/vendor/vendor-info/");
-                        } else {
-                            navigate("/vendor/");
-                        }
+                        // if (!result.storeData.has_completed_info) {
+                        //     navigate("/vendor/vendor-info/");
+                        // } else {
+                        //     navigate("/vendor/");
+                        // }
+                         navigate("/vendor/vendor-info/");
                     } else if (result.storeData.status === "Suspended") {
                         navigate("/vendor/suspend/");
                     } else if (result.storeData.status === "UnVerified") {
-                        if (!result.storeData.has_completed_info) {
-                            navigate("/vendor/vendor-info/");
-                        } else {
-                            navigate("/vendor/");
-                        }
+                          navigate("/vendor/vendor-info/");
                     }
                 }, 1000);
             } else {

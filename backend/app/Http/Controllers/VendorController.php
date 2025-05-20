@@ -265,11 +265,15 @@ class VendorController extends Controller
             'verified_by' => $request->verified_by, // Use user-provided verified_by
         ]);
 
-        $vendor = Vendor::find($request->vendor_id);
-        if ($logoPath) {
-            $vendor->logo = $logoPath;
-            $vendor->save();
-        }
+       $vendor = Vendor::find($request->vendor_id);
+if ($vendor) {
+    if ($logoPath) {
+        $vendor->logo = $logoPath;
+    }
+    $vendor->status = 'Pending'; // Set status to Pending
+    $vendor->save();
+}
+
 
         return response()->json([
             'success' => true,
@@ -279,7 +283,7 @@ class VendorController extends Controller
                 'businessInfo' => $businessInfo,
                 'bankInfo' => $bankInfo,
             ]
-        ], 201);
+        ], 201);  
     }
 
     public function addproduct(Request $request)

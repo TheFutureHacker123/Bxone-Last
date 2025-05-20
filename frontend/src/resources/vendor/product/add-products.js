@@ -141,11 +141,17 @@ function AddProduct() {
     return;
   }
 
-  const productNameRegex = /^[A-Za-z0-9 ]+$/;
-  if (!productNameRegex.test(productData.product_name)) {
-    toast.error(content?.invalid_product_name || "Product name can only contain letters, numbers, and spaces.");
-    return;
-  }
+ const productNameRegex = /^[A-Za-z0-9 ]+$/;
+const containsLetterRegex = /[A-Za-z]/;
+
+if (
+  !productNameRegex.test(productData.product_name) ||
+  !containsLetterRegex.test(productData.product_name)
+) {
+  toast.error(content?.invalid_product_name || "Product name must contain at least one letter and can only include letters, numbers, and spaces.");
+  return;
+}
+
 
  if (!productData.total_product || isNaN(productData.total_product) || Number(productData.total_product) <= 0) {
   toast.error(content?.enter_total_product || "Enter a positive total product number greater than zero.");
