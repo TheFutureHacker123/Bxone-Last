@@ -187,3 +187,5 @@ Route::post('/update-payment-status', [PaymentController::class, 'updatePaymentS
 Route::get('/payment-details', [PaymentController::class, 'getPaymentDetails']);
 
 Route::post('/update-order-status', [PaymentController::class, 'updateOrderStatus']);
+
+Route::get('/orderhistory/{user_id}', [UserController::class, 'orderHistory']);
