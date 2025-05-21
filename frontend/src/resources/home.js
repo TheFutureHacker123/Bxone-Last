@@ -342,41 +342,42 @@ function Home() {
     }
   };
 
+  const styles = {
+    loadingContainer: {
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+      height: "100vh",
+      backgroundColor: "#f5f7fa",
+    },
+    spinner: {
+      border: "8px solid #f3f3f3",
+      borderTop: "8px solid #3498db",
+      borderRadius: "50%",
+      width: "60px",
+      height: "60px",
+      animation: "spin 1s linear infinite",
+    },
+    loadingText: {
+      marginTop: "20px",
+      fontSize: "18px",
+      color: "#555",
+    },
+  };
 
-const styles = {
-  loadingContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '100vh',
-    backgroundColor: '#f5f7fa',
-  },
-  spinner: {
-    border: '8px solid #f3f3f3',
-    borderTop: '8px solid #3498db',
-    borderRadius: '50%',
-    width: '60px',
-    height: '60px',
-    animation: 'spin 1s linear infinite',
-  },
-  loadingText: {
-    marginTop: '20px',
-    fontSize: '18px',
-    color: '#555',
+  if (loading) {
+    return (
+      <div style={styles.loadingContainer}>
+        <div className="spinner"></div>
+
+        <p style={styles.loadingText}>
+          {" "}
+          {content?.loading || "Please wait, loading..."}
+        </p>
+      </div>
+    );
   }
-};
-
-if (loading) {
-  return (
-    <div style={styles.loadingContainer}>
-      <div className="spinner"></div>
-
-      <p style={styles.loadingText}> {content?.loading || "Please wait, loading..."}</p>
-    </div>
-  );
-}
-
 
   if (error) {
     return (
@@ -545,14 +546,16 @@ if (loading) {
                           aria-expanded="false"
                         >
                           <i className="bi bi-person-circle fs-4 me-2"></i>
-                          <span className="profile-name">{content?.hi || "Hi"}, {userName}</span>
+                          <span className="profile-name">
+                            {content?.hi || "Hi"}, {userName}
+                          </span>
                         </a>
                       </li>
 
                       <ul className="dropdown-menu dropdown-menu-end shadow-sm rounded">
                         <li>
                           <Link className="dropdown-item" to="/profile">
-                             {content?.profile || "Profile"}
+                            {content?.profile || "Profile"}
                           </Link>
                         </li>
                         <li>
@@ -990,7 +993,8 @@ if (loading) {
           </h2>
         ) : (
           <h2 className="section-heading fade-in-section">
-           {content?.there_is_no || 'There is no '} <strong>{searchproduct}</strong> {content?.product || 'product'}
+            {content?.there_is_no || "There is no "}{" "}
+            <strong>{searchproduct}</strong> {content?.product || "product"}
           </h2>
         )}
 
@@ -1570,7 +1574,7 @@ if (loading) {
             <div className="row align-items-center">
               {/* Copyright */}
               <div className="col-md-6">
-                <p className="small text-muted mb-0">
+                <p className="small mb-0" style={{ color: "white" }}>
                   &copy; {new Date().getFullYear()}{" "}
                   {content?.habesha_mart || "Habesha Mart"}.
                   {content?.all_rights_reserved || "All rights reserved."}
