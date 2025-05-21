@@ -17,6 +17,7 @@ use Illuminate\Validation\Rules\Password;
 
 use Illuminate\Support\Facades\Mail;
 use App\Mail\RawHtmlMail;
+use App\Models\Orders;
 
 class UserController extends Controller
 {
@@ -248,10 +249,20 @@ class UserController extends Controller
             'user_id' => 'required|integer|exists:users,user_id',
         ]);
 
+        // Retrieve user information from the users table
+        $user = User::find($request->user_id);
+
+        // Retrieve addresses for the user
         $addresses = Address::where('user_id', $request->user_id)->get();
+
+        // Retrieve bank information for the user
         $bankInfo = UserBankInfo::where('user_id', $request->user_id)->first();
 
+        // Return the user information, addresses, and bank information in a JSON response
         return response()->json([
+            'personal_name' => $user->name, // Assuming 'name' field in users table stores the user's full name
+            'email' => $user->email,
+            'phone' => $user->phone, // Assuming 'phone' field exists in users table
             'addresses' => $addresses,
             'bank_info' => $bankInfo
         ]);
@@ -395,13 +406,19 @@ public function reset(Request $request)
     return response()->json(['status' => true, 'message' => 'Otp sent successfully']);
 }
 
+ public function orderHistory(Request $request, $user_id)
+    {
+        // Remove the validate for user_id from the request body
+        // as it's now coming from the URL parameter.
+        // You can keep the 'exists' check if you want to ensure the user_id is valid
+        // but it would typically be handled by route model binding or earlier middleware.
+        // For now, let's just use the $user_id from the route.
 
+        // Retrieve order history for the specified user
+        $orderHistory = Orders::where('user_id', $user_id)->get();
 
-
-
-
-
-
-
+        // Return the order history in a response
+        return response()->json($orderHistory);
+    }
 
 }
