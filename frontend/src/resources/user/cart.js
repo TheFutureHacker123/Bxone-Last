@@ -156,6 +156,7 @@ function Cart() {
   };
 
   const checkoutProcess = () => {
+    
     const itemsToCheckout = cartitems.filter((item) =>
       selectedItems.includes(item.cart_id)
     );

@@ -293,14 +293,28 @@ class ProductController extends Controller
         try {
             DB::beginTransaction();
 
-            $totalProductPrice = 0;
-            $order = new Orders();
-            $order->user_id = $request->user_id;
-            $order->order_status = 'pending';
-            $order->payment_method = 'chapa';
-            $order->orderd_quantity = 0;
-            $order->address_id = $request->shippingAddress ? $request->shippingAddress['address_id'] ?? null : null;
-            $order->save();
+$totalProductPrice = 0;
+$order = new Orders();
+$order->user_id = $request->user_id;
+$order->order_status = 'Pending';
+$order->payment_method = 'chapa';
+$order->orderd_quantity = 0;
+
+// Get first cart item (if any) to set product_id and vendor_id
+$firstCartItem = $request->cartItems[0] ?? null;
+
+if ($firstCartItem) {
+    $cartItem = Cart::with('product')->where('cart_id', $firstCartItem['cart_id'])->first();
+
+    if ($cartItem && $cartItem->product) {
+        $order->product_id = $cartItem->product_id;
+        $order->vendor_id = $cartItem->product->vendor_id;
+    }
+}
+
+$order->address_id = $request->shippingAddress ? $request->shippingAddress['address_id'] ?? null : null;
+$order->save();
+
 
             $cartItemIdsToDelete = [];
 
