@@ -760,7 +760,7 @@ if (loading) {
                   <div className="card-body text-center">
                     <h5 className="card-title">{product.product_name}</h5>
                     <p className="card-text text-success fw-bold">
-                      ${product.product_price}
+                      {product.product_price} Birr
                     </p>
                     <Link
                       to={`/productdetails/${product.product_id}`}
@@ -1093,7 +1093,7 @@ if (loading) {
                       {product.product_name}
                     </h5>
                     <p className="card-text text-success fw-bold">
-                      ${product.product_price}
+                      {product.product_price} Birr
                     </p>
                   </div>
                 </div>
@@ -1171,7 +1171,7 @@ if (loading) {
                 </div>
                 <div className="col-md-6">
                   <p>
-                    <strong>{content?.price || "Price"}:</strong> $
+                    <strong>{content?.price || "Price"}:</strong> Birr
                     {quickViewProduct.product_price}
                   </p>
                   <p>
