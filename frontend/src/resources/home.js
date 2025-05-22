@@ -582,7 +582,7 @@ if (loading) {
                   </>
                 ) : (
                   <li className="nav-item">
-                    <Link className="nav-link" to="/login">
+                    <Link className="nav-link text-decoration-none" to="/login">
                       {content?.login_register || "Log In / Register"}
                     </Link>
                   </li>
