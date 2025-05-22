@@ -139,7 +139,7 @@ function CompletedItems() {
                   <p>{content?.price || 'Price'}: {listcompleteditems.total_paid}</p>
                   <p>{content?.quantity || 'Quantity'}: {listcompleteditems.orderd_quantity}</p>
                   <p>{content?.total || 'Subtotal'}: {listcompleteditems.total_paid}</p>
-                  <a href="#" className="view-details btn btn-warning">{content?.view_details || 'View Details'}</a>
+                  {/* <a href="#" className="view-details btn btn-warning">{content?.view_details || 'View Details'}</a> */}
                 </div>
               </li>
             ))

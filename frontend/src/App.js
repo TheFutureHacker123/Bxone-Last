@@ -21,6 +21,7 @@ import OrderedItems from "./resources/user/ordered-items"
 import ProductDetails from "./resources/user/product-details"
 import RefudnItems from "./resources/user/refund-items"
 import ShippedItems from "./resources/user/shipped-items"
+import Profile from "./resources/user/profile"
 import CompletedItems from "./resources/user/completed-items"
 import Settings from "./resources/user/settings"
 import Test from "./resources/user/test"
@@ -158,6 +159,8 @@ function App() {
           <Route path="/returns-policy" element={<ReturnsPolicy />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/contact" element={<Contact />} />
+
+          <Route path="/profile" element={<ProtectPath Cmp={Profile} />} />
 
           <Route path="/vendor/dashboard" element={<ProtectPathVendor Cmp={VendorDashboard} />} />
           <Route path="/vendor" element={<ProtectPathVendor Cmp={VendorDashboard} />} />
